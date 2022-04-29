@@ -5,18 +5,6 @@
     background: #fff;
 }
 
-.public_card_header {
-    height: 40px;
-    line-height: 40px;
-    padding: 0 15px;
-    border-bottom: 1px solid #f6f6f6;
-    color: #333;
-    border-radius: 2px 2px 0 0;
-    font-size: 14px;
-    margin: 0;
-
-}
-
 .visit_col_space {
     display: flex;
     justify-content: space-around;
@@ -53,6 +41,7 @@
 }
 
 .main_echarts {
+    width: 100%;
     background: #fff;
     margin: 0 0 16px 0;
     padding: 10px;
@@ -161,4 +150,27 @@
     background: #fff;
     border-radius: 3px;
     color: rgba(0, 0, 0, .85);
+}
+
+
+//滚动 自定义
+.height_dynamic{
+    height: 460px;
+}
+.height_right_list {
+    height: 385px;
+}
+.pub_scroll_list {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.pub_scroll_list .pub_scroll_list_column {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: -24px;
+    bottom: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }

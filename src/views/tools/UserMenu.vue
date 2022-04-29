@@ -3,7 +3,7 @@
     <div class="nav_content_box">
         <span class="hd-nav-item">
             <i class="el-icon-full-screen" ></i>
-            <span class="hd-nav-bar"></span>
+            <span class="el-icon-rank"></span>
         </span>
 
         <el-popover

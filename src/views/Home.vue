@@ -83,7 +83,7 @@
                         <i class="el-icon-s-fold" @click="toggleCollapse"></i>
                         <span class="hd-nav-bar"></span>
                     </span>
-                    <span class="hd-nav-item">
+                    <span class="hd-nav-item" @click="routerUrlClick('home','')">
                         <i class="el-icon-refresh" ></i>
                         <span class="hd-nav-bar"></span>
                     </span>
@@ -208,6 +208,7 @@ export default {
 .el-menu-vertical-demo .el-submenu .el-submenu__title .is-active i{
     color: #fff;
 }
+
 .el-menu-vertical-demo .el-submenu .el-submenu>.el-submenu__title,
 .el-menu-vertical-demo .el-submenu .el-menu-item {
     min-width: 230px !important;
