@@ -53,23 +53,23 @@
                     </el-menu-item>
                 </el-submenu>
                 
-                <el-menu-item index="1-2">
+                <el-menu-item :index="'/' + 'parametersettings'">
                     <i class="el-icon-location"></i>
                     <span>参数设置</span>
                 </el-menu-item>
-                <el-menu-item index="1-3">
+                <el-menu-item :index="'/' + 'attachmentmanagement'">
                     <i class="el-icon-bank-card"></i>
                     <span>附件管理</span>
                 </el-menu-item>
-                <el-menu-item index="1-2">
+                <el-menu-item :index="'/' + 'timedtask'">
                     <i class="el-icon-timer"></i>
                     <span>定时任务</span>
                 </el-menu-item>
-                <el-menu-item index="1-3">
+                <el-menu-item :index="'/' + 'applicationmanagement'">
                     <i class="el-icon-warning"></i>
                     <span>应用管理</span>
                 </el-menu-item>
-                <el-menu-item index="1-2">
+                <el-menu-item :index="'/' + 'codeproduction'">
                     <i class="el-icon-eleme"></i>
                     <span>代码生产</span>
                 </el-menu-item>

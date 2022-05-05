@@ -15,7 +15,7 @@
       </el-tree>
       
     </div>
-    <div class="pb-main-mid">
+    <div class="pb-main_pad-lf pb-main_pad-fr pb-main-mid">
       <div style="background: #fff;padding-bottom: 30px;height: 100%;">
         <p class="public_card_header">功能点(点击菜单树节点切换选中菜单下的权限 ，右键菜单节点追加选中菜单下的权限)
           <span class="preservat_btn">保存</span>

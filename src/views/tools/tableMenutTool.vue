@@ -1,14 +1,14 @@
 <template>
   <div class="pos_table_tool">
-        <div class="public_table_tool_inline">
-          <i class="el-icon-s-check"></i>
-        </div>
-        <div class="public_table_tool_inline">
-          <i class="el-icon-s-check"></i>
-        </div>
-        <div class="public_table_tool_inline">
-          <i class="el-icon-s-check"></i>
-        </div>
+    <div class="public_table_tool_inline">
+      <i class="el-icon-s-check"></i>
+    </div>
+    <div class="public_table_tool_inline">
+      <i class="el-icon-s-check"></i>
+    </div>
+    <div class="public_table_tool_inline">
+      <i class="el-icon-s-check"></i>
+    </div>
   </div>
 </template>
 
@@ -25,9 +25,9 @@ export default {
 </script>
 
 <style lang='less' scoped>
-.pos_table_tool{
-    padding: 10px 0 10px 15px;
-    display: flex;
-    justify-content: start;
+.pos_table_tool {
+  padding: 10px 0 10px 15px;
+  display: flex;
+  justify-content: start;
 }
 </style>

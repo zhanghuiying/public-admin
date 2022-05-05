@@ -341,11 +341,6 @@ export default {
 </script>
 
 <style >
-.el-table thead,
-.el-table .el-table__cell {
-  font-weight: 500 !important;
-  color: #333 !important;
-}
 .el-form-item__content .el-input,
 .el-select,
 .el-form-item__content .el-checkbox-group{

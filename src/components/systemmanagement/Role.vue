@@ -74,7 +74,7 @@
 import tableMenutTool from '@/views/tools/tableMenutTool'
 
 export default {
-  name: 'roleManagement',
+  name: 'role',
   components: {
     tableMenutTool,
   },

@@ -1,0 +1,232 @@
+<template>
+  <div class="pb-main-height">
+    <div class="">
+      <div class="public_table_tool">
+        <div class="public_table_tool_inline">
+          <i class="el-icon-refresh"></i>
+        </div>
+        <div class="public_table_tool_inline" @click="addNameList">
+          <i class="el-icon-circle-plus-outline"></i>
+        </div>
+
+        <div class="public_table_tool_inline">
+          <i class="el-icon-delete"></i>
+        </div>
+        <div class="">开启编辑</div>
+        <div class="pos_tool_tb">
+          <table-menut-tool />
+        </div>
+      </div>
+
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        max-height="250"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column fixed="left" type="selection" width="45" />
+        <el-table-column label="#" type="index" width="45" />
+        <el-table-column prop="timedtaskname" label="定时任务名称" />
+        <el-table-column prop="expression" label="CRON表达式" />
+        <el-table-column prop="taskname" label="任务类名" />
+        
+        <el-table-column  label="运行状态">
+          <template slot-scope="scope">
+            <el-switch
+              v-model="operatingStatus"
+              active-color="#2D8CF0"
+              inactive-color="#D2D2D2">
+            </el-switch>
+            
+          </template>
+        </el-table-column>
+
+        <el-table-column fixed="right" label="操作" width="220">
+          <template slot-scope="scope">
+            <span class="public-table-btn table-btn-edit" @click="reviseTable"
+              >修改</span
+            >
+            <span
+              class="public-table-btn table-btn-delete"
+              @click="handleDelete(scope.row)"
+              >删除</span
+            >
+            <span
+              class="public-table-btn table-btn-delete"
+              >执行一次</span
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="1"
+        class="el_pagination"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="1"
+      >
+      </el-pagination>
+    </div>
+
+    <el-dialog
+      title="附件修改"
+      :visible.sync="reviseTableDialog"
+      width="50%"
+      append-to-body
+      @close="close"
+    >
+      <div style="width: 100%; text-align: center">
+        <el-form
+          :model="timedTaskForm"
+          ref="timedTaskForm"
+          :rules="timedTaskRules"
+          label-width="120px"
+        >
+          <div class="d-display">
+            <div class="w50">
+              <el-form-item prop="taskclass" label="任务类">
+                <el-input
+                  v-model="timedTaskForm.taskclass"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+              <el-form-item prop="missionname" label="任务名称">
+                <el-input
+                  v-model="timedTaskForm.missionname"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+            </div>
+            <div class="w50">
+              <el-form-item prop="CRON" label="CRON表达式">
+                <el-input
+                  v-model="timedTaskForm.CRON"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+              <el-form-item label="运行状态">
+                <el-select v-model="timedTaskForm.status" placeholder="请选择运行状态">
+                  <el-option label="停用" value="0"></el-option>
+                  <el-option label="启用" value="1"></el-option>
+                  <el-option label="初始" value="2"></el-option>
+                </el-select>
+              </el-form-item>
+            </div>
+          </div>
+          <el-form-item prop="remark" label="备注">
+            <el-input type="textarea" v-model="timedTaskForm.remark"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm('form')">保存</el-button>
+        <el-button @click="resetForm">重置</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import tableMenutTool from '@/views/tools/tableMenutTool'
+export default {
+  name: 'Log',
+  components: {
+    tableMenutTool,
+  },
+  data() {
+    return {
+      tableData: [
+        {
+          timedtaskname: 'zhy',
+          expression: '',
+          taskname: '',
+          status: '0',
+        },
+      ],
+      currentPage: 4,
+      multipleSelection: [],
+      reviseTableDialog: false,
+      operatingStatus:'',
+      timedTaskForm: {
+        taskclass: 'sdadmin',
+        missionname: 'sdadmin',
+        CRON: '',
+        status: '1',
+        remark: '',
+      },
+      timedTaskRules: {
+        taskclass: [{ required: true, message: '任务类', trigger: 'blur' }],
+        missionname: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
+        CRON: [{ required: true, message: '请输入CRON表达式', trigger: 'blur' }],
+        status: [{ required: true, message: '请选择活动区域', trigger: 'change' }],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
+      },
+    }
+  },
+
+  created() {
+    this.getList()
+  },
+
+  methods: {
+    getList() {},
+    submitForm() {},
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
+    },
+    close() {
+      this.timedTaskForm = []
+      this.reviseTableDialog = false
+    },
+    resetForm() {
+      this.$refs.timedTaskForm.resetFields()
+      this.reviseTableDialog = false
+    },
+    reviseTable() {
+      return (this.reviseTableDialog = true)
+    },
+    addNameList() {
+      return (this.reviseTableDialog = true)
+      this.$refs.timedTaskForm.resetFields()
+    },
+
+    handleDelete(row) {
+      const ids = row.id || this.ids
+      this.$confirm('是否确认删除该用户?', '信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(function () {
+          // return delCRestaurants(ids)
+        })
+        .then(() => {
+          this.getList()
+          this.msgSuccess('删除成功')
+        })
+        .catch(function () {})
+    },
+  },
+}
+</script>
+<style>
+.el-form-item__content .el-input,
+.el-select,
+.el-date-editor,
+.el-form-item__content .el-checkbox-group {
+  width: 100% !important;
+}
+  
+</style>
+<style lang='less' scoped>
+</style>

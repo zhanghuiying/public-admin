@@ -12,6 +12,13 @@ const Log = () => import('../components/systemmanagement/Log.vue')
 const DataDictionary = () => import('../components/systemmanagement/DataDictionary.vue')
 const Menu = () => import('../components/systemmanagement/Menu.vue')
 
+const parameterSettings = () => import('../components/parameterSettings.vue')
+const attachmentManagement = () => import('../components/attachmentManagement.vue')
+const timedTask = () => import('../components/timedTask.vue')
+const applicationManagement = () => import('../components/applicationManagement.vue')
+const codeProduction = () => import('../components/codeProduction.vue')
+
+
 Vue.use(Router)
 
 const router = new Router({
@@ -30,7 +37,11 @@ const router = new Router({
         { path: '/log', component: Log },
         { path: '/datadictionary', component: DataDictionary },
         { path: '/menu', component: Menu },
-
+        { path: '/parametersettings', component: parameterSettings },
+        { path: '/attachmentmanagement', component: attachmentManagement },
+        { path: '/timedtask', component: timedTask },
+        { path: '/applicationmanagement', component: applicationManagement },
+        { path: '/codeproduction', component: codeProduction },
        
       ]
     }
