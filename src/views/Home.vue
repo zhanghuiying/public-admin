@@ -27,27 +27,27 @@
                         <i class="el-icon-setting"></i>
                         <span>系统管理</span>
                     </template>
-                    <el-menu-item :index="'/' + 'usermanagement'">
+                    <el-menu-item :index="'/' + 'user'">
                         <i class="el-icon-user-solid"></i>
                         <span>用户管理</span>
                     </el-menu-item>
-                    <el-menu-item :index="'/' + 'authoritymanagement'">
+                    <el-menu-item :index="'/' + 'authority'">
                         <i class="el-icon-s-platform"></i>
                         <span>权限管理</span>
                     </el-menu-item>
-                    <el-menu-item :index="'/' + 'rolemanagement'">
+                    <el-menu-item :index="'/' + 'role'">
                         <i class="el-icon-s-custom"></i>
                         <span>角色管理</span>
                     </el-menu-item>
-                    <el-menu-item index="1-1-3">
+                    <el-menu-item :index="'/' + 'log'">
                         <i class="el-icon-s-order"></i>
                         <span>日志管理</span>
                     </el-menu-item>
-                    <el-menu-item index="1-1-3">
+                    <el-menu-item :index="'/' + 'datadictionary'">
                         <i class="el-icon-date"></i>
                         <span>数据字典</span>
                     </el-menu-item>
-                    <el-menu-item index="1-1-3">
+                    <el-menu-item :index="'/' + 'menu'">
                         <i class="el-icon-menu"></i>
                         <span>菜单管理</span>
                     </el-menu-item>

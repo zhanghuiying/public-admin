@@ -1,6 +1,6 @@
 <template>
   <div class="d-display">
-    <div class="pb_main_left">
+    <div class="pb-main-left">
       <p class="public_card_header">权限组</p>
       <span class="" >添加权限组</span>
 
@@ -15,7 +15,7 @@
       </el-tree>
       
     </div>
-    <div class="pb_main_mid">
+    <div class="pb-main-mid">
       <div style="background: #fff;padding-bottom: 30px;height: 100%;">
         <p class="public_card_header">功能点(点击菜单树节点切换选中菜单下的权限 ，右键菜单节点追加选中菜单下的权限)
           <span class="preservat_btn">保存</span>
@@ -35,8 +35,8 @@
 
       </div>
     </div>
-    <div class="pb_main_left">
-      <p class="public_card_header">菜单树</p>
+    <div class="pb-main-left">
+      <p class="public_card_header">菜单权限</p>
       <el-tree
         :data="menuTreeData"
         show-checkbox

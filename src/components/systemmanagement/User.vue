@@ -1,6 +1,6 @@
 <template>
   <div class="public_main_app d-display">
-    <div class="pb_main_left">
+    <div class="pb-main-left">
       <p class="public_card_header">用户列表</p>
 
       <el-tree
@@ -14,15 +14,12 @@
       </el-tree>
     </div>
 
-    <div class="pb_main_right">
-      <div
-        class=""
-        style="background: #fff; padding-bottom: 30px; height: 100%"
-      >
+    <div class="pb-main-right pb-main_pad-lf">
+      <div class="pb-main-height">
         <p class="public_card_header">组织结构</p>
 
-        <div class="public_card_body">
-          <div class="public_card_body_border">
+        <div class="public-card-body">
+          <div class="public-card-body-border">
             <div class="public_table_tool">
               <div class="public_table_tool_inline">
                 <i class="el-icon-refresh"></i>
@@ -56,7 +53,6 @@
 
               <div class="pos_tool_tb">
                  <table-menut-tool />
-                
               </div>
             </div>
 
@@ -90,8 +86,8 @@
 
               <el-table-column fixed="right" label="操作" width="120">
                 <template slot-scope="scope">
-                  <span class="table_user_btn table_user_add_edit" @click="editTable">编辑</span>
-                  <span class="table_user_btn table_user_delete" @click="handleDelete(scope.row)">删除</span>
+                  <span class="public-table-btn table-btn-edit" @click="editTable">编辑</span>
+                  <span class="public-table-btn table-btn-delete" @click="handleDelete(scope.row)">删除</span>
                 </template>
               </el-table-column>
             </el-table>
@@ -361,24 +357,6 @@ export default {
 
 </style>
 <style lang='less' scoped>
-.table_user_btn {
-  display: inline-block;
-  height: 26px;
-  line-height: 26px;
-  padding: 0 6px;
-  font-size: 12px;
-  background: blue;
-  border-radius: 3px;
-  color: #fff;
-  margin-left: 10px;
-  cursor: pointer;
-}
-.table_user_add_edit {
-  background: #1e9fff;
-}
-.table_user_delete {
-  background: #ff5722;
-}
 .el_pagination {
   margin-top: 30px;
 }

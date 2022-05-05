@@ -5,12 +5,12 @@ const Login = () => import(/* webpackChunkName: "login_home_welcome" */ '../view
 const Home = () => import('../views/Home.vue')
 const mainModule = () => import('../views/mainModule.vue')
 
-const userManagement = () => import( '../components/user/userManagement.vue')
-const authorityManagement = () => import('../components/authority/authorityManagement.vue')
-
-const roleManagement = () => import('../components/role/roleManagement.vue')
-
-
+const User = () => import( '../components/systemmanagement/User.vue')
+const Authority = () => import('../components/systemmanagement/Authority.vue')
+const Role = () => import('../components/systemmanagement/Role.vue')
+const Log = () => import('../components/systemmanagement/Log.vue')
+const DataDictionary = () => import('../components/systemmanagement/DataDictionary.vue')
+const Menu = () => import('../components/systemmanagement/Menu.vue')
 
 Vue.use(Router)
 
@@ -24,9 +24,12 @@ const router = new Router({
       redirect: '/mainmodule',
       children: [
         { path: '/mainmodule', component: mainModule },
-        { path: '/authoritymanagement', component: authorityManagement },
-        { path: '/usermanagement', component: userManagement },
-        { path: '/rolemanagement', component: roleManagement },
+        { path: '/authority', component: Authority },
+        { path: '/user', component: User },
+        { path: '/role', component: Role },
+        { path: '/log', component: Log },
+        { path: '/datadictionary', component: DataDictionary },
+        { path: '/menu', component: Menu },
 
        
       ]
