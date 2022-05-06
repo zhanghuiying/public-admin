@@ -7,12 +7,12 @@
             <i class="el-icon-refresh"></i>
           </div>
           <div class="public_table_tool_inline">
-            <i class="el-icon-circle-plus-outline"></i>
-          </div>
-          <div class="public_table_tool_inline">
             <i class="el-icon-delete"></i>
           </div>
-          <div class="">开启编辑</div>
+          <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
+        @click="editingCheckbox()">开启编辑
+          <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+        </div>
           <div class="pos_tool_tb">
             <table-menut-tool />
           </div>
@@ -118,13 +118,16 @@
               <div class="public_table_tool_inline">
                 <i class="el-icon-refresh"></i>
               </div>
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="addDigitalDetails()">
                 <i class="el-icon-circle-plus-outline"></i>
               </div>
               <div class="public_table_tool_inline">
                 <i class="el-icon-delete"></i>
               </div>
-              <div class="">开启编辑</div>
+              <div :class="isShowCheckbox2===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
+              @click="editingCheckbox2()">开启编辑
+                <i :class="isShowCheckbox2===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+              </div>
               <div class="pos_tool_tb">
                 <table-menut-tool />
               </div>
@@ -168,6 +171,70 @@
         </div>
       </div>
     </div>
+
+    <el-dialog
+      title="明细详情"
+      :visible.sync="addDigitalDialog"
+      width="50%"
+      append-to-body
+    >
+      <div style="width: 100%; text-align: left;">
+        <el-form
+          :model="addDigitaForm"
+          ref="addDigitaForm"
+          :rules="addDigitaRules"
+          label-width="120px"
+        >
+          <div class="d-display">
+            <div class="w50">
+              <el-form-item prop="showName" label="显示名称">
+                <el-input
+                  v-model="addDigitaForm.showName"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+              <el-form-item prop="store" label="存储(值)">
+                <el-input
+                  v-model="addDigitaForm.store"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+            </div>
+            <div class="w50">
+              <el-form-item prop="sort" label="排序">
+                <el-input
+                  v-model="addDigitaForm.sort"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+              <el-form-item prop="state" label="状态">
+                <el-select
+                  v-model="addDigitaForm.state"
+                  placeholder="请选择状态"
+                >
+                  <el-option label="停用" value="0"></el-option>
+                  <el-option label="启用" value="1"></el-option>
+                </el-select>
+              </el-form-item>
+            </div>
+          </div>
+          
+          <el-form-item prop="remark" label="备注">
+            <el-input
+              type="textarea"
+              v-model="addDigitaForm.remark"
+              placeholder="请输入备注"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAddDigita('form')"
+          >提交</el-button
+        >
+        <el-button @click="resetAddDigita">重置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -221,6 +288,32 @@ export default {
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
         state: [{ required: true, message: '请选择状态', trigger: 'change' }],
       },
+      isShowCheckbox: false,
+      isShowCheckbox2: false,
+      addDigitalDialog: false,
+      addDigitaForm: {
+        showName: 'sdadmin',
+        store: 'sfdf',
+        sort: '',
+        state: '',
+        remark: '',
+      },
+      addDigitaRules: {
+        showName: [
+          { required: true, message: '请输入显示名称', trigger: 'blur' },
+        ],
+        store: [
+          { required: true, message: '请输入存储(值)', trigger: 'blur' },
+        ],
+        sort: [
+          { required: true, message: '请输入排序', trigger: 'blur' },
+        ],
+        state: [
+          { required: true, message: '请选择状态', trigger: 'change' },
+        ],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
+      },
+
     }
   },
 
@@ -230,6 +323,13 @@ export default {
 
   methods: {
     getList() {},
+    submitAddDigita() {},
+    editingCheckbox(){
+      this.isShowCheckbox = !this.isShowCheckbox;
+    },
+    editingCheckbox2(){
+      this.isShowCheckbox2 = !this.isShowCheckbox2;
+    },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
     },
@@ -243,8 +343,15 @@ export default {
     close() {
       this.groupingForm = []
     },
+    resetAddDigita() {
+      this.addDigitalDialog = false
+      this.$refs.groupingorm.resetFields()
+    },
     resetForm() {
       this.$refs.groupingorm.resetFields()
+    },
+    addDigitalDetails() {
+      return (this.addDigitalDialog = true)
     },
   },
 }

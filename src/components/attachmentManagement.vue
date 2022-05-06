@@ -12,7 +12,10 @@
         <div class="public_table_tool_inline">
           <i class="el-icon-delete"></i>
         </div>
-        <div class="">开启编辑</div>
+        <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
+        @click="editingCheckbox()">开启编辑
+          <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+        </div>
         <div class="pos_tool_tb">
           <table-menut-tool />
         </div>
@@ -187,6 +190,7 @@ export default {
         extensionname: [{ required: true, message: '请输入扩展名', trigger: 'blur' }],
         filelocation: [{ required: true, message: '请输入文件位置', trigger: 'blur' }],
       },
+      isShowCheckbox: false,
     }
   },
 
@@ -197,6 +201,9 @@ export default {
   methods: {
     getList() {},
     submitForm() {},
+    editingCheckbox(){
+      this.isShowCheckbox = !this.isShowCheckbox;
+    },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
     },

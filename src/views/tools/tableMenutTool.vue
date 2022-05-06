@@ -1,13 +1,13 @@
 <template>
   <div class="pos_table_tool">
     <div class="public_table_tool_inline">
-      <i class="el-icon-s-check"></i>
+      <i class="el-icon-data-analysis"></i>
     </div>
     <div class="public_table_tool_inline">
-      <i class="el-icon-s-check"></i>
+      <i class="el-icon-receiving"></i>
     </div>
     <div class="public_table_tool_inline">
-      <i class="el-icon-s-check"></i>
+      <i class="el-icon-printer"></i>
     </div>
   </div>
 </template>

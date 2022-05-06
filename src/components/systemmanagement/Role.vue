@@ -1,6 +1,7 @@
 <template>
-  <div class="d-display">
-    <div class="pb-main-right pb-main_pad-fr">
+  <div class="">
+    <div class="d-display">
+      <div class="pb-main-right pb-main_pad-fr">
       <div class="pb-main-height">
         <div class="public-card-body">
           <div class="public-card-body-border">
@@ -8,7 +9,7 @@
               <div class="public_table_tool_inline">
                 <i class="el-icon-refresh"></i>
               </div>
-              <div class="public_table_tool_inline" >
+              <div class="public_table_tool_inline" @click="addRole()">
                 <i class="el-icon-circle-plus-outline"></i>
               </div>
               <div class="public_table_tool_inline">
@@ -35,7 +36,7 @@
                   <span class="public-table-btn table-btn-edit" @click="editTable">编辑</span>
                   <span class="public-table-btn table-btn-delete" @click="handleDelete(scope.row)">删除</span>
                   <span class="public-table-btn table-btn-check">查看菜单权限</span>
-                  <span class="public-table-btn table-btn-delete">保持菜单权限</span>
+                  <span class="public-table-btn table-btn-delete" @click="saveMenuPermission(scope.row)">保持菜单权限</span>
 
                 </template>
               </el-table-column>
@@ -67,6 +68,50 @@
         :props="defaultProps">
       </el-tree>
     </div>
+
+    </div>
+    <el-dialog
+      title="添加角色"
+      :visible.sync="addRoleDialog"
+      width="50%"
+      append-to-body
+      @close="close"
+    >
+      <div style="width: 100%; text-align: center">
+        <el-form
+          :model="addRoleForm"
+          ref="addRoleForm"
+          :rules="addRoleRules"
+          label-width="120px"
+        >
+          <el-form-item prop="name" label="角色名称">
+            <el-input
+              v-model="addRoleForm.name"
+              prefix-icon="iconfont icon-user"
+              placeholder="请输入角色名称"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="number" label="角色编号">
+            <el-input
+              v-model="addRoleForm.number"
+              prefix-icon="iconfont icon-user"
+              placeholder="请输入角色编号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="remark" label="角色备注">
+            <el-input
+              type="textarea"
+              v-model="addRoleForm.parameter"
+              placeholder="请输入角色备注"
+            ></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm('form')">提交</el-button>
+        <el-button @click="resetForm">重置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -89,7 +134,7 @@ export default {
       ],
       currentPage: 4,
       multipleSelection: [],
-      editTableDialog: false,
+      addRoleDialog: false,
       menuTreeData: [{
           id: 1,
           label: '系统管理',
@@ -127,7 +172,23 @@ export default {
         defaultProps: {
           children: 'children',
           label: 'label'
-        }
+        },
+        addRoleForm: {
+          name: 'sdadmin',
+          number: '',
+          remark: ''
+        },
+        addRoleRules: {
+          name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+          number: [
+            { required: true, message: '请输入角色编号', trigger: 'blur' },
+          ],
+          remark: [
+            { required: true, message: '请输入角色备注', trigger: 'blur' },
+          ],
+      },
+
+        
 
     };
   },
@@ -162,15 +223,32 @@ export default {
         })
     },
     close() {
-      this.editForm = []
-      this.editTableDialog = false
+      this.addRoleForm = []
+      this.addRoleDialog = false
     },
     resetForm() {
-      this.$refs.editForm.resetFields()
-      this.editTableDialog = false
+      this.$refs.addRoleForm.resetFields()
+      this.addRoleDialog = false
     },
     editTable() {
-      return this.editTableDialog = true
+      return this.addRoleDialog = true
+    },
+    addRole() {
+      return this.addRoleDialog = true
+    },
+    saveMenuPermission(row) {
+        const ids = row.id || this.ids
+        this.$confirm('确定保存角色权限信息吗?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(function() {
+          // return delCRestaurants(ids)
+        }).then(() => {
+          this.getList()
+          this.msgSuccess('删除成功')
+        }).catch(function() {
+        })
     },
 
   },

@@ -23,7 +23,10 @@
           <i class="el-icon-check"></i>
         </div>
        
-        <div class="">开启编辑</div>
+        <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
+        @click="editingCheckbox()">开启编辑
+          <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+        </div>
         <div class="pos_tool_tb">
           <table-menut-tool />
         </div>
@@ -205,6 +208,7 @@ export default {
         ],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
+      isShowCheckbox: false,
     }
   },
 
@@ -215,6 +219,9 @@ export default {
   methods: {
     getList() {},
     submitForm() {},
+    editingCheckbox(){
+      this.isShowCheckbox = !this.isShowCheckbox;
+    },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
     },
