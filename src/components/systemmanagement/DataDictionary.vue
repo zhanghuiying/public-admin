@@ -9,10 +9,23 @@
           <div class="public_table_tool_inline">
             <i class="el-icon-delete"></i>
           </div>
-          <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
-        @click="editingCheckbox()">开启编辑
-          <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
-        </div>
+          <div
+            :class="
+              isShowCheckbox === true
+                ? 'public_editing_checkbox pb-checked-bg'
+                : 'public_editing_checkbox'
+            "
+            @click="editingCheckbox()"
+          >
+            开启编辑
+            <i
+              :class="
+                isShowCheckbox === true
+                  ? 'el-icon-check pb-checked-i'
+                  : 'el-icon-check'
+              "
+            ></i>
+          </div>
           <div class="pos_tool_tb">
             <table-menut-tool />
           </div>
@@ -118,15 +131,31 @@
               <div class="public_table_tool_inline">
                 <i class="el-icon-refresh"></i>
               </div>
-              <div class="public_table_tool_inline" @click="addDigitalDetails()">
+              <div
+                class="public_table_tool_inline"
+                @click="addDigitalDetails()"
+              >
                 <i class="el-icon-circle-plus-outline"></i>
               </div>
               <div class="public_table_tool_inline">
                 <i class="el-icon-delete"></i>
               </div>
-              <div :class="isShowCheckbox2===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
-              @click="editingCheckbox2()">开启编辑
-                <i :class="isShowCheckbox2===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+              <div
+                :class="
+                  isShowCheckbox2 === true
+                    ? 'public_editing_checkbox pb-checked-bg'
+                    : 'public_editing_checkbox'
+                "
+                @click="editingCheckbox2()"
+              >
+                开启编辑
+                <i
+                  :class="
+                    isShowCheckbox2 === true
+                      ? 'el-icon-check pb-checked-i'
+                      : 'el-icon-check'
+                  "
+                ></i>
               </div>
               <div class="pos_tool_tb">
                 <table-menut-tool />
@@ -139,20 +168,19 @@
               @selection-change="handleSelectionChange"
             >
               <el-table-column fixed="left" type="selection" width="45" />
-            <el-table-column label="#" type="index" width="45" />
-            
-            <el-table-column prop="name" label="显示名称" />
-            <el-table-column prop="storage" label="存储(值)" />
-            <el-table-column prop="sort" label="排序" />
-            <el-table-column label="状态">
-              <template slot-scope="scope">
-                {{ stateText[scope.row.state] }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="remark" label="备注" />
-            <el-table-column fixed="right" label="操作" width="120">
+              <el-table-column label="#" type="index" width="45" />
+
+              <el-table-column prop="name" label="显示名称" />
+              <el-table-column prop="storage" label="存储(值)" />
+              <el-table-column prop="sort" label="排序" />
+              <el-table-column label="状态">
                 <template slot-scope="scope">
+                  {{ stateText[scope.row.state] }}
                 </template>
+              </el-table-column>
+              <el-table-column prop="remark" label="备注" />
+              <el-table-column fixed="right" label="操作" width="120">
+                <template slot-scope="scope"> </template>
               </el-table-column>
             </el-table>
           </div>
@@ -178,7 +206,7 @@
       width="50%"
       append-to-body
     >
-      <div style="width: 100%; text-align: left;">
+      <div style="width: 100%; text-align: left">
         <el-form
           :model="addDigitaForm"
           ref="addDigitaForm"
@@ -218,7 +246,7 @@
               </el-form-item>
             </div>
           </div>
-          
+
           <el-form-item prop="remark" label="备注">
             <el-input
               type="textarea"
@@ -302,18 +330,11 @@ export default {
         showName: [
           { required: true, message: '请输入显示名称', trigger: 'blur' },
         ],
-        store: [
-          { required: true, message: '请输入存储(值)', trigger: 'blur' },
-        ],
-        sort: [
-          { required: true, message: '请输入排序', trigger: 'blur' },
-        ],
-        state: [
-          { required: true, message: '请选择状态', trigger: 'change' },
-        ],
+        store: [{ required: true, message: '请输入存储(值)', trigger: 'blur' }],
+        sort: [{ required: true, message: '请输入排序', trigger: 'blur' }],
+        state: [{ required: true, message: '请选择状态', trigger: 'change' }],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
-
     }
   },
 
@@ -324,11 +345,11 @@ export default {
   methods: {
     getList() {},
     submitAddDigita() {},
-    editingCheckbox(){
-      this.isShowCheckbox = !this.isShowCheckbox;
+    editingCheckbox() {
+      this.isShowCheckbox = !this.isShowCheckbox
     },
-    editingCheckbox2(){
-      this.isShowCheckbox2 = !this.isShowCheckbox2;
+    editingCheckbox2() {
+      this.isShowCheckbox2 = !this.isShowCheckbox2
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
