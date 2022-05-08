@@ -130,7 +130,8 @@ export default {
     };
   },
 
-  created: {},
+  created() {
+  },
 
   methods:  {
     append(data) {

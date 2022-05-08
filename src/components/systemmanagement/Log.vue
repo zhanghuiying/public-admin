@@ -60,7 +60,8 @@ export default {
     }
   },
 
-  created: {},
+  created() {
+  },
 
   methods: {
     handleSizeChange(val) {

@@ -1,0 +1,173 @@
+.visit-w {
+    width: 24.3%;
+    height: 124px;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.visit_col_space {
+    display: flex;
+    justify-content: space-around;
+}
+
+.visit_col_space .col_space4_fl {
+    width: 50%;
+}
+
+.top_panel_number {
+    line-height: 60px;
+    font-size: 29px;
+    color: #28333E;
+    font-size: 26px;
+    text-align: center;
+    border-right: 1px solid #eceff9;
+}
+
+.card_body {
+    height: 100%;
+    margin-top: 16px;
+    padding-bottom: 20px;
+}
+
+.card_body_left {
+    width: 75.7%;
+    padding-right: 15px;
+}
+
+.card_body_right {
+    width: 24.3%;
+    height: 100%;
+}
+
+.main_echarts {
+    width: 100%;
+    background: #fff;
+    border-radius: 3px;
+}
+
+.card_dynamic {
+    height: 510px;
+    padding: 10px 15px;
+    background: #fff;
+}
+
+.card_dynamic .admin-card-status {
+    padding: 10px 0;
+    border-bottom: 1px solid #EEE;
+}
+
+.card_dynamic .admin-card-status .left {
+    width: 8%;
+}
+
+.card_dynamic .admin-card-status .right {
+    width: 98%;
+    text-align: left;
+}
+
+.card_dynamic .admin-card-status .right .status_p {
+    height: 40px;
+    line-height: 40px;
+}
+
+.card_dynamic .admin-card-status .right span {
+    color: #BBB;
+}
+
+.card_dynamic .admin-card-status .status_img {
+    height: 34px;
+    margin-top: 15px;
+}
+
+.card_list_item {
+    height: 440px;
+    background: #fff;
+    border-radius: 3px;
+}
+
+.card_list_item .list_item {
+    position: relative;
+    height: 40px;
+    line-height: 40px;
+    color: gray;
+    padding: 0 0 0 15px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+.card_list_item .list_item .text {
+    font-size: 13px;
+    width: 100%;
+}
+
+.card_list_item .list_item .data {
+    position: absolute;
+    right: 30px;
+    font-size: 12px;
+}
+
+.card_link {
+    margin: 15px 0;
+    height: 230px;
+    padding: 0 15px;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.card_link .card_body_btn {
+    margin-top: 8px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    letter-spacing: 6px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 16px;
+    border-radius: 3px;
+}
+
+.pear-btn-primary {
+    background-color: #36b368 !important;
+}
+
+.pear-btn-warming {
+    background-color: #f6ad55 !important;
+}
+
+.pear-btn-danger {
+    background-color: #f56c6c !important;
+}
+
+.card_message {
+    text-align: left;
+    text-indent: 2em;
+    line-height: 24px;
+    padding: 0 15px 15px 15px;
+    background: #fff;
+    border-radius: 3px;
+    color: rgba(0, 0, 0, .85);
+}
+
+
+//滚动 自定义
+.height_dynamic{
+    height: 460px;
+}
+.height_right_list {
+    height: 385px;
+}
+.pub_scroll_list {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.pub_scroll_list .pub_scroll_list_column {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: -24px;
+    bottom: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}

@@ -116,7 +116,8 @@ export default {
     }
   },
 
-  created: {},
+  created() {
+  },
 
   methods: {
     logout() {

@@ -1,0 +1,392 @@
+<template>
+  <div class="d-display menu_div">
+    <div class="pb-main-menu-left">
+      <div class="menu_column">
+        菜单树
+        <el-popover placement="bottom" width="100" trigger="click">
+          <span slot="reference" class="menu_btn"
+            >菜单操作<i class="el-icon-arrow-down"></i
+          ></span>
+          <div :key="index" v-for="(item, index) in menuOptions">
+            <p class="hd-nav-btn">{{ item.label }}</p>
+          </div>
+        </el-popover>
+        <span class="btn_expand-shrink">展开/收缩</span>
+      </div>
+      <el-tree
+        :data="menuTreeData"
+        show-checkbox
+        node-key="id"
+        :default-expanded-keys="[2, 3]"
+        :default-checked-keys="[5]"
+        :props="defaultProps"
+      >
+      </el-tree>
+    </div>
+    <div class="pb-main-menu-right pb-main_pad-lf">
+      <div class="pb-bg pb-main-padding-bt pb-main-margin-b">
+        <p class="public_card_header">菜单详情</p>
+        <el-form
+          :model="munuForm"
+          ref="munuForm"
+          :rules="munuRules"
+          label-width="90px"
+        >
+          <div class="d-display pb-main-padding-t pb-main-padding-fr">
+            <div class="w25">
+              <el-form-item prop="name" label="分组代码">
+                <el-input
+                  v-model="munuForm.name"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+            </div>
+            <div class="w25">
+              <el-form-item prop="address" label="访问地址">
+                <el-popover placement="bottom" width="100" trigger="click">
+                  <el-input
+                    slot="reference"
+                    v-model="addressText[munuForm.address]"
+                    prefix-icon="iconfont icon-user"
+                  ></el-input>
+                  <div :key="index" v-for="(item, index) in addressOptions">
+                    <p class="hd-nav-btn" @click="addressOptionsClick(index)">
+                      {{ item.label }}
+                    </p>
+                  </div>
+                </el-popover>
+              </el-form-item>
+            </div>
+            <div class="w25">
+              <el-form-item prop="number" label="排序号">
+                <el-input
+                  v-model="munuForm.number"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+            </div>
+            <div class="w25">
+              <el-form-item prop="code" label="菜单编码">
+                <el-input
+                  v-model="munuForm.code"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+            </div>
+          </div>
+          <div class="d-display pb-main-padding-fr">
+            <div class="w25">
+              <el-form-item label="分组状态">
+                <el-select v-model="munuForm.state" placeholder="菜单状态">
+                  <el-option label="停用" value="0"></el-option>
+                  <el-option label="启用" value="1"></el-option>
+                  <el-option label="初始" value="2"></el-option>
+                </el-select>
+              </el-form-item>
+            </div>
+            <div class="w25">
+              <el-form-item label="图标">
+                <el-popover placement="bottom" width="100" trigger="click">
+                  <el-input
+                    slot="reference"
+                    v-model="munuForm.icon"
+                    prefix-icon="iconfont icon-user"
+                  ></el-input>
+                  <div :key="index" v-for="(item, index) in addressOptions">
+                    <p class="hd-nav-btn" @click="addressOptionsClick(index)">
+                      {{ item.label }}
+                    </p>
+                  </div>
+                </el-popover>
+              </el-form-item>
+            </div>
+            <div class="w50">
+              <el-form-item prop="remark" label="备注">
+                <el-input
+                  v-model="munuForm.remark"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+            </div>
+          </div>
+          <div>
+            <el-button type="primary" @click="submitForm('form')"
+              >保存</el-button
+            >
+            <el-button @click="resetForm">重置</el-button>
+          </div>
+        </el-form>
+      </div>
+
+      <div class="pb-bg pb-main-margin-b">
+        <div class="public-card-body">
+          <div class="public-card-body-border">
+            <div class="public_table_tool">
+              <div class="public_table_tool_inline">
+                <i class="el-icon-refresh"></i>
+              </div>
+              <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
+                @click="editingCheckbox()">开启编辑
+                  <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+                </div>
+              <div class="pos_tool_tb">
+                <table-menut-tool />
+              </div>
+            </div>
+            <el-table
+              :data="groupingDetailsData"
+              style="width: 100%"
+              max-height="250"
+              @selection-change="handleSelectionChange"
+            >
+              <el-table-column fixed="left" type="selection" width="45" />
+              <el-table-column label="#" type="index" width="45" />
+
+              <el-table-column prop="name" label="菜单名称" />
+              <el-table-column prop="address" label="菜单地址" />
+              <el-table-column prop="sort" label="排序" />
+              <el-table-column prop="icon" label="图标" />
+
+              <el-table-column label="状态">
+                <template slot-scope="scope">
+                  {{ stateText[scope.row.state] }}
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[100, 200, 300, 400]"
+            :page-size="1"
+            class="el_pagination"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="1"
+          >
+          </el-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import tableMenutTool from '@/views/tools/tableMenutTool'
+
+export default {
+  name: 'datadictionary',
+  components: {
+    tableMenutTool,
+  },
+  data() {
+    return {
+      menuOptions: [
+        {
+          label: '添加根菜单',
+        },
+        {
+          label: '添加子菜单',
+        },
+        {
+          label: '删除选中',
+        },
+        {
+          label: '禁用选中',
+        },
+        {
+          label: '启用选中',
+        },
+      ],
+      menuValue: '',
+      groupingDetailsData: [
+        {
+          name: 'CBDKXXZT',
+          address: '23',
+          sort: '1',
+          state: '1',
+          icon: '',
+        },
+      ],
+      currentPage: 4,
+      multipleSelection: [],
+      stateText: { 0: '停用', 1: '启用', 2: '初始' },
+      menuTreeData: [
+        {
+          id: 1,
+          label: '系统管理',
+          children: [
+            {
+              id: 4,
+              label: '系统管理',
+              children: [
+                {
+                  id: 9,
+                  label: '用户管理',
+                },
+                {
+                  id: 10,
+                  label: '权限管理',
+                },
+                {
+                  id: 11,
+                  label: '角色管理',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 2,
+          label: '参数设置',
+        },
+        {
+          id: 3,
+          label: '附件管理',
+        },
+        {
+          id: 4,
+          label: '定时任务',
+        },
+        {
+          id: 5,
+          label: '应用管理',
+        },
+        {
+          id: 6,
+          label: '代码生成',
+        },
+      ],
+      defaultProps: {
+        children: 'children',
+        label: 'label',
+      },
+      munuForm: {
+        name: '',
+        address: '',
+        number: '',
+        code: '',
+        state: '1',
+        icon: '',
+        remark: '',
+      },
+      munuRules: {
+        code: [{ required: true, message: '请输入分组代码', trigger: 'blur' }],
+        name: [
+          { required: true, message: '请输入分组名称', trigger: 'blur' },
+          {
+            min: 3,
+            max: 10,
+            message: '长度在 3 到 10 个字符',
+            trigger: 'blur',
+          },
+        ],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
+        state: [{ required: true, message: '请选择状态', trigger: 'change' }],
+      },
+      addressOptions: [
+        {
+          label: '参数设置',
+        },
+        {
+          label: '定时任务',
+        },
+        {
+          label: '附件管理',
+        },
+      ],
+      addressText: {
+        0: 'xtgl/info/listPage.do',
+        1: 'xtgl/dsrw/listPage.do',
+        2: 'xtgl/file/listPage.do',
+      },
+      isShowCheckbox: false,
+    }
+  },
+
+  created() {
+    this.getList()
+  },
+
+  methods: {
+    getList() {},
+    editingCheckbox(){
+      this.isShowCheckbox = !this.isShowCheckbox;
+    },
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val
+    },
+    submitForm() {},
+    close() {
+      this.munuForm = []
+    },
+    resetForm() {
+      this.$refs.groupingorm.resetFields()
+    },
+    addressOptionsClick(index) {
+      this.munuForm.address = index
+    },
+  },
+}
+</script>
+<style>
+.el-form-item__content .el-input,
+.el-select,
+.el-form-item__content .el-checkbox-group {
+  width: 100% !important;
+}
+.el-popover {
+  padding: 10px 0 0 0 !important;
+  margin-top: 0 !important;
+}
+</style>
+<style lang='less' scoped>
+.menu_column {
+  height: 40px;
+  line-height: 40px;
+  padding: 0 15px;
+  text-align: left;
+}
+.menu_column .menu_btn {
+  display: inline-block;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 10px;
+  color: #01aaed;
+  cursor: pointer;
+}
+.menu_column .menu_btn .el-icon-arrow-down {
+  margin-left: 6px;
+}
+.menu_column .menu_btn:hover {
+  font-weight: bold;
+}
+.btn_expand-shrink {
+  display: inline-block;
+  height: 28px;
+  line-height: 28px;
+  white-space: nowrap;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+  transition: 0.1s;
+  font-weight: 500;
+  padding: 0 8px;
+  font-size: 12px;
+  background-color: white;
+  border: 1px solid #dcdfe6;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.btn_expand-shrink:hover {
+  color: #2d8cf0;
+  background-color: #ecf5ff;
+}
+</style>

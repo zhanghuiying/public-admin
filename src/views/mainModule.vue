@@ -109,7 +109,8 @@ export default {
     return {}
   },
 
-  created: {},
+  created() {
+  },
 
   mounted() {
     this.echarts('echarts')
