@@ -143,7 +143,7 @@ export default {
     async getMenus() {
       let result = await getMenuList()
       this.menulist = result
-      console.log(this.menulist)
+      // console.log(this.menulist)
     },
     // 点击按钮，切换菜单的折叠与展开
     toggleCollapse() {

@@ -5,14 +5,14 @@ import { MessageBox, Message } from 'element-ui'
 
 // 创建一个axios实例
 const service = axios.create({
-  baseURL: "/api", // url = base url + request url
+  baseURL: "/api", 
   timeout: 5000
 })
 
 // const baseURL = process.env.API_ROOT
 // const service = axios.create({
 //   baseURL: baseURL, // api base_url
-//   timeout: 6000 // 请求超时时间
+//   timeout: 5000 // 请求超时时间
 // })
 // export const pureAxios = axios.create({
 //   baseURL: baseURL, // api base_url
@@ -20,20 +20,20 @@ const service = axios.create({
 // })
 
 // 请求的拦截
-// service.interceptors.request.use(
-//   config => {
-//     if (store.getters.token) {
-//       //这个是后台token的名字
-//       config.headers['X-Token'] = getToken()
-//     }
-//     return config
-//   },
-//   error => {
-//     // 错误的处理
-//     console.log(error)
-//     return Promise.reject(error)
-//   }
-// )
+service.interceptors.request.use(
+  config => {
+    // if (store.getters.token) {
+    //   //这个是后台token的名字
+    //   config.headers['X-Token'] = getToken()
+    // }
+    return config
+  },
+  error => {
+    // 错误的处理
+    console.log(error)
+    return Promise.reject(error)
+  }
+)
 
 // 响应请求
 service.interceptors.response.use(
@@ -41,7 +41,7 @@ service.interceptors.response.use(
   response => {
      const res = response.data
 
-    // if (res.code !== 20000) {
+    // if (res.code !== 200) {
     //   Message({
     //     message: res.message || 'Error',
     //     type: 'error',
@@ -63,10 +63,8 @@ service.interceptors.response.use(
       // }
     //   return Promise.reject(new Error(res.message || 'Error'))
     // } else {
-    //   return res
+      return res
     // }
-
-    return res;
   },
   error => {
     console.log('err' + error) // for debug

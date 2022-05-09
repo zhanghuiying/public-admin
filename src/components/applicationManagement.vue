@@ -35,7 +35,6 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        max-height="250"
         @selection-change="handleSelectionChange"
       >
         <el-table-column fixed="left" type="selection" width="45" />

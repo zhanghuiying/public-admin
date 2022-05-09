@@ -6,7 +6,7 @@
           <div class="public-card-body">
             <div class="public-card-body-border">
               <div class="public_table_tool">
-                <div class="public_table_tool_inline">
+                <div class="public_table_tool_inline" @click="getList()">
                   <i class="el-icon-refresh"></i>
                 </div>
                 <div class="public_table_tool_inline" @click="addRole()">
@@ -23,7 +23,6 @@
               <el-table
                 :data="tableData"
                 style="width: 100%"
-                max-height="250"
                 @selection-change="handleSelectionChange"
               >
                 <el-table-column fixed="left" type="selection" width="45" />
@@ -35,20 +34,22 @@
                   <template slot-scope="scope">
                     <span
                       class="public-table-btn table-btn-edit"
-                      @click="editTable"
+                      @click="
+                        editTable(scope.row.ROLE_ID, scope.row.ROLE_STATE)
+                      "
                       >编辑</span
                     >
                     <span
                       class="public-table-btn table-btn-delete"
-                      @click="handleDelete(scope.row)"
+                      @click="handleDelete(scope)"
                       >删除</span
                     >
                     <span class="public-table-btn table-btn-check"
-                      >查看菜单权限</span
+                      @click="checkMenuPermissions(scope.row.ROLE_ID)">查看菜单权限</span
                     >
                     <span
                       class="public-table-btn table-btn-delete"
-                      @click="saveMenuPermission(scope.row)"
+                      @click="koopMenuPermissions(scope)"
                       >保持菜单权限</span
                     >
                   </template>
@@ -59,12 +60,12 @@
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page.sync="queryParams.pageNum"
-                :page-sizes.sync="queryParams.pageSize"
                 class="el_pagination"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="total"
               />
-              <!-- <el-pagination v-show="total>10"
+              <!-- :page-sizes.sync="queryParams.pageSize"
+                <el-pagination v-show="total>10"
                     :total="total"
                     :page.sync="queryParams.pageNum"
                     :limit.sync="queryParams.pageSize"
@@ -87,7 +88,7 @@
       </div>
     </div>
     <el-dialog
-      title="添加角色"
+      :title="dialogType === 'edit' ? '修改角色' : '添加角色'"
       :visible.sync="addRoleDialog"
       width="50%"
       append-to-body
@@ -133,14 +134,25 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
-import { getRoleData,addRole } from '../../api/role/role'
+import {
+  getRoleData,
+  addRole,
+  updateRole,
+  deleteRole,
+  selectMenuByRoleId,
+  saveMenuByRoleId
+} from '../../api/role/role'
 
 export default {
   name: 'role',
   components: {
     tableMenutTool,
     getRoleData,
-    addRole
+    addRole,
+    updateRole,
+    deleteRole,
+    selectMenuByRoleId,
+    saveMenuByRoleId
   },
   data() {
     return {
@@ -166,7 +178,7 @@ export default {
           label: '系统管理',
           children: [
             {
-              id: 4,
+              id: 5,
               label: '系统管理',
               children: [
                 {
@@ -181,7 +193,33 @@ export default {
                   id: 11,
                   label: '角色管理',
                 },
+                {
+                  id: 11,
+                  label: '日志管理',
+                },
+                {
+                  id: 11,
+                  label: '数据字典',
+                },
+                {
+                  id: 11,
+                  label: '菜单管理',
+                },
               ],
+            },
+          ],
+        },
+        {
+          id: 2,
+          label: '消息管理',
+          children: [
+            {
+              id: 5,
+              label: '消息通知',
+            },
+            {
+              id: 5,
+              label: '我的消息',
             },
           ],
         },
@@ -198,7 +236,7 @@ export default {
           label: '定时任务',
         },
         {
-          id: 5,
+          id: 11,
           label: '应用管理',
         },
         {
@@ -210,16 +248,18 @@ export default {
         children: 'children',
         label: 'label',
       },
+      dialogType: 'new',
       addRoleForm: {
-        ROLE_ID:'',
+        ROLE_ID: '',
         ROLE_STATE: '',
-        ROLE_NAME:'',
-        ROLE_CODE:'',
-        ROLE_REMARK:'',
+        ROLE_NAME: '',
+        ROLE_CODE: '',
+        ROLE_REMARK: '',
       },
-      
       addRoleRules: {
-        ROLE_NAME: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
+        ROLE_NAME: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' },
+        ],
         ROLE_CODE: [
           { required: true, message: '请输入角色编号', trigger: 'blur' },
         ],
@@ -235,12 +275,16 @@ export default {
   },
 
   methods: {
-    // 获取所有的菜单
     async getList() {
       let result = await getRoleData()
       this.tableData = result.data
-      this.total = result.data.length
+      // for (let i = 0; i < this.tableData.length; i++) {
+      //   this.addRoleForm.ROLE_NAME = this.tableData[i].ROLE_NAME;
+      //   this.addRoleForm.ROLE_CODE = this.tableData[i].ROLE_CODE;
+      //   this.addRoleForm.ROLE_REMARK = this.tableData[i].ROLE_REMARK;
+      // }
       console.log(this.tableData)
+      this.total = result.count
     },
 
     handleSizeChange(val) {
@@ -253,28 +297,52 @@ export default {
       this.multipleSelection = val
     },
     async submitForm() {
-      const { data } = await addRole(this.addRoleForm.ROLE_NAME,
-      this.addRoleForm.ROLE_CODE,
-      this.addRoleForm.ROLE_REMARK)
-      console.log(this.data)
-      // this.role.key = data.key
-      // this.rolesList.push(this.role)
+      const isEdit = this.dialogType === 'edit'
+      // const checkedKeys = this.$refs.tree.getCheckedKeys()
+      // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+      if (isEdit) {
+        const { data } = await updateRole(
+          this.addRoleForm.ROLE_ID,
+          this.addRoleForm.ROLE_STATE,
+          this.addRoleForm.ROLE_NAME,
+          this.addRoleForm.ROLE_CODE,
+          this.addRoleForm.ROLE_REMARK
+        )
+        console.log(this.data)
+        // for (let index = 0; index < this.rolesList.length; index++) {
+        //   if (this.rolesList[index].key === this.role.key) {
+        //     this.rolesList.splice(index, 1, Object.assign({}, this.role))
+        //     break
+        //   }
+        // }
+      } else {
+        const { data } = await addRole(
+          this.addRoleForm.ROLE_NAME,
+          this.addRoleForm.ROLE_CODE,
+          this.addRoleForm.ROLE_REMARK
+        )
+        console.log(this.data)
+      }
+      this.addRoleDialog = false
+      this.getList()
     },
-    handleDelete(row) {
-      const ids = row.id || this.ids
+    handleDelete({ $index, row }) {
       this.$confirm('是否确认删除该用户?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
-        .then(function () {
-          // return delCRestaurants(ids)
+        .then(async () => {
+          await deleteRole(row.ROLE_ID)
+          this.tableData.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
         })
-        .then(() => {
-          this.getList()
-          this.msgSuccess('删除成功')
+        .catch((err) => {
+          console.error(err)
         })
-        .catch(function () {})
     },
     close() {
       this.addRoleForm = []
@@ -282,27 +350,46 @@ export default {
     },
     resetForm() {
       this.$refs.addRoleForm.resetFields()
+      const isEdit = this.dialogType === 'edit'
       this.addRoleDialog = false
     },
-    editTable() {
-      return (this.addRoleDialog = true)
+    editTable(editId, atate) {
+      this.dialogType = 'edit'
+      this.addRoleDialog = true
+      this.addRoleForm.ROLE_ID = editId
+      this.addRoleForm.ROLE_STATE = atate
+      // for (let index = 0; index < this.tableData.length; index++) {
+      //     // if (this.tableData[index].ROLE_ID === this.editId) {
+      //       // this.tableData.splice(index, 1, Object.assign({}, this.role))
+      //       // break
+      //       // console.log(this.tableData[1].ROLE_ID);
+      //     // }
+      //     console.log(this.tableData[index].ROLE_ID);
+      //   }
+      console.log(editId)
     },
     addRole() {
+      this.dialogType = 'new'
       return (this.addRoleDialog = true)
     },
-    saveMenuPermission(row) {
+    async checkMenuPermissions(id){
+      let selectMenu = await selectMenuByRoleId(id)
+      console.log(selectMenu)
+
+    },
+    koopMenuPermissions(row,mwnu_id) {
       const ids = row.id || this.ids
       this.$confirm('确定保存角色权限信息吗?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
-        .then(function () {
-          // return delCRestaurants(ids)
-        })
-        .then(() => {
-          this.getList()
-          this.msgSuccess('删除成功')
+        .then(async () => {
+          await saveMenuByRoleId(row.ROLE_ID,mwnu_id)
+          this.$message({
+            type: 'success',
+            message: '保存成功!',
+          })
         })
         .catch(function () {})
     },
