@@ -23,6 +23,7 @@
               <el-table
                 :data="tableData"
                 style="width: 100%"
+                v-loading="loading"
                 @selection-change="handleSelectionChange"
               >
                 <el-table-column fixed="left" type="selection" width="45" />
@@ -34,9 +35,7 @@
                   <template slot-scope="scope">
                     <span
                       class="public-table-btn table-btn-edit"
-                      @click="
-                        editTable(scope.row.ROLE_ID, scope.row.ROLE_STATE)
-                      "
+                      @click="editTable(scope)"
                       >编辑</span
                     >
                     <span
@@ -44,8 +43,10 @@
                       @click="handleDelete(scope)"
                       >删除</span
                     >
-                    <span class="public-table-btn table-btn-check"
-                      @click="checkMenuPermissions(scope.row.ROLE_ID)">查看菜单权限</span
+                    <span
+                      class="public-table-btn table-btn-check"
+                      @click="checkMenuPermissions(scope.row.ROLE_ID)"
+                      >查看菜单权限</span
                     >
                     <span
                       class="public-table-btn table-btn-delete"
@@ -57,19 +58,14 @@
               </el-table>
 
               <el-pagination
+                v-show="total > 0"
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
-                :current-page.sync="queryParams.pageNum"
-                class="el_pagination"
+                :current-page="queryParams.pageNum"
+                :page-size="queryParams.pageSize"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="total"
-              />
-              <!-- :page-sizes.sync="queryParams.pageSize"
-                <el-pagination v-show="total>10"
-                    :total="total"
-                    :page.sync="queryParams.pageNum"
-                    :limit.sync="queryParams.pageSize"
-                    @pagination="getList" /> -->
+              ></el-pagination>
             </div>
           </div>
         </div>
@@ -97,22 +93,22 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="addRoleForm"
-          ref="addRoleForm"
+          ref="queryForm"
           :rules="addRoleRules"
           label-width="120px"
         >
-          <el-form-item prop="ROLE_NAME" label="角色名称">
-            <el-input
-              v-model="addRoleForm.ROLE_NAME"
-              prefix-icon="iconfont icon-user"
-              placeholder="请输入角色名称"
-            ></el-input>
-          </el-form-item>
           <el-form-item prop="ROLE_CODE" label="角色编号">
             <el-input
               v-model="addRoleForm.ROLE_CODE"
               prefix-icon="iconfont icon-user"
               placeholder="请输入角色编号"
+            ></el-input>
+          </el-form-item>
+          <el-form-item prop="ROLE_NAME" label="角色名称">
+            <el-input
+              v-model="addRoleForm.ROLE_NAME"
+              prefix-icon="iconfont icon-user"
+              placeholder="请输入角色名称"
             ></el-input>
           </el-form-item>
           <el-form-item prop="ROLE_REMARK" label="角色备注">
@@ -125,8 +121,10 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm()">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
+        <el-button type="primary" @click="submitForm('addRoleForm')"
+          >提交</el-button
+        >
+        <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
   </div>
@@ -136,11 +134,11 @@
 import tableMenutTool from '@/views/tools/tableMenutTool'
 import {
   getRoleData,
-  addRole,
-  updateRole,
+  addRoleSave,
   deleteRole,
   selectMenuByRoleId,
-  saveMenuByRoleId
+  saveMenuByRoleId,
+  getRoleMenu,
 } from '../../api/role/role'
 
 export default {
@@ -148,28 +146,27 @@ export default {
   components: {
     tableMenutTool,
     getRoleData,
-    addRole,
-    updateRole,
     deleteRole,
     selectMenuByRoleId,
-    saveMenuByRoleId
+    saveMenuByRoleId,
+    addRoleSave,
+    getRoleMenu
   },
   data() {
     return {
+      // 选中数组
+      ids: [],
+      // 非单个禁用
+      single: true,
+      // 非多个禁用
+      multiple: true,
       tableData: [],
-      // currentPage: '',
-      // pageSizes: {
-      //   type: Array,
-      //   default () {
-      //     return [10, 20, 30, 50]
-      //   }
-      // },
       total: 0,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
       },
-
+      loading: false,
       multipleSelection: [],
       addRoleDialog: false,
       menuTreeData: [
@@ -178,23 +175,23 @@ export default {
           label: '系统管理',
           children: [
             {
-              id: 5,
+              id: 11,
               label: '系统管理',
               children: [
                 {
-                  id: 9,
+                  id: 111,
                   label: '用户管理',
                 },
                 {
-                  id: 10,
+                  id: 112,
                   label: '权限管理',
                 },
                 {
-                  id: 11,
+                  id: 113,
                   label: '角色管理',
                 },
                 {
-                  id: 11,
+                  id: 114,
                   label: '日志管理',
                 },
                 {
@@ -202,7 +199,7 @@ export default {
                   label: '数据字典',
                 },
                 {
-                  id: 11,
+                  id: 115,
                   label: '菜单管理',
                 },
               ],
@@ -214,33 +211,33 @@ export default {
           label: '消息管理',
           children: [
             {
-              id: 5,
+              id: 221,
               label: '消息通知',
             },
             {
-              id: 5,
+              id: 222,
               label: '我的消息',
             },
           ],
         },
         {
-          id: 2,
+          id: 3,
           label: '参数设置',
         },
         {
-          id: 3,
+          id: 4,
           label: '附件管理',
         },
         {
-          id: 4,
+          id: 5,
           label: '定时任务',
         },
         {
-          id: 11,
+          id: 6,
           label: '应用管理',
         },
         {
-          id: 6,
+          id: 7,
           label: '代码生成',
         },
       ],
@@ -249,6 +246,7 @@ export default {
         label: 'label',
       },
       dialogType: 'new',
+      addRoleFormObj: {},
       addRoleForm: {
         ROLE_ID: '',
         ROLE_STATE: '',
@@ -272,59 +270,69 @@ export default {
 
   created() {
     this.getList()
+    this.getRoleMenuList('')
   },
 
   methods: {
-    async getList() {
-      let result = await getRoleData()
-      this.tableData = result.data
-      // for (let i = 0; i < this.tableData.length; i++) {
-      //   this.addRoleForm.ROLE_NAME = this.tableData[i].ROLE_NAME;
-      //   this.addRoleForm.ROLE_CODE = this.tableData[i].ROLE_CODE;
-      //   this.addRoleForm.ROLE_REMARK = this.tableData[i].ROLE_REMARK;
-      // }
-      console.log(this.tableData)
-      this.total = result.count
+    getList() {
+      this.loading = true
+      getRoleData(this.queryParams).then((response) => {
+        this.tableData = response.data
+        this.total = response.count
+        this.loading = false
+      })
     },
-
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+    //获取角色 菜单权限
+    getRoleMenuList(data) {
+      getRoleMenu(data).then((response) => {
+        let getMenu = response
+        console.log(getMenu)
+        // this.menuTreeData = response
+        // console.log(this.menuTreeData)
+      })
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val
-    },
-    async submitForm() {
-      const isEdit = this.dialogType === 'edit'
-      // const checkedKeys = this.$refs.tree.getCheckedKeys()
-      // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
-      if (isEdit) {
-        const { data } = await updateRole(
-          this.addRoleForm.ROLE_ID,
-          this.addRoleForm.ROLE_STATE,
-          this.addRoleForm.ROLE_NAME,
-          this.addRoleForm.ROLE_CODE,
-          this.addRoleForm.ROLE_REMARK
-        )
-        console.log(this.data)
-        // for (let index = 0; index < this.rolesList.length; index++) {
-        //   if (this.rolesList[index].key === this.role.key) {
-        //     this.rolesList.splice(index, 1, Object.assign({}, this.role))
-        //     break
-        //   }
-        // }
-      } else {
-        const { data } = await addRole(
-          this.addRoleForm.ROLE_NAME,
-          this.addRoleForm.ROLE_CODE,
-          this.addRoleForm.ROLE_REMARK
-        )
-        console.log(this.data)
-      }
-      this.addRoleDialog = false
+    handleSizeChange(newSize) {
+      this.queryParams.pageSize = newSize
       this.getList()
+      console.log('sssssss' + this.queryParams.pageSize)
+    },
+    handleCurrentChange(newPage) {
+      this.queryParams.pageNum = newPage
+      this.getList()
+      console.log('zzzz' + this.queryParams.pageNum)
+    },
+    // 多选框选中数据
+    handleSelectionChange(selection) {
+      this.multipleSelection = selection
+      console.log(this.multipleSelection)
+      this.ids = selection.map((item) => item.id)
+      this.single = selection.length != 1
+      this.multiple = !selection.length
+      console.log('dddddddd' + this.ids + this.multiple + this.single)
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.loading = true
+          addRoleSave(this.addRoleForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.addRoleDialog = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
     },
     handleDelete({ $index, row }) {
       this.$confirm('是否确认删除该用户?', '信息', {
@@ -348,36 +356,27 @@ export default {
       this.addRoleForm = []
       this.addRoleDialog = false
     },
-    resetForm() {
-      this.$refs.addRoleForm.resetFields()
-      const isEdit = this.dialogType === 'edit'
+    resetQuery() {
+      this.resetForm("queryForm");
       this.addRoleDialog = false
     },
-    editTable(editId, atate) {
+    editTable(from) {
       this.dialogType = 'edit'
       this.addRoleDialog = true
-      this.addRoleForm.ROLE_ID = editId
-      this.addRoleForm.ROLE_STATE = atate
-      // for (let index = 0; index < this.tableData.length; index++) {
-      //     // if (this.tableData[index].ROLE_ID === this.editId) {
-      //       // this.tableData.splice(index, 1, Object.assign({}, this.role))
-      //       // break
-      //       // console.log(this.tableData[1].ROLE_ID);
-      //     // }
-      //     console.log(this.tableData[index].ROLE_ID);
-      //   }
-      console.log(editId)
+      this.addRoleForm = from.row
     },
     addRole() {
       this.dialogType = 'new'
       return (this.addRoleDialog = true)
     },
-    async checkMenuPermissions(id){
-      let selectMenu = await selectMenuByRoleId(id)
-      console.log(selectMenu)
-
+    checkMenuPermissions(id) {
+      selectMenuByRoleId(id).then((response) => {
+        let selectMenu = response
+        console.log(selectMenu)
+      })
     },
-    koopMenuPermissions(row,mwnu_id) {
+
+    koopMenuPermissions(row, mwnu_id) {
       const ids = row.id || this.ids
       this.$confirm('确定保存角色权限信息吗?', '信息', {
         confirmButtonText: '确定',
@@ -385,7 +384,7 @@ export default {
         type: 'warning',
       })
         .then(async () => {
-          await saveMenuByRoleId(row.ROLE_ID,mwnu_id)
+          await saveMenuByRoleId(row.ROLE_ID, mwnu_id)
           this.$message({
             type: 'success',
             message: '保存成功!',

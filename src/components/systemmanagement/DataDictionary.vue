@@ -40,34 +40,32 @@
             <el-table-column fixed="left" type="selection" width="45" />
             <el-table-column label="分组代码">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.groupingCode"></el-input>
+                <el-input v-model="scope.row.OG_CODE"></el-input>
               </template>
             </el-table-column>
             <el-table-column label="分组名称">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.groupingName"></el-input>
+                <el-input v-model="scope.row.OG_NAME"></el-input>
               </template>
             </el-table-column>
 
             <el-table-column label="状态">
               <template slot-scope="scope">
-                {{ stateText[scope.row.state] }}
+                {{ stateText[scope.row.OG_STATE] }}
               </template>
             </el-table-column>
           </el-table>
         </div>
 
         <el-pagination
+          v-show="total > 0"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[100, 200, 300, 400]"
-          :page-size="1"
-          class="el_pagination"
+          :current-page="queryParams.pageNum"
+          :page-size="queryParams.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="1"
-        >
-        </el-pagination>
+          :total="total"
+        ></el-pagination>
       </div>
     </div>
     <div class="pb-main-data-right pb-main_pad-lf">
@@ -75,7 +73,7 @@
         <p class="public_card_header">分组详情</p>
         <el-form
           :model="groupingForm"
-          ref="groupingForm"
+          ref="queryForm"
           :rules="groupingRules"
           label-width="120px"
         >
@@ -117,7 +115,7 @@
             <el-button type="primary" @click="submitForm('form')"
               >保存</el-button
             >
-            <el-button @click="resetForm">重置</el-button>
+            <el-button @click="resetQuery">重置</el-button>
           </div>
         </el-form>
       </div>
@@ -168,32 +166,41 @@
               <el-table-column fixed="left" type="selection" width="45" />
               <el-table-column label="#" type="index" width="45" />
 
-              <el-table-column prop="name" label="显示名称" />
-              <el-table-column prop="storage" label="存储(值)" />
-              <el-table-column prop="sort" label="排序" />
+              <el-table-column prop="OD_TEXT" label="显示名称" />
+              <el-table-column prop="OD_VALUE" label="存储(值)" />
+              <el-table-column prop="OD_SORT" label="排序" />
               <el-table-column label="状态">
                 <template slot-scope="scope">
-                  {{ stateText[scope.row.state] }}
+                  {{ stateText[scope.row.OD_STATE] }}
                 </template>
               </el-table-column>
-              <el-table-column prop="remark" label="备注" />
+              <el-table-column prop="OD_REMARK" label="备注" />
               <el-table-column fixed="right" label="操作" width="120">
-                <template slot-scope="scope"> </template>
+                <template slot-scope="scope">
+                  <span
+                    class="public-table-btn table-btn-edit"
+                    @click="editTableClick(scope)"
+                    >编辑</span
+                  >
+                  <span
+                    class="public-table-btn table-btn-delete"
+                    @click="handleDelete(scope)"
+                    >删除</span
+                  >
+                </template>
               </el-table-column>
             </el-table>
           </div>
 
           <el-pagination
+            v-show="total > 0"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="1"
-            class="el_pagination"
+            :current-page="queryParams.pageNum"
+            :page-size="queryParams.pageSize"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="1"
-          >
-          </el-pagination>
+            :total="total2"
+          ></el-pagination>
         </div>
       </div>
     </div>
@@ -207,7 +214,7 @@
       <div style="width: 100%; text-align: left">
         <el-form
           :model="addDigitaForm"
-          ref="addDigitaForm"
+          ref="queryForm2"
           :rules="addDigitaRules"
           label-width="120px"
         >
@@ -258,7 +265,7 @@
         <el-button type="primary" @click="submitAddDigita('form')"
           >提交</el-button
         >
-        <el-button @click="resetAddDigita">重置</el-button>
+        <el-button @click="resetQuery2">重置</el-button>
       </div>
     </el-dialog>
   </div>
@@ -267,30 +274,32 @@
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
 
+import {
+  getData,
+  getListJsonByOgid,
+} from '../../api/datadictionary/datadictionary'
 export default {
   name: 'datadictionary',
   components: {
     tableMenutTool,
+    getData,
+    getListJsonByOgid,
   },
   data() {
     return {
-      tableData: [
-        {
-          groupingCode: 'CBDKXXZT',
-          groupingName: '消息级别',
-          state: '1',
-        },
-      ],
-      groupingDetailsData: [
-        {
-          name: 'CBDKXXZT',
-          storage: '23',
-          sort: '1',
-          state: '1',
-          remark: '1',
-        },
-      ],
-      currentPage: 4,
+      loading: true,
+      tableData: [],
+      groupingDetailsData: [],
+      total: 0,
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+      },
+      total2: 0,
+      queryParams2: {
+        pageNum: 1,
+        pageSize: 10,
+      },
       multipleSelection: [],
       stateText: { 0: '停用', 1: '启用', 2: '初始' },
       editTableDialog: false,
@@ -338,10 +347,25 @@ export default {
 
   created() {
     this.getList()
+    this.getGroupingList()
   },
 
   methods: {
-    getList() {},
+    getList() {
+      this.loading = true
+      getData(this.queryParams).then((response) => {
+        this.tableData = response.data
+        this.total = response.count
+        this.loading = false
+      })
+    },
+
+    async getGroupingList() {
+      let result = await getListJsonByOgid()
+      this.groupingDetailsData = result.data
+      this.total2 = result.count
+      console.log(this.groupingDetailsData)
+    },
     submitAddDigita() {},
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
@@ -349,11 +373,13 @@ export default {
     editingCheckbox2() {
       this.isShowCheckbox2 = !this.isShowCheckbox2
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+    handleSizeChange(newSize) {
+      this.queryParams.pageSize = newSize
+      this.getList()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+    handleCurrentChange(newPage) {
+      this.queryParams.pageNum = newPage
+      this.getList()
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
@@ -362,15 +388,38 @@ export default {
     close() {
       this.groupingForm = []
     },
-    resetAddDigita() {
+    resetQuery() {
+      this.resetForm("queryForm");
       this.addDigitalDialog = false
-      this.$refs.groupingorm.resetFields()
     },
-    resetForm() {
-      this.$refs.groupingorm.resetFields()
+    resetQuery2() {
+      this.resetForm("queryForm2");
     },
     addDigitalDetails() {
       return (this.addDigitalDialog = true)
+    },
+    // handleDelete({ $index, row }) {
+    //   this.$confirm('是否确认删除该用户?', '信息', {
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     type: 'warning',
+    //   })
+    //     .then(async () => {
+    //       await deleteUSER(row.USER_ID)
+    //       this.tableData.splice($index, 1)
+    //       this.$message({
+    //         type: 'success',
+    //         message: '删除成功!',
+    //       })
+    //     })
+    //     .catch((err) => {
+    //       console.error(err)
+    //     })
+    // },
+    async editTableClick(row) {
+      this.dialogType = 'edit'
+      this.editTableDialog = true
+      // console.log(data)
     },
   },
 }

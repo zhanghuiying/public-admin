@@ -28,7 +28,7 @@
       @close="close"
     >
       <div style="width: 100%; text-align: center">
-        <el-form :model="form" ref="form" :rules="rules" label-width="120px">
+        <el-form :model="form" ref="queryForm" :rules="rules" label-width="120px">
           <el-form-item label="原密码：" prop="oldPassword">
             <el-input
               show-password

@@ -70,7 +70,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="appendixForm"
-          ref="appendixForm"
+          ref="queryForm"
           :rules="appendixRules"
           label-width="90px"
         >
@@ -141,7 +141,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm('form')">保存</el-button>
-        <el-button @click="resetForm">重置</el-button>
+        <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
   </div>
@@ -216,16 +216,16 @@ export default {
       this.appendixForm = []
       this.reviseTableDialog = false
     },
-    resetForm() {
-      this.$refs.appendixForm.resetFields()
+    resetQuery() {
+      this.resetForm("queryForm");
       this.reviseTableDialog = false
     },
     reviseTable() {
       return (this.reviseTableDialog = true)
     },
     addNameList() {
+      this.resetForm("queryForm");
       return (this.reviseTableDialog = true)
-      this.$refs.appendixForm.resetFields()
     },
 
     handleDelete(row) {

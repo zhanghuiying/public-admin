@@ -1,64 +1,44 @@
 import request from '../../../utils/request'
+import qs from 'qs'
 
-const ROLE_PUBLIC = "/lui_sys/pim/role";
+const URL_PUBLIC = "/lui_sys/pim/role";
 
-export function getRoleData() {
+export function getRoleData(query) {
   return request({
-    url: ROLE_PUBLIC+'/listJson.do',
-    method: 'post'
+    url: URL_PUBLIC+'/listJson.do',
+    method: 'post',
+    params: query
   })
 }
 //添加
-export function addRole(ROLE_NAME,ROLE_CODE,ROLE_REMARK) {
+export function addRoleSave(data) {
   return request({
-    url: ROLE_PUBLIC+'/save.do',
+    url: URL_PUBLIC + '/save.do',
     method: 'post',
-    params: {
-      ROLE_NAME,
-      ROLE_CODE,
-      ROLE_REMARK
-    }
+    data: qs.stringify(data)
   })
 }
-//修改
-export function updateRole(ROLE_ID,ROLE_STATE,ROLE_NAME,ROLE_CODE,ROLE_REMARK) {
-  return request({
-    url: ROLE_PUBLIC+'/save.do',
-    method: 'post',
-    params: {
-      ROLE_ID,
-      ROLE_STATE,
-      ROLE_NAME,
-      ROLE_CODE,
-      ROLE_REMARK
-    }
-  })
-}
-
-
+//删除
 export function deleteRole(ids) {
   return request({
-    url: ROLE_PUBLIC+'/delete.do',
+    url: URL_PUBLIC+'/delete.do',
     method: 'post',
     params: {
       ids
     }
   })
 }
-
+//查看菜单权限
 export function selectMenuByRoleId(id) {
   return request({
-    url: ROLE_PUBLIC+'/selectMenuByRoleId.do'+`?ROLE_ID=${id}`,
+    url: URL_PUBLIC+'/selectMenuByRoleId.do'+`?ROLE_ID=${id}`,
     method: 'get',
   })
 }
-
-//查看菜单权限
-
 //保存菜单权限
 export function saveMenuByRoleId(ROLE_ID,MENU_ID) {
   return request({
-    url: ROLE_PUBLIC+`/saveMenuByRoleId.do`,
+    url: URL_PUBLIC+`/saveMenuByRoleId.do`,
     method: 'post',
     params: {
       ROLE_ID,
@@ -66,12 +46,11 @@ export function saveMenuByRoleId(ROLE_ID,MENU_ID) {
     }
   })
 }
-
-
-// export function updateRole(id, data) {
-//   return request({
-//     url: `lui_sys/pim/role/save.do${id}`,
-//     method: 'put',
-//     data
-//   })
-// }
+//获取角色 菜单权限
+export function getRoleMenu(data) {
+  return request({
+    url: `/lui_sys/pim/menu/selectall.do`,
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}

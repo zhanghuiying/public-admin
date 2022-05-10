@@ -2,7 +2,7 @@
   <div class="pb-main-height">
     <div class="">
       <div class="public_table_tool">
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="getList()">
           <i class="el-icon-refresh"></i>
         </div>
 
@@ -41,16 +41,19 @@
       <el-table
         :data="tableData"
         style="width: 100%"
+        v-loading="loading"
         @selection-change="handleSelectionChange"
       >
         <el-table-column fixed="left" type="selection" width="45" />
         <el-table-column label="#" type="index" width="45" />
-        <el-table-column prop="name" label="参数名称" />
-        <el-table-column prop="parametervalue" label="参数值" width="700" />
+        <el-table-column prop="CODE" label="参数名称" />
+        <el-table-column prop="JSONSTR" label="参数值" width="700" />
 
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
-            <span class="public-table-btn table-btn-edit" @click="reviseTable"
+            <span
+              class="public-table-btn table-btn-edit"
+              @click="editTable(scope)"
               >修改</span
             >
             <span
@@ -63,16 +66,14 @@
       </el-table>
 
       <el-pagination
+        v-show="total > 0"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="1"
-        class="el_pagination"
+        :current-page="queryParams.pageNum"
+        :page-size="queryParams.pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="1"
-      >
-      </el-pagination>
+        :total="total"
+      ></el-pagination>
     </div>
 
     <el-dialog
@@ -85,27 +86,29 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="parameterForm"
-          ref="parameterForm"
+          ref="queryForm"
           :rules="parameterRules"
           label-width="120px"
         >
           <el-form-item prop="name" label="参数名称">
             <el-input
-              v-model="parameterForm.name"
+              v-model="parameterForm.CODE"
               prefix-icon="iconfont icon-user"
             ></el-input>
           </el-form-item>
           <el-form-item prop="parameter" label="参数值">
             <el-input
               type="textarea"
-              v-model="parameterForm.parameter"
+              v-model="parameterForm.JSONSTR"
             ></el-input>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('form')">提交</el-button>
-        <el-button @click="resetForm">重置</el-button>
+        <el-button type="primary" @click="submitForm('parameterForm')"
+          >提交</el-button
+        >
+        <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
 
@@ -115,10 +118,10 @@
       width="50%"
       append-to-body
     >
-      <div style="width: 100%; text-align: left;">
+      <div style="width: 100%; text-align: left">
         <el-form
           :model="settingForm"
-          ref="settingForm"
+          ref="queryForm2"
           :rules="settingRules"
           label-width="120px"
         >
@@ -197,10 +200,10 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitSettingForm('form')"
+        <el-button type="primary" @click="submitSettingForm('settingForm')"
           >提交</el-button
         >
-        <el-button @click="resetSettingForm">重置</el-button>
+        <el-button @click="resetQuery2">重置</el-button>
       </div>
     </el-dialog>
 
@@ -212,32 +215,41 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
+import {
+  getParameterData,
+  addParameterSave,
+  deleteParameter,
+  addSystemParameterSave,
+} from '../api/parametersettings'
 export default {
   name: 'parametersettings',
   components: {
     tableMenutTool,
+    getParameterData,
+    addParameterSave,
+    deleteParameter,
+    addSystemParameterSave,
   },
   data() {
     return {
-      tableData: [
-        {
-          name: 'zhy',
-          parametervalue: '登录系统',
-        },
-      ],
-      currentPage: 4,
+      loading: false,
+      tableData: [],
+      total: 0,
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+      },
       multipleSelection: [],
       reviseTableDialog: false,
       SettingFromDialog: false,
       parameterForm: {
-        name: 'sdadmin',
-        parameter: 'sdadmin',
+        ID: '',
+        CODE: '',
+        JSONSTR: '',
       },
       parameterRules: {
-        name: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
-        parameter: [
-          { required: true, message: '请填写参数值', trigger: 'blur' },
-        ],
+        CODE: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
+        JSONSTR: [{ required: true, message: '请填写参数值', trigger: 'blur' }],
       },
       settingForm: {
         homeName: 'sdadmin',
@@ -268,6 +280,7 @@ export default {
       isShowCheckbox: false,
       dialogVisible: false,
       disabled: false,
+      dialogType: 'new',
     }
   },
 
@@ -276,17 +289,90 @@ export default {
   },
 
   methods: {
-    getList() {},
-    submitForm() {},
-    submitSettingForm() {},
+    getList() {
+      this.loading = true
+      getParameterData(this.queryParams).then((response) => {
+        this.tableData = response.data
+        this.total = response.count
+        this.loading = false
+      })
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.loading = true
+          addParameterSave(this.parameterForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.reviseTableDialog = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
+    handleDelete({ $index, row }) {
+      this.$confirm('是否确认删除该用户?', '信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          await deleteParameter(row.ROLE_ID)
+          this.tableData.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
+    submitSettingForm() {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.loading = true
+          addSystemParameterSave(this.parameterForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.SettingFromDialog = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+    handleSizeChange(newSize) {
+      this.queryParams.pageSize = newSize
+      this.getList()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+    handleCurrentChange(newPage) {
+      this.queryParams.pageNum = newPage
+      this.getList()
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
@@ -295,40 +381,26 @@ export default {
       this.parameterForm = []
       this.reviseTableDialog = false
     },
-    resetForm() {
-      this.$refs.parameterForm.resetFields()
+    resetQuery() {
+      this.resetForm('queryForm')
       this.reviseTableDialog = false
     },
-    resetSettingForm() {
-      this.$refs.settingForm.resetFields()
+    resetQuery2() {
+      this.resetForm('queryForm2')
       this.SettingFromDialog = false
     },
-    reviseTable() {
-      return (this.reviseTableDialog = true)
+    editTable(from) {
+      this.dialogType = 'edit'
+      this.reviseTableDialog = true
+      this.parameterForm = from.row
     },
+
     editingSetting() {
       return (this.SettingFromDialog = true)
     },
     addNameList() {
+      this.dialogType = 'new'
       return (this.reviseTableDialog = true)
-      this.$refs.parameterForm.resetFields()
-    },
-
-    handleDelete(row) {
-      const ids = row.id || this.ids
-      this.$confirm('是否确认删除该用户?', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(function () {
-          // return delCRestaurants(ids)
-        })
-        .then(() => {
-          this.getList()
-          this.msgSuccess('删除成功')
-        })
-        .catch(function () {})
     },
     handleRemove(file) {
       console.log(file)

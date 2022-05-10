@@ -5,7 +5,7 @@
   >
     <div class="login_box">
       <p class="login_title">盛鼎科技</p>
-        <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" label-width="60px" class="login_form">
+        <el-form ref="queryForm" :model="loginForm" :rules="loginFormRules" label-width="60px" class="login_form">
           <el-form-item prop="username" label="账号">
             <el-input v-model="loginForm.username" prefix-icon="iconfont icon-user"></el-input>
           </el-form-item>
@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     resetLoginForm() {
-      this.$refs.loginFormRef.resetFields()
+      this.resetForm("queryForm");
     },
     login() {
       this.$router.push('/home')

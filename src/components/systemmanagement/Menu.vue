@@ -28,7 +28,7 @@
         <p class="public_card_header">菜单详情</p>
         <el-form
           :model="munuForm"
-          ref="munuForm"
+          ref="queryForm"
           :rules="munuRules"
           label-width="90px"
         >
@@ -113,7 +113,7 @@
             <el-button type="primary" @click="submitForm('form')"
               >保存</el-button
             >
-            <el-button @click="resetForm">重置</el-button>
+            <el-button @click="resetQuery">重置</el-button>
           </div>
         </el-form>
       </div>
@@ -134,7 +134,7 @@
               </div>
             </div>
             <el-table
-              :data="groupingDetailsData"
+              :data="tableData"
               style="width: 100%"
               @selection-change="handleSelectionChange"
             >
@@ -155,16 +155,15 @@
           </div>
 
           <el-pagination
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="currentPage"
-            :page-sizes="[100, 200, 300, 400]"
-            :page-size="1"
-            class="el_pagination"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="1"
-          >
-          </el-pagination>
+                v-show="total > 0"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="queryParams.pageNum"
+                :page-size="queryParams.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total"
+              ></el-pagination>
+
         </div>
       </div>
     </div>
@@ -173,9 +172,15 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
-
+import {
+  getMenuData,
+  getMenu
+} from '../../api/menu/menu'
 export default {
   name: 'datadictionary',
+   components: {
+    getMenu,
+  },
   components: {
     tableMenutTool,
   },
@@ -199,7 +204,7 @@ export default {
         },
       ],
       menuValue: '',
-      groupingDetailsData: [
+      tableData: [
         {
           name: 'CBDKXXZT',
           address: '23',
@@ -208,7 +213,11 @@ export default {
           icon: '',
         },
       ],
-      currentPage: 4,
+      total: 0,
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+      },
       multipleSelection: [],
       stateText: { 0: '停用', 1: '启用', 2: '初始' },
       menuTreeData: [
@@ -301,23 +310,43 @@ export default {
         2: 'xtgl/file/listPage.do',
       },
       isShowCheckbox: false,
+      loading: false,
+      menuTreeList:[],
     }
   },
 
   created() {
     this.getList()
+    this.getMenuList('')
   },
 
   methods: {
-    getList() {},
+    getList() {
+      this.loading = true
+      getMenuData(this.queryParams).then((response) => {
+        this.tableData = response.data
+        this.total = response.count
+        this.loading = false
+      })
+    },
+    getMenuList() {
+      // this.loading = true
+      getMenu(this.queryParams).then((response) => {
+        this.menuTreeList = response
+        // this.loading = false
+        console.log(this.menuTreeList);
+      })
+    },
     editingCheckbox(){
       this.isShowCheckbox = !this.isShowCheckbox;
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+    handleSizeChange(newSize) {
+      this.queryParams.pageSize = newSize
+      this.getList()
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+    handleCurrentChange(newPage) {
+      this.queryParams.pageNum = newPage
+      this.getList()
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
@@ -326,8 +355,8 @@ export default {
     close() {
       this.munuForm = []
     },
-    resetForm() {
-      this.$refs.groupingorm.resetFields()
+    resetQuery() {
+      this.resetForm("queryForm");
     },
     addressOptionsClick(index) {
       this.munuForm.address = index

@@ -92,7 +92,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="applicationForm"
-          ref="applicationForm"
+          ref="queryForm"
           :rules="applicationRules"
           label-width="120px"
         >
@@ -150,7 +150,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm('form')">保存</el-button>
-        <el-button @click="resetForm">重置</el-button>
+        <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
   </div>
@@ -234,8 +234,8 @@ export default {
       this.applicationForm = []
       this.reviseTableDialog = false
     },
-    resetForm() {
-      this.$refs.applicationForm.resetFields()
+    resetQuery() {
+      this.resetForm("queryForm");
       this.reviseTableDialog = false
     },
     reviseTable() {
@@ -243,7 +243,7 @@ export default {
     },
     addNameList() {
       return (this.reviseTableDialog = true)
-      this.$refs.applicationForm.resetFields()
+      this.resetForm("queryForm");
     },
 
     handleDelete(row) {

@@ -11,7 +11,13 @@
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <div id="app">
+      <div id="loading-mask">
+          <div class="loading-wrapper">
+            <span class="loading-dot loading-dot-spin"><i></i><i></i><i></i><i></i></span>
+          </div>
+        </div>
+    </div>
+    <!-- require cdn assets js -->
   </body>
 </html>

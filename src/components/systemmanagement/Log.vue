@@ -15,9 +15,9 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column fixed="left" label="#" type="index" width="45" />
-      <el-table-column prop="account" label="登录账号" />
-      <el-table-column prop="operationlog" label="操作日志" width="700" />
-      <el-table-column prop="data" label="操作时间" />
+      <el-table-column prop="LOG_CONTENT" label="登录账号" />
+      <el-table-column prop="LOG_CONTENT" label="操作日志" width="700" />
+      <el-table-column prop="LOG_OPERATE_TIME" label="操作时间" />
 
       <el-table-column fixed="right" label="备注" width="120">
         <template slot-scope="scope"> </template>
@@ -25,49 +25,59 @@
     </el-table>
 
     <el-pagination
+      v-show="total > 0"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[100, 200, 300, 400]"
-      :page-size="1"
-      class="el_pagination"
+      :current-page="queryParams.pageNum"
+      :page-size="queryParams.pageSize"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="1"
-    >
-    </el-pagination>
+      :total="total"
+    ></el-pagination>
   </div>
 </template>
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
+import { getLogsData } from '../../api/logs/logs'
 export default {
   name: 'Log',
   components: {
     tableMenutTool,
+    getLogsData,
   },
   data() {
     return {
-      tableData: [
-        {
-          account: 'zhy',
-          operationlog: '登录系统',
-          data: '2021-05-28 22:01:59',
-        },
-      ],
-      currentPage: 4,
+      loading: false,
+      tableData: [],
+      total: 0,
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+      },
       multipleSelection: [],
     }
   },
 
   created() {
+    this.getList()
   },
 
   methods: {
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+    getList() {
+      this.loading = true
+      getLogsData(this.queryParams).then((response) => {
+        this.tableData = response.data
+        this.total = response.count
+        this.loading = false
+      })
     },
-    handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+    handleSizeChange(newSize) {
+      this.queryParams.pageSize = newSize
+      this.getList()
+    },
+    handleCurrentChange(newPage) {
+      this.queryParams.pageNum = newPage
+      this.getList()
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
