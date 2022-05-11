@@ -158,8 +158,8 @@
                 v-show="total > 0"
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
-                :current-page="queryParams.pageNum"
-                :page-size="queryParams.pageSize"
+                :current-page="queryParams.page"
+                :page-size="queryParams.limit"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="total"
               ></el-pagination>

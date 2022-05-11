@@ -3,8 +3,11 @@
     <div class="pb-main-data-left">
       <div class="public-card-body">
         <div class="public_table_tool">
-          <div class="public_table_tool_inline">
+          <div class="public_table_tool_inline" @click="getList()">
             <i class="el-icon-refresh"></i>
+          </div>
+          <div class="public_table_tool_inline" @click="addDetaList()">
+            <i class="el-icon-circle-plus-outline"></i>
           </div>
           <div class="public_table_tool_inline">
             <i class="el-icon-delete"></i>
@@ -61,9 +64,9 @@
           v-show="total > 0"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="queryParams.pageNum"
-          :page-size="queryParams.pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
+          :current-page="queryParams.page"
+          :page-size="queryParams.limit"
+          layout="total, prev, pager, next"
           :total="total"
         ></el-pagination>
       </div>
@@ -79,15 +82,15 @@
         >
           <div class="d-display pb-main-padding-t">
             <div class="w50">
-              <el-form-item prop="code" label="分组代码">
+              <el-form-item prop="OG_CODE" label="分组代码">
                 <el-input
-                  v-model="groupingForm.code"
+                  v-model="groupingForm.OG_CODE"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="name" label="分组名称">
+              <el-form-item prop="OG_NAME" label="分组名称">
                 <el-input
-                  v-model="groupingForm.name"
+                  v-model="groupingForm.OG_NAME"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
@@ -95,26 +98,23 @@
             <div class="w50">
               <el-form-item label="分组状态">
                 <el-select
-                  v-model="groupingForm.state"
+                  v-model="groupingForm.OG_STATE"
                   placeholder="请选择状态"
                 >
                   <el-option label="停用" value="0"></el-option>
                   <el-option label="启用" value="1"></el-option>
-                  <el-option label="初始" value="2"></el-option>
                 </el-select>
               </el-form-item>
-              <el-form-item prop="remark" label="备注">
+              <el-form-item prop="OG_REMARK" label="备注">
                 <el-input
-                  v-model="groupingForm.remark"
+                  v-model="groupingForm.OG_REMARK"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
             </div>
           </div>
           <div>
-            <el-button type="primary" @click="submitForm"
-              >保存</el-button
-            >
+            <el-button type="primary" @click="submitForm">保存</el-button>
             <el-button @click="resetQuery">重置</el-button>
           </div>
         </el-form>
@@ -125,7 +125,7 @@
         <div class="public-card-body">
           <div class="public-card-body-border">
             <div class="public_table_tool">
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="getGroupingList()">
                 <i class="el-icon-refresh"></i>
               </div>
               <div
@@ -179,7 +179,7 @@
                 <template slot-scope="scope">
                   <span
                     class="public-table-btn table-btn-edit"
-                    @click="editTableClick(scope)"
+                    @click="editTable(scope)"
                     >编辑</span
                   >
                   <span
@@ -194,10 +194,10 @@
 
           <el-pagination
             v-show="total > 0"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="queryParams.pageNum"
-            :page-size="queryParams.pageSize"
+            @size-change="handleSizeChange2"
+            @current-change="handleCurrentChange2"
+            :current-page="queryParams2.page"
+            :page-size="queryParams2.limit"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total2"
           ></el-pagination>
@@ -220,29 +220,29 @@
         >
           <div class="d-display">
             <div class="w50">
-              <el-form-item prop="showName" label="显示名称">
+              <el-form-item prop="OD_TEXT" label="显示名称">
                 <el-input
-                  v-model="addDigitaForm.showName"
+                  v-model="addDigitaForm.OD_TEXT"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="store" label="存储(值)">
+              <el-form-item prop="OD_VALUE" label="存储(值)">
                 <el-input
-                  v-model="addDigitaForm.store"
+                  v-model="addDigitaForm.OD_VALUE"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
             </div>
             <div class="w50">
-              <el-form-item prop="sort" label="排序">
+              <el-form-item prop="OD_SORT" label="排序">
                 <el-input
-                  v-model="addDigitaForm.sort"
+                  v-model="addDigitaForm.OD_SORT"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="state" label="状态">
+              <el-form-item prop="OD_STATE" label="状态">
                 <el-select
-                  v-model="addDigitaForm.state"
+                  v-model="addDigitaForm.OD_STATE"
                   placeholder="请选择状态"
                 >
                   <el-option label="停用" value="0"></el-option>
@@ -252,19 +252,17 @@
             </div>
           </div>
 
-          <el-form-item prop="remark" label="备注">
+          <el-form-item prop="OD_REMARK" label="备注">
             <el-input
               type="textarea"
-              v-model="addDigitaForm.remark"
+              v-model="addDigitaForm.OD_REMARK"
               placeholder="请输入备注"
             ></el-input>
           </el-form-item>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAddDigita"
-          >提交</el-button
-        >
+        <el-button type="primary" @click="submitAddDigita">提交</el-button>
         <el-button @click="resetQuery2">重置</el-button>
       </div>
     </el-dialog>
@@ -277,6 +275,8 @@ import tableMenutTool from '@/views/tools/tableMenutTool'
 import {
   getData,
   getListJsonByOgid,
+  addDataSave,
+  deleteData,
 } from '../../api/datadictionary/datadictionary'
 export default {
   name: 'datadictionary',
@@ -284,6 +284,8 @@ export default {
     tableMenutTool,
     getData,
     getListJsonByOgid,
+    addDataSave,
+    deleteData,
   },
   data() {
     return {
@@ -297,21 +299,25 @@ export default {
       },
       total2: 0,
       queryParams2: {
-        pageNum: 1,
-        pageSize: 10,
+        page: 1,
+        limit: 10,
+        OG_ID: '',
       },
       multipleSelection: [],
       stateText: { 0: '停用', 1: '启用', 2: '初始' },
       editTableDialog: false,
       groupingForm: {
-        code: '',
-        name: '',
-        remark: '',
-        state: '1',
+        OG_ID: '',
+        OG_CODE: '',
+        OG_NAME: '',
+        OG_STATE: '',
+        OG_REMARK: '',
       },
       groupingRules: {
-        code: [{ required: true, message: '请输入分组代码', trigger: 'blur' }],
-        name: [
+        OG_CODE: [
+          { required: true, message: '请输入分组代码', trigger: 'blur' },
+        ],
+        OG_NAME: [
           { required: true, message: '请输入分组名称', trigger: 'blur' },
           {
             min: 3,
@@ -320,27 +326,35 @@ export default {
             trigger: 'blur',
           },
         ],
-        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
-        state: [{ required: true, message: '请选择状态', trigger: 'change' }],
+        OG_STATE: [
+          { required: true, message: '请选择状态', trigger: 'change' },
+        ],
+        OG_REMARK: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
       isShowCheckbox: false,
       isShowCheckbox2: false,
       addDigitalDialog: false,
       addDigitaForm: {
-        showName: 'sdadmin',
-        store: 'sfdf',
-        sort: '',
-        state: '',
-        remark: '',
+        OD_ID: '',
+        OG_ID: '',
+        OD_TEXT: '',
+        OD_VALUE: '',
+        OD_SORT: '',
+        OD_STATE: '',
+        OD_REMARK: '',
       },
       addDigitaRules: {
-        showName: [
+        OD_TEXT: [
           { required: true, message: '请输入显示名称', trigger: 'blur' },
         ],
-        store: [{ required: true, message: '请输入存储(值)', trigger: 'blur' }],
-        sort: [{ required: true, message: '请输入排序', trigger: 'blur' }],
-        state: [{ required: true, message: '请选择状态', trigger: 'change' }],
-        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
+        OD_VALUE: [
+          { required: true, message: '请输入存储(值)', trigger: 'blur' },
+        ],
+        OD_SORT: [{ required: true, message: '请输入排序', trigger: 'blur' }],
+        OD_STATE: [
+          { required: true, message: '请选择状态', trigger: 'change' },
+        ],
+        OD_REMARK: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
     }
   },
@@ -359,36 +373,15 @@ export default {
         this.loading = false
       })
     },
-
-    async getGroupingList() {
-      let result = await getListJsonByOgid()
-      this.groupingDetailsData = result.data
-      this.total2 = result.count
-      console.log(this.groupingDetailsData)
-    },
-    submitAddDigita: function () {
-      this.$refs['addDigitaForm'].validate((valid) => {
-        if (valid) {
-          // addRoleSave(this.addDigitaForm)
-          //   .then((res) => {
-          //     if (res.statusCode == 200) {
-          //       this.$notify.success({ title: '提示', message: '保存成功' })
-          //     } else {
-          //       this.$notify.error({ title: '错误', message: res.message })
-          //     }
-          //     this.loading = false
-          //     this.addDigitalDialog = false
-          //     this.getList()
-          //   })
-          //   .catch((error) => {
-          //     this.loading = false
-          //   })
-        } else {
-          this.loading = false
-          return false
-        }
+    getGroupingList() {
+      this.loading = true
+      getListJsonByOgid(this.queryParams2).then((response) => {
+        this.groupingDetailsData = response.data
+        this.total2 = response.count
+        this.loading = false
       })
     },
+
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -403,14 +396,21 @@ export default {
       this.queryParams.page = newPage
       this.getList()
     },
+    handleSizeChange2(newSize) {
+      this.queryParams2.limit = newSize
+      this.getGroupingList()
+    },
+    handleCurrentChange2(newPage) {
+      this.queryParams2.page = newPage
+      this.getGroupingList()
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    
     submitForm: function () {
       this.$refs['groupingForm'].validate((valid) => {
         if (valid) {
-          addTimedtaskSave(this.groupingForm)
+          addDataSave(this.groupingForm)
             .then((res) => {
               if (res.statusCode == 200) {
                 this.$notify.success({ title: '提示', message: '保存成功' })
@@ -429,41 +429,68 @@ export default {
         }
       })
     },
+    submitAddDigita: function () {
+      this.$refs['addDigitaForm'].validate((valid) => {
+        if (valid) {
+          addDataSave(this.addDigitaForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.addDigitalDialog = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
     close() {
       this.groupingForm = []
     },
     resetQuery() {
-      this.resetForm("groupingForm");
+      this.resetForm('groupingForm')
       this.addDigitalDialog = false
     },
     resetQuery2() {
-      this.resetForm("addDigitaForm");
+      this.resetForm('addDigitaForm')
+    },
+    addDetaList() {
+      this.resetForm('groupingForm')
+      this.$notify.success({ title: '提示', message: '请在分组详情中填写内容后保存。' })
     },
     addDigitalDetails() {
       return (this.addDigitalDialog = true)
     },
-    // handleDelete({ $index, row }) {
-    //   this.$confirm('是否确认删除该用户?', '信息', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     type: 'warning',
-    //   })
-    //     .then(async () => {
-    //       await deleteUSER(row.USER_ID)
-    //       this.tableData.splice($index, 1)
-    //       this.$message({
-    //         type: 'success',
-    //         message: '删除成功!',
-    //       })
-    //     })
-    //     .catch((err) => {
-    //       console.error(err)
-    //     })
-    // },
-    async editTableClick(row) {
+    handleDelete({ $index, row }) {
+      this.$confirm('是否确认删除该用户?', '信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          await deleteData(row.ROLE_ID)
+          this.groupingDetailsData.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
+    editTable(from) {
       this.dialogType = 'edit'
       this.editTableDialog = true
-      // console.log(data)
+      this.addDigitaForm = from.row
     },
   },
 }
