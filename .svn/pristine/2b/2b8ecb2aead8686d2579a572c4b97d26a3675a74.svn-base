@@ -5,6 +5,9 @@
         <div class="public_table_tool_inline">
           <i class="el-icon-refresh"></i>
         </div>
+        <div class="public_table_tool_inline">
+          <i class="el-icon-zoom-out"></i>
+        </div>
         <div class="public_table_tool_inline" @click="addNameList">
           <i class="el-icon-circle-plus-outline"></i>
         </div>
@@ -12,6 +15,14 @@
         <div class="public_table_tool_inline">
           <i class="el-icon-delete"></i>
         </div>
+
+        <div class="public_table_tool_inline">
+          <i class="el-icon-close"></i>
+        </div>
+        <div class="public_table_tool_inline">
+          <i class="el-icon-check"></i>
+        </div>
+       
         <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
         @click="editingCheckbox()">开启编辑
           <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
@@ -28,49 +39,47 @@
       >
         <el-table-column fixed="left" type="selection" width="45" />
         <el-table-column label="#" type="index" width="45" />
-        <el-table-column prop="timedtaskname" label="定时任务名称" />
-        <el-table-column prop="expression" label="CRON表达式" />
-        <el-table-column prop="taskname" label="任务类名" />
-        
-        <el-table-column  label="运行状态">
+        <el-table-column prop="applicationName" label="应用名称" />
+        <el-table-column prop="address" label="访问地址" width="200" />
+        <el-table-column prop="sort" label="排序" />
+        <el-table-column prop="icon" label="图标" />
+
+        <el-table-column label="状态">
           <template slot-scope="scope">
             <el-switch
               v-model="operatingStatus"
               active-color="#2D8CF0"
-              inactive-color="#D2D2D2">
+              inactive-color="#D2D2D2"
+            >
             </el-switch>
-            
           </template>
         </el-table-column>
 
-        <el-table-column fixed="right" label="操作" width="220">
+        <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <span class="public-table-btn table-btn-edit" @click="reviseTable"
-              >修改</span
+              >更新</span
             >
             <span
               class="public-table-btn table-btn-delete"
               @click="handleDelete(scope.row)"
               >删除</span
             >
-            <span
-              class="public-table-btn table-btn-delete"
-              >执行一次</span
-            >
           </template>
         </el-table-column>
       </el-table>
 
       <el-pagination
-        v-show="total > 0"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="queryParams.page"
-        :page-size="queryParams.limit"
+        :current-page="currentPage"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="1"
+        class="el_pagination"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-      ></el-pagination>
-
+        :total="1"
+      >
+      </el-pagination>
     </div>
 
     <el-dialog
@@ -82,44 +91,60 @@
     >
       <div style="width: 100%; text-align: center">
         <el-form
-          :model="timedTaskForm"
+          :model="applicationForm"
           ref="queryForm"
-          :rules="timedTaskRules"
+          :rules="applicationRules"
           label-width="120px"
         >
           <div class="d-display">
             <div class="w50">
-              <el-form-item prop="taskclass" label="任务类">
+              <el-form-item prop="applicationCode" label="应用代码">
                 <el-input
-                  v-model="timedTaskForm.taskclass"
+                  v-model="applicationForm.applicationCode"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="missionname" label="任务名称">
+              <el-form-item prop="applicationName" label="应用名称">
                 <el-input
-                  v-model="timedTaskForm.missionname"
+                  v-model="applicationForm.applicationName"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
+
+              <el-form-item prop="icon" label="图标">
+                <el-input
+                  v-model="applicationForm.icon"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
             </div>
             <div class="w50">
-              <el-form-item prop="CRON" label="CRON表达式">
+              <el-form-item prop="sort" label="排序">
                 <el-input
-                  v-model="timedTaskForm.CRON"
+                  v-model="applicationForm.sort"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-              <el-form-item label="运行状态">
-                <el-select v-model="timedTaskForm.status" placeholder="请选择运行状态">
+              <el-form-item label="状态">
+                <el-select
+                  v-model="applicationForm.status"
+                  placeholder="请选择状态"
+                >
                   <el-option label="停用" value="0"></el-option>
                   <el-option label="启用" value="1"></el-option>
                   <el-option label="初始" value="2"></el-option>
                 </el-select>
               </el-form-item>
+              <el-form-item prop="address" label="访问地址">
+                <el-input
+                  v-model="applicationForm.address"
+                  prefix-icon="iconfont icon-user"
+                ></el-input>
+              </el-form-item>
             </div>
           </div>
           <el-form-item prop="remark" label="备注">
-            <el-input type="textarea" v-model="timedTaskForm.remark"></el-input>
+            <el-input type="textarea" v-model="applicationForm.remark"></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -140,36 +165,46 @@ export default {
   },
   data() {
     return {
-      // tableData: [
-      //   {
-      //     timedtaskname: 'zhy',
-      //     expression: '',
-      //     taskname: '',
-      //     status: '0',
-      //   },
-      // ],
-      loading: false,
-      tableData: [],
-      total: 0,
-      queryParams: {
-        page: 1,
-        limit: 20,
-      },
+      tableData: [
+        {
+          applicationName: '应用名称',
+          address: '	http://127.0.0.1:8087/landos',
+          sort: '1',
+          icon: '',
+          status: '0',
+        },
+      ],
+      currentPage: 4,
       multipleSelection: [],
       reviseTableDialog: false,
-      operatingStatus:'',
-      timedTaskForm: {
-        taskclass: 'sdadmin',
-        missionname: 'sdadmin',
-        CRON: '',
-        status: '1',
+      operatingStatus: '',
+      applicationForm: {
+        applicationCode: '',
+        applicationName: '应用名称',
+        address: '	http://127.0.0.1:8087/landos',
+        sort: '1',
+        icon: '',
+        status: '0',
         remark: '',
       },
-      timedTaskRules: {
-        taskclass: [{ required: true, message: '任务类', trigger: 'blur' }],
-        missionname: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
-        CRON: [{ required: true, message: '请输入CRON表达式', trigger: 'blur' }],
-        status: [{ required: true, message: '请选择活动区域', trigger: 'change' }],
+
+      applicationRules: {
+        applicationCode: [
+          { required: true, message: '请输入应用代码', trigger: 'blur' },
+        ],
+        applicationCode: [
+          { required: true, message: '请输入应用名称', trigger: 'blur' },
+        ],
+        address: [{ required: true, message: '请输入访问地址', trigger: 'blur' }],
+        sort: [
+          { required: true, message: '请输入排序', trigger: 'blur' },
+        ],
+        icon: [
+          { required: true, message: '请选择图标', trigger: 'change' },
+        ],
+        status: [
+          { required: true, message: '请选择活动区域', trigger: 'change' },
+        ],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
       isShowCheckbox: false,
@@ -186,19 +221,17 @@ export default {
     editingCheckbox(){
       this.isShowCheckbox = !this.isShowCheckbox;
     },
-    handleSizeChange(newSize) {
-      this.queryParams.limit = newSize
-      this.getList()
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
     },
-    handleCurrentChange(newPage) {
-      this.queryParams.page = newPage
-      this.getList()
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
     },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
     close() {
-      this.timedTaskForm = []
+      this.applicationForm = []
       this.reviseTableDialog = false
     },
     resetQuery() {
@@ -209,8 +242,8 @@ export default {
       return (this.reviseTableDialog = true)
     },
     addNameList() {
-      this.resetForm("queryForm");
       return (this.reviseTableDialog = true)
+      this.resetForm("queryForm");
     },
 
     handleDelete(row) {
@@ -239,7 +272,6 @@ export default {
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
 }
-  
 </style>
 <style lang='less' scoped>
 </style>

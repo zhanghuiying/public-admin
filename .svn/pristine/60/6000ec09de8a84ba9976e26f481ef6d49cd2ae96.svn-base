@@ -236,8 +236,8 @@ export default {
       tableData: [],
       total: 0,
       queryParams: {
-        page: 1,
-        limit: 20,
+        pageNum: 1,
+        pageSize: 10,
       },
       multipleSelection: [],
       reviseTableDialog: false,
@@ -367,11 +367,11 @@ export default {
       this.isShowCheckbox = !this.isShowCheckbox
     },
     handleSizeChange(newSize) {
-      this.queryParams.limit = newSize
+      this.queryParams.pageSize = newSize
       this.getList()
     },
     handleCurrentChange(newPage) {
-      this.queryParams.page = newPage
+      this.queryParams.pageNum = newPage
       this.getList()
     },
     handleSelectionChange(val) {

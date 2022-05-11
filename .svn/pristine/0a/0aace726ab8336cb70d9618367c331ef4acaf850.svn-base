@@ -62,15 +62,16 @@
       </el-table>
 
       <el-pagination
-        v-show="total > 0"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="queryParams.page"
-        :page-size="queryParams.limit"
+        :current-page="currentPage"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="1"
+        class="el_pagination"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-      ></el-pagination>
-
+        :total="1"
+      >
+      </el-pagination>
     </div>
 
     <el-dialog
@@ -140,21 +141,15 @@ export default {
   },
   data() {
     return {
-      // tableData: [
-      //   {
-      //     timedtaskname: 'zhy',
-      //     expression: '',
-      //     taskname: '',
-      //     status: '0',
-      //   },
-      // ],
-      loading: false,
-      tableData: [],
-      total: 0,
-      queryParams: {
-        page: 1,
-        limit: 20,
-      },
+      tableData: [
+        {
+          timedtaskname: 'zhy',
+          expression: '',
+          taskname: '',
+          status: '0',
+        },
+      ],
+      currentPage: 4,
       multipleSelection: [],
       reviseTableDialog: false,
       operatingStatus:'',
@@ -186,13 +181,11 @@ export default {
     editingCheckbox(){
       this.isShowCheckbox = !this.isShowCheckbox;
     },
-    handleSizeChange(newSize) {
-      this.queryParams.limit = newSize
-      this.getList()
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
     },
-    handleCurrentChange(newPage) {
-      this.queryParams.page = newPage
-      this.getList()
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
     },
     handleSelectionChange(val) {
       this.multipleSelection = val

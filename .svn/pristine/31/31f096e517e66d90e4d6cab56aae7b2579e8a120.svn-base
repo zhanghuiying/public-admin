@@ -292,8 +292,8 @@ export default {
       groupingDetailsData: [],
       total: 0,
       queryParams: {
-        page: 1,
-        limit: 20,
+        pageNum: 1,
+        pageSize: 10,
       },
       total2: 0,
       queryParams2: {
@@ -374,11 +374,11 @@ export default {
       this.isShowCheckbox2 = !this.isShowCheckbox2
     },
     handleSizeChange(newSize) {
-      this.queryParams.limit = newSize
+      this.queryParams.pageSize = newSize
       this.getList()
     },
     handleCurrentChange(newPage) {
-      this.queryParams.page = newPage
+      this.queryParams.pageNum = newPage
       this.getList()
     },
     handleSelectionChange(val) {
