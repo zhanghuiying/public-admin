@@ -7,3 +7,10 @@ export function getMenuList() {
   })
 }
 
+export function changePassword(data) {
+  return request({
+    url: '/lui_sys/pim/user/savePwd.do',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}

@@ -29,28 +29,28 @@
     >
       <div style="width: 100%; text-align: center">
         <el-form :model="form" ref="queryForm" :rules="rules" label-width="120px">
-          <el-form-item label="原密码：" prop="oldPassword">
+          <el-form-item label="原密码：" prop="Y_PWD">
             <el-input
               show-password
-              v-model="form.oldPassword"
+              v-model="form.Y_PWD"
               placeholder="请填写原密码"
               class="imput_discount"
               maxlength="20"
             ></el-input>
           </el-form-item>
-          <el-form-item label="新密码：" prop="newPassword">
+          <el-form-item label="新密码：" prop="NEW_PWD">
             <el-input
               show-password
-              v-model="form.newPassword"
+              v-model="form.NEW_PWD"
               placeholder="密码为6-20位字符,包含字母,数字,特殊字符@#$%&*"
               class="imput_discount"
               maxlength="20"
             ></el-input>
           </el-form-item>
-          <el-form-item label="确认密码：" prop="confirmPassword">
+          <el-form-item label="确认密码：" prop="NEW_PASSWORD2">
             <el-input
               show-password
-              v-model="form.confirmPassword"
+              v-model="form.NEW_PASSWORD2"
               placeholder="请填写确认密码"
               class="imput_discount"
               maxlength="20"
@@ -67,12 +67,18 @@
 </template>
 
 <script>
+import {
+  changePassword,
+} from '../../api/menu'
 export default {
+  components: {
+    changePassword,
+  },
   data() {
     let validatePass = (rule, value, callback) => {
-      if (value !== this.form.newPassword) {
+      if (value !== this.form.NEW_PWD) {
         callback(new Error('两次输入密码不一致!'))
-      } else if (value == this.form.oldPassword) {
+      } else if (value == this.form.Y_PWD) {
         callback(new Error('新密码不能与旧密码相同!'))
       } else {
         callback()
@@ -83,15 +89,15 @@ export default {
       openDialog: false,
       loading: false,
       form: {
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        Y_PWD: '',
+        NEW_PWD: '',
+        NEW_PASSWORD2: '',
       },
       rules: {
-        oldPassword: [
+        Y_PWD: [
           { required: true, message: '请输入原密码', trigger: 'blur' },
         ],
-        newPassword: [
+        NEW_PWD: [
           {
             required: true,
             message: '请输入新密码，密码必须包含字母，数字，字符.',
@@ -103,7 +109,7 @@ export default {
             trigger: 'blur',
           },
         ],
-        confirmPassword: [
+        NEW_PASSWORD2: [
           { required: true, message: '请输入确认密码', trigger: 'blur' },
           { required: true, validator: validatePass, trigger: 'blur' },
           {
@@ -137,25 +143,21 @@ export default {
         })
     },
     submitForm(formName) {
-      let data = {
-        oldPassword: this.form.oldPassword,
-        newPassword: this.form.newPassword,
-      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          return this.UpdatePassWord(data)
+          changePassword(this.form)
             .then((res) => {
-              if (res.code == 0) {
+              if (res.statusCode == 200) {
                 this.$notify.success({ title: '提示', message: '更改密码成功' })
-                this.form = []
-                this.openDialog = false
               } else {
-                this.$notify.error({ title: '错误', message: res.msg })
+                this.$notify.error({ title: '错误', message: res.message })
               }
+              this.openDialog = false
             })
-            .catch((err) => {
-              this.$notify.error({ title: '错误', message: err })
+            .catch((error) => {
             })
+        } else {
+          return false
         }
       })
     },

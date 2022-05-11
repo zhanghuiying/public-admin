@@ -4,7 +4,9 @@
       <div class="visit-w v_module">
         <p class="public_card_header">今日访问</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">440.34</div>
+          <div class="col_space4_fl top_panel_number">
+            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+            </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img1.png" alt="" />
           </div>
@@ -13,7 +15,9 @@
       <div class="visit-w v_module">
         <p class="public_card_header">提交次数</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">440.34</div>
+          <div class="col_space4_fl top_panel_number">
+            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img2.png" alt="" />
           </div>
@@ -22,7 +26,9 @@
       <div class="visit-w v_module">
         <p class="public_card_header">下载数量</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">440.34</div>
+          <div class="col_space4_fl top_panel_number">
+            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img3.png" alt="" />
           </div>
@@ -31,7 +37,9 @@
       <div class="visit-w v_module">
         <p class="public_card_header">流量统计</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">440.34</div>
+          <div class="col_space4_fl top_panel_number">
+            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img4.png" alt="" />
           </div>
@@ -103,10 +111,20 @@
 
 <script>
 import echarts from 'echarts'
+import countTo from 'vue-count-to';
 import '@/views/style/mainmodule.less'
 export default {
+  components:{
+  echarts,
+  countTo
+},
   data() {
-    return {}
+    return {
+      //数字开始
+      startVal: 0,
+      //数字结束
+      endVal: 440.34
+    }
   },
 
   created() {
