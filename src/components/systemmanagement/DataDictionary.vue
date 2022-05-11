@@ -73,7 +73,7 @@
         <p class="public_card_header">分组详情</p>
         <el-form
           :model="groupingForm"
-          ref="queryForm"
+          ref="groupingForm"
           :rules="groupingRules"
           label-width="120px"
         >
@@ -112,7 +112,7 @@
             </div>
           </div>
           <div>
-            <el-button type="primary" @click="submitForm('form')"
+            <el-button type="primary" @click="submitForm"
               >保存</el-button
             >
             <el-button @click="resetQuery">重置</el-button>
@@ -214,7 +214,7 @@
       <div style="width: 100%; text-align: left">
         <el-form
           :model="addDigitaForm"
-          ref="queryForm2"
+          ref="addDigitaForm"
           :rules="addDigitaRules"
           label-width="120px"
         >
@@ -262,7 +262,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAddDigita('form')"
+        <el-button type="primary" @click="submitAddDigita"
           >提交</el-button
         >
         <el-button @click="resetQuery2">重置</el-button>
@@ -366,7 +366,29 @@ export default {
       this.total2 = result.count
       console.log(this.groupingDetailsData)
     },
-    submitAddDigita() {},
+    submitAddDigita: function () {
+      this.$refs['addDigitaForm'].validate((valid) => {
+        if (valid) {
+          // addRoleSave(this.addDigitaForm)
+          //   .then((res) => {
+          //     if (res.statusCode == 200) {
+          //       this.$notify.success({ title: '提示', message: '保存成功' })
+          //     } else {
+          //       this.$notify.error({ title: '错误', message: res.message })
+          //     }
+          //     this.loading = false
+          //     this.addDigitalDialog = false
+          //     this.getList()
+          //   })
+          //   .catch((error) => {
+          //     this.loading = false
+          //   })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -384,16 +406,38 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    submitForm() {},
+    
+    submitForm: function () {
+      this.$refs['groupingForm'].validate((valid) => {
+        if (valid) {
+          addTimedtaskSave(this.groupingForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
     close() {
       this.groupingForm = []
     },
     resetQuery() {
-      this.resetForm("queryForm");
+      this.resetForm("groupingForm");
       this.addDigitalDialog = false
     },
     resetQuery2() {
-      this.resetForm("queryForm2");
+      this.resetForm("addDigitaForm");
     },
     addDigitalDetails() {
       return (this.addDigitalDialog = true)

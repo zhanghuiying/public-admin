@@ -73,7 +73,7 @@
     >
       <el-form
         :model="generateCodeForm"
-        ref="queryForm"
+        ref="generateCodeForm"
         :rules="generateCodeRules"
         label-width="120px"
       >
@@ -324,30 +324,29 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    // submitForm(formName) {
-    //   this.$refs[formName].validate((valid) => {
-    //     if (valid) {
-    //       this.loading = true
-    //       addParameterSave(this.parameterForm)
-    //         .then((res) => {
-    //           if (res.statusCode == 200) {
-    //             this.$notify.success({ title: '提示', message: '保存成功' })
-    //           } else {
-    //             this.$notify.error({ title: '错误', message: res.message })
-    //           }
-    //           this.loading = false
-    //           this.reviseTableDialog = false
-    //           this.getList()
-    //         })
-    //         .catch((error) => {
-    //           this.loading = false
-    //         })
-    //     } else {
-    //       this.loading = false
-    //       return false
-    //     }
-    //   })
-    // },
+    submitForm: function () {
+      this.$refs['parameterForm'].validate((valid) => {
+        if (valid) {
+          addParameterSave(this.parameterForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.reviseTableDialog = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
@@ -372,7 +371,7 @@ export default {
       this.fieldInformationDialog = false
     },
     resetQuery() {
-      this.resetForm('queryForm')
+      this.resetForm('generateCodeForm')
       this.generateCodeDialog = false
     },
     fieldInformation() {

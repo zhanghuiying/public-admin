@@ -102,7 +102,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="timedTaskForm"
-          ref="queryForm"
+          ref="timedTaskForm"
           :rules="timedTaskRules"
           label-width="120px"
         >
@@ -145,7 +145,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm()">保存</el-button>
+        <el-button type="primary" @click="submitForm('timedTaskForm')">保存</el-button>
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
@@ -234,10 +234,9 @@ export default {
         this.loading = false
       })
     },
-    submitForm() {
+    submitForm: function () {
       this.$refs['timedTaskForm'].validate((valid) => {
         if (valid) {
-          this.loading = true
           addTimedtaskSave(this.timedTaskForm)
             .then((res) => {
               if (res.statusCode == 200) {
@@ -277,7 +276,7 @@ export default {
       this.reviseTableDialog = false
     },
     resetQuery() {
-      this.resetForm('queryForm')
+      this.resetForm('timedTaskForm')
       this.reviseTableDialog = false
     },
     editTable(from) {

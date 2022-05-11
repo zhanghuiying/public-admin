@@ -142,8 +142,8 @@ export default {
           this.msgError(err.message)
         })
     },
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+    submitForm(queryForm) {
+      this.$refs[queryForm].validate((valid) => {
         if (valid) {
           changePassword(this.form)
             .then((res) => {

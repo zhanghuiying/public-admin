@@ -28,7 +28,7 @@
         <p class="public_card_header">菜单详情</p>
         <el-form
           :model="munuForm"
-          ref="queryForm"
+          ref="munuForm"
           :rules="munuRules"
           label-width="90px"
         >
@@ -110,7 +110,7 @@
             </div>
           </div>
           <div>
-            <el-button type="primary" @click="submitForm('form')"
+            <el-button type="primary" @click="submitFor"
               >保存</el-button
             >
             <el-button @click="resetQuery">重置</el-button>
@@ -174,12 +174,14 @@
 import tableMenutTool from '@/views/tools/tableMenutTool'
 import {
   getMenuData,
-  getMenu
+  getMenu,
+  addMenuSave
 } from '../../api/menu/menu'
 export default {
   name: 'datadictionary',
    components: {
     getMenu,
+    addMenuSave
   },
   components: {
     tableMenutTool,
@@ -351,12 +353,33 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    submitForm() {},
+    submitForm: function () {
+      this.$refs['munuForm'].validate((valid) => {
+        if (valid) {
+          addMenuSave(this.munuForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
+    },
     close() {
       this.munuForm = []
     },
     resetQuery() {
-      this.resetForm("queryForm");
+      this.resetForm("munuForm");
     },
     addressOptionsClick(index) {
       this.munuForm.address = index

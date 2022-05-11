@@ -86,7 +86,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="parameterForm"
-          ref="queryForm"
+          ref="parameterForm"
           :rules="parameterRules"
           label-width="120px"
         >
@@ -105,7 +105,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('parameterForm')"
+        <el-button type="primary" @click="submitForm"
           >提交</el-button
         >
         <el-button @click="resetQuery">重置</el-button>
@@ -121,7 +121,7 @@
       <div style="width: 100%; text-align: left">
         <el-form
           :model="settingForm"
-          ref="queryForm2"
+          ref="settingForm"
           :rules="settingRules"
           label-width="120px"
         >
@@ -297,10 +297,9 @@ export default {
         this.loading = false
       })
     },
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+    submitForm: function () {
+      this.$refs['parameterForm'].validate((valid) => {
         if (valid) {
-          this.loading = true
           addParameterSave(this.parameterForm)
             .then((res) => {
               if (res.statusCode == 200) {
@@ -339,11 +338,10 @@ export default {
           console.error(err)
         })
     },
-    submitSettingForm() {
-      this.$refs[formName].validate((valid) => {
+    submitSettingForm: function () {
+      this.$refs['settingForm'].validate((valid) => {
         if (valid) {
-          this.loading = true
-          addSystemParameterSave(this.parameterForm)
+          addSystemParameterSave(this.settingForm)
             .then((res) => {
               if (res.statusCode == 200) {
                 this.$notify.success({ title: '提示', message: '保存成功' })
@@ -363,6 +361,7 @@ export default {
         }
       })
     },
+    
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -382,11 +381,11 @@ export default {
       this.reviseTableDialog = false
     },
     resetQuery() {
-      this.resetForm('queryForm')
+      this.resetForm('parameterForm')
       this.reviseTableDialog = false
     },
     resetQuery2() {
-      this.resetForm('queryForm2')
+      this.resetForm('settingForm')
       this.SettingFromDialog = false
     },
     editTable(from) {

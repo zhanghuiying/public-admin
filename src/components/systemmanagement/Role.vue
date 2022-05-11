@@ -93,7 +93,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="addRoleForm"
-          ref="queryForm"
+          ref="addRoleForm"
           :rules="addRoleRules"
           label-width="120px"
         >
@@ -121,9 +121,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('addRoleForm')"
-          >提交</el-button
-        >
+        <el-button type="primary" @click="submitForm">提交</el-button>
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
@@ -150,7 +148,7 @@ export default {
     selectMenuByRoleId,
     saveMenuByRoleId,
     addRoleSave,
-    getRoleMenu
+    getRoleMenu,
   },
   data() {
     return {
@@ -308,10 +306,9 @@ export default {
       this.multiple = !selection.length
       console.log('dddddddd' + this.ids + this.multiple + this.single)
     },
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+    submitForm: function () {
+      this.$refs['addRoleForm'].validate((valid) => {
         if (valid) {
-          this.loading = true
           addRoleSave(this.addRoleForm)
             .then((res) => {
               if (res.statusCode == 200) {
@@ -355,7 +352,7 @@ export default {
       this.addRoleDialog = false
     },
     resetQuery() {
-      this.resetForm("queryForm");
+      this.resetForm('addRoleForm')
       this.addRoleDialog = false
     },
     editTable(from) {

@@ -68,7 +68,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="appendixForm"
-          ref="queryForm"
+          ref="appendixForm"
           :rules="appendixRules"
           label-width="90px"
         >
@@ -138,7 +138,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('form')">保存</el-button>
+        <el-button type="primary" @click="submitForm">保存</el-button>
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
@@ -204,29 +204,28 @@ export default {
         this.loading = false
       })
     },
-    submitForm(formName) {
-      // this.$refs[formName].validate((valid) => {
-      //   if (valid) {
-      //     this.loading = true
-      //     addAttachmentSave(this.appendixForm)
-      //       .then((res) => {
-      //         if (res.statusCode == 200) {
-      //           this.$notify.success({ title: '提示', message: '保存成功' })
-      //         } else {
-      //           this.$notify.error({ title: '错误', message: res.message })
-      //         }
-      //         this.loading = false
-      //         this.reviseTableDialog = false
-      //         this.getList()
-      //       })
-      //       .catch((error) => {
-      //         this.loading = false
-      //       })
-      //   } else {
-      //     this.loading = false
-      //     return false
-      //   }
-      // })
+    submitForm: function () {
+      this.$refs['appendixForm'].validate((valid) => {
+        if (valid) {
+          addAttachmentSave(this.appendixForm)
+            .then((res) => {
+              if (res.statusCode == 200) {
+                this.$notify.success({ title: '提示', message: '保存成功' })
+              } else {
+                this.$notify.error({ title: '错误', message: res.message })
+              }
+              this.loading = false
+              this.reviseTableDialog = false
+              this.getList()
+            })
+            .catch((error) => {
+              this.loading = false
+            })
+        } else {
+          this.loading = false
+          return false
+        }
+      })
     },
     editingCheckbox(){
       this.isShowCheckbox = !this.isShowCheckbox;
@@ -247,14 +246,14 @@ export default {
       this.reviseTableDialog = false
     },
     resetQuery() {
-      this.resetForm("queryForm");
+      this.resetForm("appendixForm");
       this.reviseTableDialog = false
     },
     reviseTable() {
       return (this.reviseTableDialog = true)
     },
     addNameList() {
-      this.resetForm("queryForm");
+      this.resetForm("appendixForm");
       return (this.reviseTableDialog = true)
     },
 

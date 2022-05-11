@@ -191,7 +191,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('editForm')"
+        <el-button type="primary" @click="submitForm"
           >提交</el-button
         >
         <el-button @click="resetQuery">重置</el-button>
@@ -400,10 +400,9 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
-    submitForm() {
-      this.$refs[formName].validate((valid) => {
+    submitForm: function () {
+      this.$refs['editForm'].validate((valid) => {
         if (valid) {
-          this.loading = true
           addUserSave(this.editForm)
             .then((res) => {
               if (res.statusCode == 200) {
@@ -448,7 +447,7 @@ export default {
       this.editTableDialog = false
     },
     resetQuery() {
-      this.resetForm('queryForm')
+      this.resetForm('editForm')
       this.editTableDialog = false
     },
     editTable(from) {
