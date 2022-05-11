@@ -1,4 +1,5 @@
 import request from '../../../utils/request'
+import qs from 'qs'
 
 const URL_PUBLIC = "/lui_sys/pim/user";
 
