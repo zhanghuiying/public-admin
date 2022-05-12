@@ -64,7 +64,7 @@
                 <i class="el-icon-circle-plus-outline"></i>
               </div>
 
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="deleteTable()">
                 <i class="el-icon-delete"></i>
               </div>
               <div class="public_table_tool_inline">
@@ -91,11 +91,11 @@
                 <table-menut-tool />
               </div>
             </div>
-
             <el-table
               :data="tableData"
               style="width: 100%"
               v-loading="loading"
+              tooltip-effect="dark"
               @selection-change="handleSelectionChange"
             >
               <el-table-column fixed="left" type="selection" width="45" />
@@ -209,7 +209,7 @@
                 v-for="(item, index) in userRole"
                 :key="index"
                 :label="index"
-                @change="changeUserRole(item.ROLE_ID)"
+                @change="changeUserRole(item.USER_ID)"
                 >{{ item.ROLE_NAME }}</el-checkbox
               >
             </el-checkbox-group>
@@ -379,6 +379,7 @@ export default {
       treeInput: '',
       modifyTreeInput: false,
       org_id:'',
+      tableDeleteChange:'',//勾选选中列表id
     }
   },
 
@@ -409,7 +410,6 @@ export default {
     getFollowNodList() {
       getFollowNod(this.followNodData).then((response) => {
         this.followNodData = response
-        console.log(this.followNodData)
       })
     },
     
@@ -417,19 +417,14 @@ export default {
       this.queryParams.ORG_ID = data.ORG_ID
       getUserData(this.queryParams).then((response) => {
         this.org_id = response.ORG_ID
-        // console.log(this.org_id);
       })
     },
     append(data) {
       this.equeryAddfollowParams = data
       this.equeryAddfollowParams.ORG_CODE = data.ORG_ID
-      console.log(this.equeryAddfollowParams);
+      // console.log(this.equeryAddfollowParams);
       addFollowNod(this.equeryAddfollowParams).then((response) => {})
 
-      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
-      // if (!data.children) {
-      //   this.$set(data, 'children', [])
-      // }
       // data.children.push(newChild)
       // data.ORG_ID data.ORG_NAME data.ORG_PID this.ORG_ID
       // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
@@ -439,7 +434,6 @@ export default {
       // data.children.push(newChild)
     },
     remove(node, data) {
-      
       this.$confirm('确认删除部门 "' + data.ORG_NAME + '" 吗（该组织机构下的用户也会被删除）?', "警告", {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -465,7 +459,7 @@ export default {
     modify(node, data) {
       this.modifyTreeInput = true
       this.treeInput = data.ORG_NAME
-      console.log(this.modifyTreeInput,this.treeInput);
+      // console.log(this.modifyTreeInput,this.treeInput);
       // console.log("000000"+this.modifyTreeInput);
     },
     treeInputChange(){
@@ -502,11 +496,11 @@ export default {
     // },
     changeUserOpg(val) {
       this.editForm.roleIds = val
-      console.log(this.editForm.roleIds)
+      // console.log(this.editForm.roleIds)
     },
     changeUserRole(val) {
       this.editForm.operateIds = val
-      console.log(this.editForm.operateIds)
+      // console.log(this.editForm.operateIds)
     },
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
@@ -516,9 +510,41 @@ export default {
       this.queryParams.page = newPage
       this.getList()
     },
-    handleSelectionChange(val) {
-      this.multipleSelection = val
+    handleSelectionChange(val,user_ID) {
+      const that = this;
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function(e) {
+        that.tableDeleteChange += e.USER_ID + ",";
+      });
+      // console.log(that.tableDeleteChange);
     },
+    deleteTable(){
+      const that = this;
+      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
+        that.$message({message: '请勾选择要删除的数据',type: 'warning',center: true});
+      }else{
+        that.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            await deleteUser(that.tableDeleteChange)
+            // that.tableDeleteChange == {}
+            // console.log(that.tableDeleteChange);
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+
+    },
+    
     submitForm: function () {
       this.$refs['editForm'].validate((valid) => {
         if (valid) {
@@ -543,13 +569,13 @@ export default {
       })
     },
     handleDelete({ $index, row }) {
-      this.$confirm('是否确认删除该用户?', '信息', {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
         .then(async () => {
-          await deleteUser(row.ROLE_ID)
+          await deleteUser(row.USER_ID)
           this.tableData.splice($index, 1)
           this.$message({
             type: 'success',

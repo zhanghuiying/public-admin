@@ -259,7 +259,7 @@ export default {
 
     handleDelete(row) {
       const ids = row.id || this.ids
-      this.$confirm('是否确认删除该用户?', '信息', {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
