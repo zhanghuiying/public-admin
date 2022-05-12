@@ -63,21 +63,20 @@
               <div class="public_table_tool_inline" @click="addNameList()">
                 <i class="el-icon-circle-plus-outline"></i>
               </div>
-
               <div class="public_table_tool_inline" @click="deleteTable()">
                 <i class="el-icon-delete"></i>
               </div>
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="disabledTable()">
                 <i class="el-icon-close"></i>
               </div>
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="enableTable()">
                 <i class="el-icon-check"></i>
               </div>
-
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="rechargePasswordTable()">
                 <i class="el-icon-unlock"></i>
               </div>
-              <div class="public_table_tool_inline">
+
+              <div class="public_table_tool_inline" >
                 <i class="el-icon-coordinate"></i>
               </div>
               <div class="public_table_tool_inline">
@@ -245,6 +244,9 @@ import {
   getUserData,
   addUserSave,
   deleteUser,
+  disableUser,
+  enableUser,
+  resetPasswordUser,
   getUserPageData,
   getFollowNod,
   addFollowNod,
@@ -261,12 +263,16 @@ export default {
     getUserData,
     addUserSave,
     deleteUser,
+    disableUser,
+    enableUser,
+    resetPasswordUser,
     getUserPageData,
     getFollowNod,
     addFollowNod,
     addFollowNodPost,
     updateFollowNod,
     deleteFollowNod,
+    
   },
   data() {
     const data = [
@@ -512,39 +518,12 @@ export default {
     },
     handleSelectionChange(val,user_ID) {
       const that = this;
+      that.tableDeleteChange = ''
       that.multipleSelection = val
       that.multipleSelection.forEach(function(e) {
         that.tableDeleteChange += e.USER_ID + ",";
       });
-      // console.log(that.tableDeleteChange);
     },
-    deleteTable(){
-      const that = this;
-      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
-        that.$message({message: '请勾选择要删除的数据',type: 'warning',center: true});
-      }else{
-        that.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-        })
-          .then(async () => {
-            await deleteUser(that.tableDeleteChange)
-            // that.tableDeleteChange == {}
-            // console.log(that.tableDeleteChange);
-            that.getList()
-            that.$message({
-              type: 'success',
-              message: '删除成功!',
-            })
-          })
-          .catch((err) => {
-            console.error(err)
-          })
-      }
-
-    },
-    
     submitForm: function () {
       this.$refs['editForm'].validate((valid) => {
         if (valid) {
@@ -608,6 +587,106 @@ export default {
         this.dialogType = 'new'
         this.editTableDialog = true
         addFollowNodPost(this.equeryAddfollowParams).then((response) => {})
+      }
+    },
+    //删除勾选的列表用户
+    deleteTable(){
+      const that = this;
+      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
+        that.$message({message: '请勾选择要删除的数据',type: 'warning',center: true});
+      }else{
+        that.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            await deleteUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    //禁用勾选的列表用户
+    disabledTable(){
+      const that = this;
+      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
+        that.$message({message: '请先勾选择要操作的数据',type: 'warning',center: true});
+      }else{
+        that.$confirm('禁用该用户, 是否继续?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            await disableUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '禁用成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    //启用勾选的列表用户
+    enableTable(){
+      const that = this;
+      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
+        that.$message({message: '请先勾选择要操作的数据',type: 'warning',center: true});
+      }else{
+        that.$confirm('启用该用户, 是否继续?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            await enableUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '启用成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    //重置密码勾选的列表用户
+    rechargePasswordTable(){
+      const that = this;
+      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
+        that.$message({message: '请先勾选择要操作的数据',type: 'warning',center: true});
+      }else{
+        that.$confirm('重置密码该用户, 是否继续?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async (res) => {
+            await resetPasswordUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '密码重置成功！新密码为Qq123456用户首次登陆后需要修改密码!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
       }
     },
   },

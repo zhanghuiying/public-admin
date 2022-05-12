@@ -27,10 +27,42 @@ export function addUserSave(data) {
     data: qs.stringify(data)
   })
 }
-
+//删除勾选列表
 export function deleteUser(ids) {
   return request({
     url: URL_PUBLIC+'/delete.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
+//禁用勾选列表
+export function disableUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/disable.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
+
+//启用勾选列表
+export function enableUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/enable.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
+
+//重置密码勾选列表用户 
+export function resetPasswordUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/resetPassword.do',
     method: 'post',
     params: {
       ids
