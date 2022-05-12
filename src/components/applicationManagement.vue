@@ -2,7 +2,7 @@
   <div class="pb-main-height">
     <div class="">
       <div class="public_table_tool">
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="getList">
           <i class="el-icon-refresh"></i>
         </div>
         <div class="public_table_tool_inline">

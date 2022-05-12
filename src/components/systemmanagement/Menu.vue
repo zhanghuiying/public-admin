@@ -122,7 +122,7 @@
         <div class="public-card-body">
           <div class="public-card-body-border">
             <div class="public_table_tool">
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="getList">
                 <i class="el-icon-refresh"></i>
               </div>
               <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
@@ -419,25 +419,5 @@ export default {
 .menu_column .menu_btn:hover {
   font-weight: bold;
 }
-.btn_expand-shrink {
-  display: inline-block;
-  height: 28px;
-  line-height: 28px;
-  white-space: nowrap;
-  text-align: center;
-  box-sizing: border-box;
-  outline: none;
-  transition: 0.1s;
-  font-weight: 500;
-  padding: 0 8px;
-  font-size: 12px;
-  background-color: white;
-  border: 1px solid #dcdfe6;
-  border-radius: 2px;
-  cursor: pointer;
-}
-.btn_expand-shrink:hover {
-  color: #2d8cf0;
-  background-color: #ecf5ff;
-}
+
 </style>

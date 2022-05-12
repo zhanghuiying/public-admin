@@ -43,7 +43,11 @@
             <el-table-column fixed="left" type="selection" width="45" />
             <el-table-column label="分组代码">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.OG_CODE"></el-input>
+                <el-input v-model="scope.row.OG_CODE"
+                onfocus="inputOnfocusFrom()"
+                onblur="inputOnblurFrom()"
+                onchange="inputOnchangeFrom()"
+                ></el-input>
               </template>
             </el-table-column>
             <el-table-column label="分组名称">
@@ -381,6 +385,15 @@ export default {
         this.loading = false
       })
     },
+    inputOnfocusFrom(){
+
+    },
+    inputOnblurFrom(){
+
+    },
+    inputOnchangeFrom(){
+
+    },
 
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
@@ -464,7 +477,10 @@ export default {
     },
     addDetaList() {
       this.resetForm('groupingForm')
-      this.$notify.success({ title: '提示', message: '请在分组详情中填写内容后保存。' })
+      this.$notify.success({
+        title: '提示',
+        message: '请在分组详情中填写内容后保存。',
+      })
     },
     addDigitalDetails() {
       return (this.addDigitalDialog = true)

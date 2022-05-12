@@ -1,9 +1,12 @@
 <template>
   <div class="public_main_app d-display">
     <div class="pb-main-left">
-      <p class="public_card_header">用户列表</p>
+      <p class="public_card_header">组织结构
+        <span class="btn_expand-shrink" style="margin-left: 10px;" @click="addFollowNode()">添加跟节点</span>
+      </p>
 
-      <el-tree
+      <div class="public-card-body">
+        <el-tree
         :data="data"
         show-checkbox
         node-key="id"
@@ -12,16 +15,17 @@
         :render-content="renderContent"
       >
       </el-tree>
+      </div>
     </div>
 
     <div class="pb-main-right pb-main_pad-lf">
       <div class="pb-main-height">
-        <p class="public_card_header">组织结构</p>
+        <p class="public_card_header">用户列表</p>
 
         <div class="public-card-body">
           <div class="public-card-body-border">
             <div class="public_table_tool">
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="getList">
                 <i class="el-icon-refresh"></i>
               </div>
               <div class="public_table_tool_inline" @click="addNameList()">
@@ -207,6 +211,10 @@ import {
   addUserSave,
   deleteUser,
   getUserPageData,
+  getFollowNod,
+  addFollowNod,
+  updateFollowNod,
+  deleteFollowNod
 } from '../../api/user/user'
 
 let id = 1000
@@ -218,6 +226,10 @@ export default {
     addUserSave,
     deleteUser,
     getUserPageData,
+    getFollowNod,
+    addFollowNod,
+    updateFollowNod,
+    deleteFollowNod
   },
   data() {
     const data = [
@@ -252,6 +264,7 @@ export default {
       queryParams: {
         page: 1,
         limit: 10,
+        ORG_ID: '',
       },
       multipleSelection: [],
       editTableDialog: false,
@@ -314,12 +327,25 @@ export default {
       pageDataList: {},
       userOpg: [],
       userRole: [],
+      followNodData: [],//获取菜单跟节点
+      equeryAddfollowParams: {
+        ORG_CODE: '',
+        ORG_ID: '',
+        ORG_PID: '',
+        ORG_NAME: '',
+      },
+      equeryUpdatefollowParams: {
+        ORG_ID: '',
+        ORG_PID: '',
+        ORG_NAME: '',
+      },
     }
   },
 
   created() {
     this.getList()
     this.getPageDataList()
+    this.getFollowNodList()
   },
 
   methods: {
@@ -338,6 +364,11 @@ export default {
 
         console.log(this.userOpg)
         console.log(this.userRole)
+      })
+    },
+    getFollowNodList() {
+      getFollowNod(this.followNodData).then((response) => {
+        this.followNodData = response
       })
     },
     changeUserOpg(val) {
@@ -460,6 +491,9 @@ export default {
       this.dialogType = 'new'
       return (this.editTableDialog = true)
     },
+    addFollowNode(){
+      addFollowNod(this.equeryAddfollowParams).then((response) => {})
+    }
   },
 }
 </script>

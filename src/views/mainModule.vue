@@ -113,21 +113,25 @@
 import echarts from 'echarts'
 import countTo from 'vue-count-to';
 import '@/views/style/mainmodule.less'
+import { getPearData} from '../api/menu'
 export default {
   components:{
   echarts,
-  countTo
+  countTo,
+  getPearData
 },
   data() {
     return {
       //数字开始
       startVal: 0,
       //数字结束
-      endVal: 440.34
+      endVal: 440.34,
+      pearlist: [],
     }
   },
 
   created() {
+    this.getPearList()
   },
 
   mounted() {
@@ -135,93 +139,100 @@ export default {
   },
 
   methods: {
+    // 获取所有的菜单
+    getPearList() {
+      getPearData().then((response) => {
+        this.pearlist = response
+        console.log(this.pearlist)
+      })
+    },
     echarts(id) {
-      let myChart = echarts.init(document.getElementById(id))
-      let option = {
-        tooltip: {
-          trigger: 'axis',
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true,
-        },
-        toolbox: {
-          feature: {
-            saveAsImage: {},
-          },
-        },
-        xAxis: {
-          type: 'category',
-          boundaryGap: false,
-          data: ['10:10', '10:10', '10:10', '10:30', '10:40', '10:10'],
-        },
-        yAxis: {
-          type: 'value',
-        },
-        series: [
-          {
-            name: '',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {
-              normal: {
-                color: new echarts.graphic.LinearGradient(
-                  0,
-                  0,
-                  0,
-                  1,
-                  [
-                    {
-                      offset: 0,
-                      color: 'rgba(155, 155, 226, 0.8)',
-                    },
-                    {
-                      offset: 1,
-                      color: 'rgba(155, 155, 226, 0)',
-                    },
-                  ],
-                  false
-                ),
-                shadowColor: 'rgba(155, 155, 226, 0.8)',
-                shadowBlur: 20,
-              },
-            },
-            data: [120, 132, 101, 134, 90, 230, 210],
-          },
-          {
-            name: '',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {
-              normal: {
-                color: new echarts.graphic.LinearGradient(
-                  0,
-                  0,
-                  0,
-                  1,
-                  [
-                    {
-                      offset: 0,
-                      color: 'rgba(155, 155, 226, 0.8)',
-                    },
-                    {
-                      offset: 1,
-                      color: 'rgba(155, 155, 226, 0)',
-                    },
-                  ],
-                  false
-                ),
-                shadowColor: 'rgba(155, 155, 226, 0.8)',
-                shadowBlur: 20,
-              },
-            },
-            data: [220, 182, 191, 234, 290, 330, 310],
-          },
-        ],
-      }
-      myChart.setOption(option)
+      // let myChart = echarts.init(document.getElementById(id))
+      // let option = {
+      //   tooltip: {
+      //     trigger: 'axis',
+      //   },
+      //   grid: {
+      //     left: '3%',
+      //     right: '4%',
+      //     bottom: '3%',
+      //     containLabel: true,
+      //   },
+      //   toolbox: {
+      //     feature: {
+      //       saveAsImage: {},
+      //     },
+      //   },
+      //   xAxis: {
+      //     type: 'category',
+      //     boundaryGap: false,
+      //     data: ['10:10', '10:10', '10:10', '10:30', '10:40', '10:10'],
+      //   },
+      //   yAxis: {
+      //     type: 'value',
+      //   },
+      //   series: [
+      //     {
+      //       name: '',
+      //       type: 'line',
+      //       stack: 'Total',
+      //       areaStyle: {
+      //         normal: {
+      //           color: new echarts.graphic.LinearGradient(
+      //             0,
+      //             0,
+      //             0,
+      //             1,
+      //             [
+      //               {
+      //                 offset: 0,
+      //                 color: 'rgba(155, 155, 226, 0.8)',
+      //               },
+      //               {
+      //                 offset: 1,
+      //                 color: 'rgba(155, 155, 226, 0)',
+      //               },
+      //             ],
+      //             false
+      //           ),
+      //           shadowColor: 'rgba(155, 155, 226, 0.8)',
+      //           shadowBlur: 20,
+      //         },
+      //       },
+      //       data: [120, 132, 101, 134, 90, 230, 210],
+      //     },
+      //     {
+      //       name: '',
+      //       type: 'line',
+      //       stack: 'Total',
+      //       areaStyle: {
+      //         normal: {
+      //           color: new echarts.graphic.LinearGradient(
+      //             0,
+      //             0,
+      //             0,
+      //             1,
+      //             [
+      //               {
+      //                 offset: 0,
+      //                 color: 'rgba(155, 155, 226, 0.8)',
+      //               },
+      //               {
+      //                 offset: 1,
+      //                 color: 'rgba(155, 155, 226, 0)',
+      //               },
+      //             ],
+      //             false
+      //           ),
+      //           shadowColor: 'rgba(155, 155, 226, 0.8)',
+      //           shadowBlur: 20,
+      //         },
+      //       },
+      //       data: [220, 182, 191, 234, 290, 330, 310],
+      //     },
+      //   ],
+      // }
+      // myChart.setOption(option)
     },
   },
 }

@@ -103,7 +103,7 @@
             <span class="hd-nav-bar"></span>
           </span>
         </div>
-        <user-menu class="header-index-right" />
+        <user-menu class="header-index-right"/>
       </div>
       <router-view class="public_main_p"></router-view>
     </el-main>
@@ -112,7 +112,8 @@
 
 <script>
 import Menu from '../components/Menu.vue'
-import { getMenuList } from '../api/menu'
+import { getMenuData
+ } from '../api/menu'
 
 import UserMenu from '../views/tools/UserMenu'
 export default {
@@ -131,7 +132,6 @@ export default {
 
   created() {
     this.getMenus()
-    
   },
 
   methods: {
@@ -142,7 +142,7 @@ export default {
 
     // 获取所有的菜单
     getMenus() {
-      getMenuList().then((response) => {
+      getMenuData().then((response) => {
         this.menulist = response
         // console.log(this.menulist)
       })

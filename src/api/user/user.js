@@ -38,7 +38,41 @@ export function deleteUser(ids) {
   })
 }
 
-//添加
+//菜单树 获取跟节点
+export function getFollowNod(query) {
+  return request({
+    url: '/lui_sys/pim/org/getOrg.do',
+    method: 'post',
+    params: query
+  })
+}
+
+
+//菜单树 添加跟节点
+export function addFollowNod(query) {
+  return request({
+    url: '/lui_sys/pim/org!insert.action',
+    method: 'post',
+    params: query
+  })
+}
+
+//菜单树 修改跟节点名称
+export function updateFollowNod(query) {
+  return request({
+    url: '/lui_sys/pim/org/update.do',
+    method: 'post',
+    params: query
+  })
+}
+
+// /lui_sys/pim/org!delete.action?ORG_ID=157061
+export function deleteFollowNod(ORG_ID) {
+  return request({
+    url: '/lui_sys/pim/org!delete.action' + `${ORG_ID}`,
+    method: 'get'
+  })
+}
 // export function addUSER(USER_ID, ORG_ID, USER_ACCOUNT,
 //       USER_NAME, USER_PHONE, USER_SEX,
 //       USER_STATE,roleIds,operateIds) {
