@@ -477,10 +477,7 @@ export default {
     },
     addDetaList() {
       this.resetForm('groupingForm')
-      this.$notify.success({
-        title: '提示',
-        message: '请在分组详情中填写内容后保存。',
-      })
+      this.$message({message: '请在分组详情中填写内容后保存。',type: 'warning',center: true});
     },
     addDigitalDetails() {
       return (this.addDigitalDialog = true)

@@ -1,20 +1,52 @@
 <template>
   <div class="public_main_app d-display">
     <div class="pb-main-left">
-      <p class="public_card_header">组织结构
-        <span class="btn_expand-shrink" style="margin-left: 10px;" @click="addFollowNode()">添加跟节点</span>
+      <p class="public_card_header">
+        组织结构
+        <span
+          class="btn_expand-shrink"
+          style="margin-left: 10px"
+          @click="addFollowNode()"
+          >添加跟节点</span
+        >
       </p>
 
-      <div class="public-card-body">
+      <div class="tree_body">
         <el-tree
-        :data="data"
-        show-checkbox
-        node-key="id"
-        default-expand-all
-        :expand-on-click-node="false"
-        :render-content="renderContent"
-      >
-      </el-tree>
+          :data="followNodData"
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          :expand-on-click-node="false"
+        >
+        <!-- :class="queryParams.ORG_ID != ''?'tree_checked custom_tree_node' : 'custom_tree_node'" -->
+          <span class="custom_tree_node"
+            slot-scope="{ node, data }"
+          @click="() => treeChecked(node, data)">
+            <el-input v-if="modifyTreeInput"
+            v-model="treeInput"
+            @blur="treeInputBlur"
+            @change="treeInputChange"></el-input>
+            <span v-else>{{ data.ORG_NAME }}</span>
+            <span>
+              <i
+                style="color: #333; margin-left: 6px"
+                class="el-icon-folder-add"
+                @click="() => append(data)"
+              ></i>
+              <i
+                style="color: #333; margin-left: 6px"
+                class="el-icon-edit"
+                @click="() => modify(node, data)"
+              ></i>
+              <i
+                style="color: #333; margin-left: 6px"
+                class="el-icon-delete"
+                @click="() => remove(node, data)"
+              ></i>
+            </span>
+          </span>
+        </el-tree>
       </div>
     </div>
 
@@ -172,8 +204,9 @@
             </el-select>
           </el-form-item>
           <el-form-item label="角色绑定">
-            <el-checkbox-group v-model="editForm.roleIds" >
-              <el-checkbox v-for="(item, index) in userRole"
+            <el-checkbox-group v-model="editForm.roleIds">
+              <el-checkbox
+                v-for="(item, index) in userRole"
                 :key="index"
                 :label="index"
                 @change="changeUserRole(item.ROLE_ID)"
@@ -183,8 +216,12 @@
           </el-form-item>
 
           <el-form-item label="权限绑定">
-            <el-checkbox-group v-model="editForm.operateIds" v-if="userOpg.length>0">
-              <el-checkbox v-for="(item, index) in userOpg"
+            <el-checkbox-group
+              v-model="editForm.operateIds"
+              v-if="userOpg.length > 0"
+            >
+              <el-checkbox
+                v-for="(item, index) in userOpg"
                 :key="index"
                 :label="index"
                 @change="changeUserOpg(index.RES_ID)"
@@ -195,9 +232,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm"
-          >提交</el-button
-        >
+        <el-button type="primary" @click="submitForm">提交</el-button>
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
@@ -213,11 +248,12 @@ import {
   getUserPageData,
   getFollowNod,
   addFollowNod,
+  addFollowNodPost,
   updateFollowNod,
-  deleteFollowNod
+  deleteFollowNod,
 } from '../../api/user/user'
 
-let id = 1000
+let id = 0
 export default {
   name: 'userManagement',
   components: {
@@ -228,8 +264,9 @@ export default {
     getUserPageData,
     getFollowNod,
     addFollowNod,
+    addFollowNodPost,
     updateFollowNod,
-    deleteFollowNod
+    deleteFollowNod,
   },
   data() {
     const data = [
@@ -327,7 +364,7 @@ export default {
       pageDataList: {},
       userOpg: [],
       userRole: [],
-      followNodData: [],//获取菜单跟节点
+      followNodData: [], //获取菜单跟节点
       equeryAddfollowParams: {
         ORG_CODE: '',
         ORG_ID: '',
@@ -339,10 +376,14 @@ export default {
         ORG_PID: '',
         ORG_NAME: '',
       },
+      treeInput: '',
+      modifyTreeInput: false,
+      org_id:'',
     }
   },
 
   created() {
+    this.modifyTreeInput = false
     this.getList()
     this.getPageDataList()
     this.getFollowNodList()
@@ -361,64 +402,111 @@ export default {
       getUserPageData(this.pageDataList).then((response) => {
         this.userOpg = response.opgList
         this.userRole = response.roleList
-
-        console.log(this.userOpg)
-        console.log(this.userRole)
+        // console.log(this.userOpg)
+        // console.log(this.userRole)
       })
     },
     getFollowNodList() {
       getFollowNod(this.followNodData).then((response) => {
         this.followNodData = response
+        console.log(this.followNodData)
       })
     },
+    
+    treeChecked(node, data){
+      this.queryParams.ORG_ID = data.ORG_ID
+      getUserData(this.queryParams).then((response) => {
+        this.org_id = response.ORG_ID
+        // console.log(this.org_id);
+      })
+    },
+    append(data) {
+      this.equeryAddfollowParams = data
+      this.equeryAddfollowParams.ORG_CODE = data.ORG_ID
+      console.log(this.equeryAddfollowParams);
+      addFollowNod(this.equeryAddfollowParams).then((response) => {})
+
+      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
+      // if (!data.children) {
+      //   this.$set(data, 'children', [])
+      // }
+      // data.children.push(newChild)
+      // data.ORG_ID data.ORG_NAME data.ORG_PID this.ORG_ID
+      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
+      // if (!data.children) {
+      //   this.$set(data, 'children', [])
+      // }
+      // data.children.push(newChild)
+    },
+    remove(node, data) {
+      
+      this.$confirm('确认删除部门 "' + data.ORG_NAME + '" 吗（该组织机构下的用户也会被删除）?', "警告", {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          await deleteFollowNod(data.ORG_ID)
+          this.getFollowNodList()
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+      // const parent = node.parent
+      // const children = parent.data.children || parent.data
+      // const index = children.findIndex((d) => d.id === data.id)
+      // children.splice(index, 1)
+    },
+
+    modify(node, data) {
+      this.modifyTreeInput = true
+      this.treeInput = data.ORG_NAME
+      console.log(this.modifyTreeInput,this.treeInput);
+      // console.log("000000"+this.modifyTreeInput);
+    },
+    treeInputChange(){
+      this.modifyTreeInput = false
+      // console.log("1111111"+this.modifyTreeInput);
+    },
+    treeInputBlur(){
+      this.modifyTreeInput = false
+      // console.log("222222"+this.modifyTreeInput);
+    },
+    // renderContent(h, { node, data, store }) {
+    //   return (
+    //     <span class="custom_tree_node">
+    //       <span>{node.label}</span>
+    //       <span>
+    //         <i
+    //           style="color: #333;margin-left: 6px;"
+    //           class="el-icon-folder-add"
+    //           on-click={() => this.append(data)}
+    //         ></i>
+    //         <i
+    //           style="color: #333;margin-left: 6px;"
+    //           class="el-icon-edit"
+    //           on-click={() => this.modify(node, data)}
+    //         ></i>
+    //         <i
+    //           style="color: #333;margin-left: 6px;"
+    //           class="el-icon-delete"
+    //           on-click={() => this.remove(node, data)}
+    //         ></i>
+    //       </span>
+    //     </span>
+    //   )
+    // },
     changeUserOpg(val) {
       this.editForm.roleIds = val
-      console.log(this.editForm.roleIds);
+      console.log(this.editForm.roleIds)
     },
     changeUserRole(val) {
       this.editForm.operateIds = val
-      console.log(this.editForm.operateIds);
-    },
-    append(data) {
-      const newChild = { id: id++, label: 'new node1', children: [] }
-      if (!data.children) {
-        this.$set(data, 'children', [])
-      }
-      data.children.push(newChild)
-    },
-
-    remove(node, data) {
-      const parent = node.parent
-      const children = parent.data.children || parent.data
-      const index = children.findIndex((d) => d.id === data.id)
-      children.splice(index, 1)
-    },
-
-    modify(node, data) {},
-
-    renderContent(h, { node, data, store }) {
-      return (
-        <span class="custom_tree_node">
-          <span>{node.label}</span>
-          <span>
-            <i
-              style="color: #333;margin-left: 6px;"
-              class="el-icon-folder-add"
-              on-click={() => this.append(data)}
-            ></i>
-            <i
-              style="color: #333;margin-left: 6px;"
-              class="el-icon-edit"
-              on-click={() => this.modify(node, data)}
-            ></i>
-            <i
-              style="color: #333;margin-left: 6px;"
-              class="el-icon-delete"
-              on-click={() => this.remove(node, data)}
-            ></i>
-          </span>
-        </span>
-      )
+      console.log(this.editForm.operateIds)
     },
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
@@ -488,12 +576,14 @@ export default {
     },
 
     addNameList() {
-      this.dialogType = 'new'
-      return (this.editTableDialog = true)
+      if(this.org_id ===''){
+        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
+      }else{
+        this.dialogType = 'new'
+        this.editTableDialog = true
+        addFollowNodPost(this.equeryAddfollowParams).then((response) => {})
+      }
     },
-    addFollowNode(){
-      addFollowNod(this.equeryAddfollowParams).then((response) => {})
-    }
   },
 }
 </script>
@@ -507,9 +597,26 @@ export default {
 .el-checkbox-group {
   text-align: left;
 }
+.custom_tree_node .el-input__inner,
+.tree_checked .el-input__inner{
+  height: 24px;
+  line-height: 24px;
+}
+
 </style>
 <style lang='less' scoped>
 .el_pagination {
   margin-top: 30px;
 }
+.custom_tree_node{
+  // background-color: #fff;
+}
+.tree_checked{
+  background-color: #e5e5e5;
+}
+.tree_body{
+  padding: 16px;
+  // overflow:auto;
+}
+
 </style>

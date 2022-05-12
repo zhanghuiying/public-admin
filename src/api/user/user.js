@@ -47,9 +47,18 @@ export function getFollowNod(query) {
   })
 }
 
+// action?ORG_CODE=19181&ORG_ID=19181&ORG_PID=69604&ORG_NAME=new%20node1
 
-//菜单树 添加跟节点
+//菜单树 get添加跟节点
 export function addFollowNod(query) {
+  return request({
+    url: '/lui_sys/pim/org!insert.action',
+    method: 'get',
+    params: query
+  })
+}
+//菜单树 post添加跟节点
+export function addFollowNodPost(query) {
   return request({
     url: '/lui_sys/pim/org!insert.action',
     method: 'post',
@@ -66,25 +75,11 @@ export function updateFollowNod(query) {
   })
 }
 
-// /lui_sys/pim/org!delete.action?ORG_ID=157061
 export function deleteFollowNod(ORG_ID) {
   return request({
-    url: '/lui_sys/pim/org!delete.action' + `${ORG_ID}`,
+    url: '/lui_sys/pim/org!delete.action?ORG_ID=' + `${ORG_ID}`,
     method: 'get'
   })
 }
-// export function addUSER(USER_ID, ORG_ID, USER_ACCOUNT,
-//       USER_NAME, USER_PHONE, USER_SEX,
-//       USER_STATE,roleIds,operateIds) {
-//   return request({
-//     url: USER_PUBLIC+'/save.do',
-//     method: 'post',
-//     params: {
-//       USER_ID, ORG_ID, USER_ACCOUNT,
-//       USER_NAME, USER_PHONE, USER_SEX,
-//       USER_STATE,roleIds,operateIds,
-//     }
-//   })
-// }
 
 
