@@ -29,7 +29,7 @@ export function getMenu(data) {
 //添加
 export function addMenuSave(data) {
   return request({
-    url: USER_PUBLIC + '/save.do',
+    url: URL_PUBLIC+ '/save.do',
     method: 'post',
     data: qs.stringify(data)
   })

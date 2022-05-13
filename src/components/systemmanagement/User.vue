@@ -167,7 +167,7 @@
       <div style="width: 100%; text-align: center">
         <el-form
           :model="editForm"
-          ref="queryForm"
+          ref="editForm"
           :rules="editRules"
           label-width="120px"
         >
@@ -205,10 +205,10 @@
           <el-form-item label="角色绑定">
             <el-checkbox-group v-model="editForm.roleIds">
               <el-checkbox
-                v-for="(item, index) in userRole"
+                v-for="(item, index) in userRoleList"
                 :key="index"
                 :label="index"
-                @change="changeUserRole(item.USER_ID)"
+                @change="changeUserRole(item.ROLE_ID)"
                 >{{ item.ROLE_NAME }}</el-checkbox
               >
             </el-checkbox-group>
@@ -217,13 +217,13 @@
           <el-form-item label="权限绑定">
             <el-checkbox-group
               v-model="editForm.operateIds"
-              v-if="userOpg.length > 0"
+              v-if="userOpgList.length > 0"
             >
               <el-checkbox
-                v-for="(item, index) in userOpg"
+                v-for="(item, index) in userOpgList"
                 :key="index"
                 :label="index"
-                @change="changeUserOpg(index.RES_ID)"
+                @change="changeUserOpg(item.RES_ID)"
                 >{{ item.RES_NAME }}</el-checkbox
               >
             </el-checkbox-group>
@@ -368,8 +368,8 @@ export default {
         ],
       },
       pageDataList: {},
-      userOpg: [],
-      userRole: [],
+      userOpgList: [],
+      userRoleList: [],
       followNodData: [], //获取菜单跟节点
       equeryAddfollowParams: {
         ORG_CODE: '',
@@ -407,10 +407,10 @@ export default {
     },
     getPageDataList() {
       getUserPageData(this.pageDataList).then((response) => {
-        this.userOpg = response.opgList
-        this.userRole = response.roleList
-        // console.log(this.userOpg)
-        // console.log(this.userRole)
+        this.userOpgList = response.opgList
+        this.userRoleList = response.roleList
+        // console.log(this.userOpgList)
+        // console.log(this.userRoleList)
       })
     },
     getFollowNodList() {
@@ -501,12 +501,12 @@ export default {
     //   )
     // },
     changeUserOpg(val) {
-      this.editForm.roleIds = val
-      // console.log(this.editForm.roleIds)
+      // this.editForm.roleIds = val
+      console.log(val)
     },
     changeUserRole(val) {
-      this.editForm.operateIds = val
-      // console.log(this.editForm.operateIds)
+      // this.editForm.operateIds = val
+      console.log(val)
     },
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize

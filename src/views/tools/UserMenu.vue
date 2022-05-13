@@ -28,7 +28,7 @@
       @close="close"
     >
       <div style="width: 100%; text-align: center">
-        <el-form :model="form" ref="queryForm" :rules="rules" label-width="120px">
+        <el-form :model="form" ref="form" :rules="rules" label-width="120px">
           <el-form-item label="原密码：" prop="Y_PWD">
             <el-input
               show-password
@@ -142,8 +142,8 @@ export default {
           this.msgError(err.message)
         })
     },
-    submitForm(queryForm) {
-      this.$refs[queryForm].validate((valid) => {
+    submitForm(form) {
+      this.$refs[form].validate((valid) => {
         if (valid) {
           changePassword(this.form)
             .then((res) => {

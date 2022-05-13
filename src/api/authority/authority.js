@@ -21,7 +21,7 @@ export function getPageData(query) {
 //添加
 // export function addUserSave(data) {
 //   return request({
-//     url: USER_PUBLIC + '/save.do',
+//     url: URL_PUBLIC+ '/save.do',
 //     method: 'post',
 //     data: qs.stringify(data)
 //   })

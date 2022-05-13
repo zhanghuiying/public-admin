@@ -98,7 +98,7 @@
             <i class="el-icon-s-fold" @click="toggleCollapse"></i>
             <span class="hd-nav-bar"></span>
           </span>
-          <span class="hd-nav-item" @click="routerUrlClick('home', '')">
+          <span class="hd-nav-item" @click="routerUrlClick('mainmodule', '')">
             <i class="el-icon-refresh"></i>
             <span class="hd-nav-bar"></span>
           </span>
