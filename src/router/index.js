@@ -30,6 +30,10 @@ const router = new Router({
       component: Home,
       redirect: '/mainmodule',
       children: [
+        {
+          path: '/refresh',
+          component: () => import('../refresh')
+        },
         { path: '/mainmodule', component: mainModule },
         { path: '/authority', component: Authority },
         { path: '/user', component: User },

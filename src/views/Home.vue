@@ -98,7 +98,7 @@
             <i class="el-icon-s-fold" @click="toggleCollapse"></i>
             <span class="hd-nav-bar"></span>
           </span>
-          <span class="hd-nav-item" @click="routerUrlClick('mainmodule', '')">
+          <span class="hd-nav-item" @click="onReload">
             <i class="el-icon-refresh"></i>
             <span class="hd-nav-bar"></span>
           </span>
@@ -135,6 +135,15 @@ export default {
   },
 
   methods: {
+    //刷新当前页面
+    onReload() {
+      this.$router.replace({
+      path: '/refresh',
+      query: {
+        t: Date.now()
+      }
+    })
+    },
     routerUrlClick(url, params) {
       let path = params != '' ? { name: url, params: params } : { name: url }
       this.$router.push(path)
