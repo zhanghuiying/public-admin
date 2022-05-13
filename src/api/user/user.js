@@ -87,11 +87,11 @@ export function saveUserOperate(data) {
   })
 }
 //更换机构 dialog
-export function saveUserOrg(query) {
+export function saveUserOrg(data) {
   return request({
     url: '/lui_sys/pim/user!saveUserOrg.action',
     method: 'post',
-    params: query
+    data: qs.stringify(data)
   })
 }
 // ids: 2cdb783527c74ed09c9c5264ededfe7d

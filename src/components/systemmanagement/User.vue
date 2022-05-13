@@ -447,6 +447,11 @@ export default {
         USER_IDS: '',
         operateIds: '',
       },
+      queryParamsSaveUserOrg: {
+        ids:'',
+        OLDORG_ID: '',
+        ORG_ID: '',
+      },
     }
   },
 
@@ -572,9 +577,11 @@ export default {
     handleSelectionChange(val) {
       const that = this;
       that.tableDeleteChange = ''
+      that.queryParamsSaveUserOrg.ids = ''
       that.multipleSelection = val
       that.multipleSelection.forEach(function(e) {
         that.tableDeleteChange += e.USER_ID + ",";
+        that.queryParamsSaveUserOrg.ids+= e.USER_ID + ",";
       });
     },
     submitForm: function () {
@@ -820,12 +827,14 @@ export default {
       })
     },
     submitBindMechanism(){
-      
-      // this.getList()
-      // this.bindMechanismDialog = false
-    }
+      // console.log(this.queryParamsSaveUserOrg);
+      saveUserOrg(this.queryParamsSaveUserOrg).then((response) => {
+        that.getList()
+        that.bindMechanismDialog = false
+      });
+    },
 
-  },
+  }
 }
 </script>
 
@@ -849,9 +858,6 @@ export default {
 .el_pagination {
   margin-top: 30px;
   
-}
-.custom_tree_node{
-  // background-color: #fff;
 }
 .tree_checked{
   background-color: #e5e5e5;
