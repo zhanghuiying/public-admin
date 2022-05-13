@@ -18,7 +18,7 @@ export function addRoleSave(data) {
     data: qs.stringify(data)
   })
 }
-//删除
+//删除/删除勾选列表
 export function deleteRole(ids) {
   return request({
     url: URL_PUBLIC+'/delete.do',
@@ -28,6 +28,7 @@ export function deleteRole(ids) {
     }
   })
 }
+
 //查看菜单权限
 export function selectMenuByRoleId(id) {
   return request({

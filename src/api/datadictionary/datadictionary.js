@@ -36,3 +36,13 @@ export function deleteData(ids) {
     }
   })
 }
+//删除勾选列表
+export function deleteByIds(ids) {
+  return request({
+    url: '/lui_sys/pim/optionGroup/deleteByIds.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}

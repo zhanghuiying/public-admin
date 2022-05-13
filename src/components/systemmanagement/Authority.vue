@@ -74,7 +74,7 @@
       </div>
     </div>
     <div class="pb-main-left">
-      <p class="public_card_header">
+      <p class="public_card_header" style="margin: 0 0 16px 0">
         菜单权限
         <span
           class="btn_expand-shrink"
@@ -84,7 +84,6 @@
         >
       </p>
 
-      <p class="public_card_header">菜单权限</p>
       <el-tree
         :data="menuDataList"
         show-checkbox

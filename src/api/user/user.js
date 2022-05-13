@@ -94,9 +94,6 @@ export function saveUserOrg(data) {
     data: qs.stringify(data)
   })
 }
-// ids: 2cdb783527c74ed09c9c5264ededfe7d
-// OLDORG_ID: 
-// ORG_ID: 69832
 
 //菜单树 获取跟节点--------------------
 export function getFollowNod(query) {

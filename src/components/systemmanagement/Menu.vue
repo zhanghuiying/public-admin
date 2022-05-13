@@ -13,14 +13,18 @@
         </el-popover>
         <span class="btn_expand-shrink">展开/收缩</span>
       </div>
+
       <el-tree
         :data="menuTreeData"
         show-checkbox
         node-key="id"
-        :default-expanded-keys="[2, 3]"
-        :default-checked-keys="[5]"
-        :props="defaultProps"
+        default-expand-all
+        :expand-on-click-node="false"
+        @node-click="handleNodeClick"
       >
+        <span class="custom_tree_node" slot-scope="{ data }">
+          <span>{{ data.MENU_NAME }}</span>
+        </span>
       </el-tree>
     </div>
     <div class="pb-main-menu-right pb-main_pad-lf">
@@ -110,9 +114,7 @@
             </div>
           </div>
           <div>
-            <el-button type="primary" @click="submitFor"
-              >保存</el-button
-            >
+            <el-button type="primary" @click="submitFor">保存</el-button>
             <el-button @click="resetQuery">重置</el-button>
           </div>
         </el-form>
@@ -122,13 +124,23 @@
         <div class="public-card-body">
           <div class="public-card-body-border">
             <div class="public_table_tool">
-              <div class="public_table_tool_inline" @click="getList">
-                <i class="el-icon-refresh"></i>
+              <div
+                :class="
+                  isShowCheckbox === true
+                    ? 'public_editing_checkbox pb-checked-bg'
+                    : 'public_editing_checkbox'
+                "
+                @click="editingCheckbox()"
+              >
+                开启编辑
+                <i
+                  :class="
+                    isShowCheckbox === true
+                      ? 'el-icon-check pb-checked-i'
+                      : 'el-icon-check'
+                  "
+                ></i>
               </div>
-              <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
-                @click="editingCheckbox()">开启编辑
-                  <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
-                </div>
               <div class="pos_tool_tb">
                 <table-menut-tool />
               </div>
@@ -155,15 +167,14 @@
           </div>
 
           <el-pagination
-                v-show="total > 0"
-                @size-change="handleSizeChange"
-                @current-change="handleCurrentChange"
-                :current-page="queryParams.page"
-                :page-size="queryParams.limit"
-                layout="total, sizes, prev, pager, next, jumper"
-                :total="total"
-              ></el-pagination>
-
+            v-show="total > 0"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="queryParams.page"
+            :page-size="queryParams.limit"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total"
+          ></el-pagination>
         </div>
       </div>
     </div>
@@ -172,16 +183,12 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
-import {
-  getMenuData,
-  getMenu,
-  addMenuSave
-} from '../../api/menu/menu'
+import { getMenuData, getMenu, addMenuSave } from '../../api/menu/menu'
 export default {
   name: 'datadictionary',
-   components: {
+  components: {
     getMenu,
-    addMenuSave
+    addMenuSave,
   },
   components: {
     tableMenutTool,
@@ -222,52 +229,6 @@ export default {
       },
       multipleSelection: [],
       stateText: { 0: '停用', 1: '启用', 2: '初始' },
-      menuTreeData: [
-        {
-          id: 1,
-          label: '系统管理',
-          children: [
-            {
-              id: 4,
-              label: '系统管理',
-              children: [
-                {
-                  id: 9,
-                  label: '用户管理',
-                },
-                {
-                  id: 10,
-                  label: '权限管理',
-                },
-                {
-                  id: 11,
-                  label: '角色管理',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: 2,
-          label: '参数设置',
-        },
-        {
-          id: 3,
-          label: '附件管理',
-        },
-        {
-          id: 4,
-          label: '定时任务',
-        },
-        {
-          id: 5,
-          label: '应用管理',
-        },
-        {
-          id: 6,
-          label: '代码生成',
-        },
-      ],
       defaultProps: {
         children: 'children',
         label: 'label',
@@ -313,7 +274,7 @@ export default {
       },
       isShowCheckbox: false,
       loading: false,
-      menuTreeList:[],
+      menuTreeData: [],
     }
   },
 
@@ -332,15 +293,13 @@ export default {
       })
     },
     getMenuList() {
-      // this.loading = true
       getMenu(this.queryParams).then((response) => {
-        this.menuTreeList = response
-        // this.loading = false
-        console.log(this.menuTreeList);
+        this.menuTreeData = response
+        console.log(this.menuTreeData)
       })
     },
-    editingCheckbox(){
-      this.isShowCheckbox = !this.isShowCheckbox;
+    editingCheckbox() {
+      this.isShowCheckbox = !this.isShowCheckbox
     },
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
@@ -379,10 +338,13 @@ export default {
       this.munuForm = []
     },
     resetQuery() {
-      this.resetForm("munuForm");
+      this.resetForm('munuForm')
     },
     addressOptionsClick(index) {
       this.munuForm.address = index
+    },
+    handleNodeClick(data) {
+      console.log(data.MENU_ID)
     },
   },
 }
@@ -419,5 +381,4 @@ export default {
 .menu_column .menu_btn:hover {
   font-weight: bold;
 }
-
 </style>

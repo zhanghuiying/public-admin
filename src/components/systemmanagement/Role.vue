@@ -12,7 +12,7 @@
                 <div class="public_table_tool_inline" @click="addRole()">
                   <i class="el-icon-circle-plus-outline"></i>
                 </div>
-                <div class="public_table_tool_inline">
+                <div class="public_table_tool_inline" @click="deleteTable()">
                   <i class="el-icon-delete"></i>
                 </div>
                 <div class="pos_tool_tb">
@@ -71,15 +71,26 @@
         </div>
       </div>
       <div class="pb-main-left">
-        <p class="public_card_header">菜单权限</p>
+        <p class="public_card_header" style="margin: 0 0 16px 0">
+          菜单权限
+          <span
+            class="btn_expand-shrink"
+            style="margin-left: 10px"
+            @click="getRoleMenuList()"
+            >刷新</span
+          >
+        </p>
         <el-tree
           :data="menuTreeData"
           show-checkbox
           node-key="id"
-          :default-expanded-keys="[2, 3]"
-          :default-checked-keys="[5]"
-          :props="defaultProps"
+          default-expand-all
+          :expand-on-click-node="false"
+          @node-click="handleNodeClick"
         >
+          <span class="custom_tree_node" slot-scope="{ data }">
+            <span>{{ data.MENU_NAME }}</span>
+          </span>
         </el-tree>
       </div>
     </div>
@@ -167,82 +178,82 @@ export default {
       loading: false,
       multipleSelection: [],
       addRoleDialog: false,
-      menuTreeData: [
-        {
-          id: 1,
-          label: '系统管理',
-          children: [
-            {
-              id: 11,
-              label: '系统管理',
-              children: [
-                {
-                  id: 111,
-                  label: '用户管理',
-                },
-                {
-                  id: 112,
-                  label: '权限管理',
-                },
-                {
-                  id: 113,
-                  label: '角色管理',
-                },
-                {
-                  id: 114,
-                  label: '日志管理',
-                },
-                {
-                  id: 11,
-                  label: '数据字典',
-                },
-                {
-                  id: 115,
-                  label: '菜单管理',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: 2,
-          label: '消息管理',
-          children: [
-            {
-              id: 221,
-              label: '消息通知',
-            },
-            {
-              id: 222,
-              label: '我的消息',
-            },
-          ],
-        },
-        {
-          id: 3,
-          label: '参数设置',
-        },
-        {
-          id: 4,
-          label: '附件管理',
-        },
-        {
-          id: 5,
-          label: '定时任务',
-        },
-        {
-          id: 6,
-          label: '应用管理',
-        },
-        {
-          id: 7,
-          label: '代码生成',
-        },
-      ],
-      defaultProps: {
-        children: 'children',
-        label: 'label',
-      },
+      // menuTreeData: [
+      //   {
+      //     id: 1,
+      //     label: '系统管理',
+      //     children: [
+      //       {
+      //         id: 11,
+      //         label: '系统管理',
+      //         children: [
+      //           {
+      //             id: 111,
+      //             label: '用户管理',
+      //           },
+      //           {
+      //             id: 112,
+      //             label: '权限管理',
+      //           },
+      //           {
+      //             id: 113,
+      //             label: '角色管理',
+      //           },
+      //           {
+      //             id: 114,
+      //             label: '日志管理',
+      //           },
+      //           {
+      //             id: 11,
+      //             label: '数据字典',
+      //           },
+      //           {
+      //             id: 115,
+      //             label: '菜单管理',
+      //           },
+      //         ],
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     id: 2,
+      //     label: '消息管理',
+      //     children: [
+      //       {
+      //         id: 221,
+      //         label: '消息通知',
+      //       },
+      //       {
+      //         id: 222,
+      //         label: '我的消息',
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     id: 3,
+      //     label: '参数设置',
+      //   },
+      //   {
+      //     id: 4,
+      //     label: '附件管理',
+      //   },
+      //   {
+      //     id: 5,
+      //     label: '定时任务',
+      //   },
+      //   {
+      //     id: 6,
+      //     label: '应用管理',
+      //   },
+      //   {
+      //     id: 7,
+      //     label: '代码生成',
+      //   },
+      // ],
+      // defaultProps: {
+      //   children: 'children',
+      //   label: 'label',
+      // },
       dialogType: 'new',
       addRoleFormObj: {},
       addRoleForm: {
@@ -263,6 +274,9 @@ export default {
           { required: true, message: '请输入角色备注', trigger: 'blur' },
         ],
       },
+      menuTreeData: [],
+      tableDeleteChange:'',//勾选选中列表id
+      
     }
   },
 
@@ -283,10 +297,8 @@ export default {
     //获取角色 菜单权限
     getRoleMenuList(data) {
       getRoleMenu(data).then((response) => {
-        let getMenu = response
-        console.log(getMenu)
-        // this.menuTreeData = response
-        // console.log(this.menuTreeData)
+        this.menuTreeData = response
+        console.log(this.menuTreeData)
       })
     },
     handleSizeChange(newSize) {
@@ -296,15 +308,6 @@ export default {
     handleCurrentChange(newPage) {
       this.queryParams.page = newPage
       this.getList()
-    },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.multipleSelection = selection
-      console.log(this.multipleSelection)
-      this.ids = selection.map((item) => item.id)
-      this.single = selection.length != 1
-      this.multiple = !selection.length
-      console.log('dddddddd' + this.ids + this.multiple + this.single)
     },
     submitForm: function () {
       this.$refs['addRoleForm'].validate((valid) => {
@@ -386,6 +389,44 @@ export default {
           })
         })
         .catch(function () {})
+    },
+    // 多选框选中数据
+    handleSelectionChange(val) {
+      const that = this;
+      that.tableDeleteChange = ''
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function(e) {
+        that.tableDeleteChange += e.ROLE_ID + ",";
+      });
+    },
+    //删除勾选的列表用户
+    deleteTable(){
+      const that = this;
+      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
+        that.$message({message: '请勾选择要删除的数据',type: 'warning',center: true});
+      }else{
+        that.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            await deleteRole(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    handleNodeClick(data) {
+      
+      console.log(data.MENU_ID)
     },
   },
 }

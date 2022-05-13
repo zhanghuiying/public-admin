@@ -10,7 +10,7 @@
           <i class="el-icon-circle-plus-outline"></i>
         </div>
 
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="deleteTable">
           <i class="el-icon-delete"></i>
         </div>
         <div class="public_table_tool_inline">
@@ -58,7 +58,7 @@
             >
             <span
               class="public-table-btn table-btn-delete"
-              @click="handleDelete(scope.row)"
+              @click="handleDelete(scope)"
               >删除</span
             >
           </template>
@@ -77,13 +77,13 @@
     </div>
 
     <el-dialog
-      title="参数修改"
+      :title="dialogType === 'edit' ? '参数修改' : '参数添加'"
       :visible.sync="reviseTableDialog"
       width="50%"
       append-to-body
       @close="close"
     >
-      <div style="width: 100%; text-align: center">
+      <div class="dialog_div">
         <el-form
           :model="parameterForm"
           ref="parameterForm"
@@ -91,11 +91,25 @@
           label-width="120px"
         >
           <el-form-item prop="name" label="参数名称">
-            <el-input
-              v-model="parameterForm.CODE"
-              prefix-icon="iconfont icon-user"
-            ></el-input>
+            <!-- <el-select v-model="parameterForm.CODE" clearable placeholder="请选择">
+            <el-option
+              v-for="item in sysinfoKeyMapData"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select> -->
+           <el-input v-model="parameterForm.CODE"></el-input>
+            <!-- <div class="input_popover">
+              <el-input v-model="parameterForm.CODE"></el-input>
+              <div class="popover_div" >
+                <div v-for="item in sysinfoKeyMapData" :key="item">
+                  <p class="popover_div_p">{{item}}</p>
+                </div>
+              </div>
+            </div> -->
           </el-form-item>
+
           <el-form-item prop="parameter" label="参数值">
             <el-input
               type="textarea"
@@ -105,9 +119,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm"
-          >提交</el-button
-        >
+        <el-button type="primary" @click="submitForm">提交</el-button>
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
@@ -220,6 +232,7 @@ import {
   addParameterSave,
   deleteParameter,
   addSystemParameterSave,
+  getSysinfoKeyMap,
 } from '../api/parametersettings'
 export default {
   name: 'parametersettings',
@@ -229,6 +242,7 @@ export default {
     addParameterSave,
     deleteParameter,
     addSystemParameterSave,
+    getSysinfoKeyMap,
   },
   data() {
     return {
@@ -281,11 +295,14 @@ export default {
       dialogVisible: false,
       disabled: false,
       dialogType: 'new',
+      tableDeleteChange: '', //勾选选中列表id
+      sysinfoKeyMapData: [], //add 参数名称 集合
     }
   },
 
   created() {
     this.getList()
+    this.getSysinfoKeyMapList()
   },
 
   methods: {
@@ -295,6 +312,12 @@ export default {
         this.tableData = response.data
         this.total = response.count
         this.loading = false
+      })
+    },
+    getSysinfoKeyMapList() {
+      getSysinfoKeyMap(this.sysinfoKeyMapData).then((response) => {
+        this.sysinfoKeyMapData = response
+        console.log(this.sysinfoKeyMapData)
       })
     },
     submitForm: function () {
@@ -327,7 +350,7 @@ export default {
         type: 'warning',
       })
         .then(async () => {
-          await deleteParameter(row.ROLE_ID)
+          await deleteParameter(row.ID)
           this.tableData.splice($index, 1)
           this.$message({
             type: 'success',
@@ -361,7 +384,7 @@ export default {
         }
       })
     },
-    
+
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -372,9 +395,6 @@ export default {
     handleCurrentChange(newPage) {
       this.queryParams.page = newPage
       this.getList()
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val
     },
     close() {
       this.parameterForm = []
@@ -411,9 +431,82 @@ export default {
     handleDownload(file) {
       console.log(file)
     },
+    // 多选框选中数据
+    handleSelectionChange(val) {
+      const that = this
+      that.tableDeleteChange = ''
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function (e) {
+        that.tableDeleteChange += e.ID + ','
+      })
+    },
+    //删除勾选的列表用户
+    deleteTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await deleteParameter(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
   },
 }
 </script>
+<style>
 
+</style>
 <style lang='less' scoped>
+.dialog_div{
+  // width: 100%;
+  // text-align: center
+}
+.input_popover{
+  // text-align: left;
+  position: relative;
+  background: red;
+}
+.popover_div{
+  // position: absolute;
+  // left: 0;
+  // bottom: -180px;
+  // width: 100%;
+  // height: 180px;
+  // z-index: 999;
+  // background: yellow;
+}
+.popover_div_p{
+  height: 36px;
+  line-height: 36px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+.popover_div_p:hover{
+  font-weight: bold;
+  color: #2d8cf0;
+  background: #F6F6F6;
+}
 </style>

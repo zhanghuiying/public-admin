@@ -9,7 +9,7 @@
           <div class="public_table_tool_inline" @click="addDetaList()">
             <i class="el-icon-circle-plus-outline"></i>
           </div>
-          <div class="public_table_tool_inline">
+          <div class="public_table_tool_inline" @click="deleteTable">
             <i class="el-icon-delete"></i>
           </div>
           <div
@@ -43,10 +43,11 @@
             <el-table-column fixed="left" type="selection" width="45" />
             <el-table-column label="分组代码">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.OG_CODE"
-                onfocus="inputOnfocusFrom()"
-                onblur="inputOnblurFrom()"
-                onchange="inputOnchangeFrom()"
+                <el-input
+                  v-model="scope.row.OG_CODE"
+                  onfocus="inputOnfocusFrom()"
+                  onblur="inputOnblurFrom()"
+                  onchange="inputOnchangeFrom()"
                 ></el-input>
               </template>
             </el-table-column>
@@ -138,7 +139,7 @@
               >
                 <i class="el-icon-circle-plus-outline"></i>
               </div>
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="deleteTableDetails">
                 <i class="el-icon-delete"></i>
               </div>
               <div
@@ -165,7 +166,7 @@
             <el-table
               :data="groupingDetailsData"
               style="width: 100%"
-              @selection-change="handleSelectionChange"
+              @selection-change="groupingChange"
             >
               <el-table-column fixed="left" type="selection" width="45" />
               <el-table-column label="#" type="index" width="45" />
@@ -281,6 +282,7 @@ import {
   getListJsonByOgid,
   addDataSave,
   deleteData,
+  deleteByIds,
 } from '../../api/datadictionary/datadictionary'
 export default {
   name: 'datadictionary',
@@ -290,6 +292,7 @@ export default {
     getListJsonByOgid,
     addDataSave,
     deleteData,
+    deleteByIds,
   },
   data() {
     return {
@@ -308,6 +311,7 @@ export default {
         OG_ID: '',
       },
       multipleSelection: [],
+      multipleSelectionDetails: [],
       stateText: { 0: '停用', 1: '启用', 2: '初始' },
       editTableDialog: false,
       groupingForm: {
@@ -360,6 +364,8 @@ export default {
         ],
         OD_REMARK: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
+      tableDeleteChange: '', //勾选选中列表id
+      tableDeleteChangeDetails: '', //勾选详情老板选中列表id
     }
   },
 
@@ -385,15 +391,9 @@ export default {
         this.loading = false
       })
     },
-    inputOnfocusFrom(){
-
-    },
-    inputOnblurFrom(){
-
-    },
-    inputOnchangeFrom(){
-
-    },
+    inputOnfocusFrom() {},
+    inputOnblurFrom() {},
+    inputOnchangeFrom() {},
 
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
@@ -416,9 +416,6 @@ export default {
     handleCurrentChange2(newPage) {
       this.queryParams2.page = newPage
       this.getGroupingList()
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val
     },
     submitForm: function () {
       this.$refs['groupingForm'].validate((valid) => {
@@ -477,7 +474,11 @@ export default {
     },
     addDetaList() {
       this.resetForm('groupingForm')
-      this.$message({message: '请在分组详情中填写内容后保存。',type: 'warning',center: true});
+      this.$message({
+        message: '请在分组详情中填写内容后保存。',
+        type: 'warning',
+        center: true,
+      })
     },
     addDigitalDetails() {
       return (this.addDigitalDialog = true)
@@ -504,6 +505,87 @@ export default {
       this.dialogType = 'edit'
       this.editTableDialog = true
       this.addDigitaForm = from.row
+    },
+    handleSelectionChange(val) {
+      const that = this
+      that.tableDeleteChange = ''
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function (e) {
+        that.tableDeleteChange += e.OG_ID + ','
+      })
+    },
+    deleteTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('确认删除吗?这将会删除分组及其明细数据', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await deleteByIds(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    groupingChange(val) {
+      this.multipleSelectionDetails = val
+      const that = this
+      that.tableDeleteChangeDetails = ''
+      that.multipleSelectionDetails = val
+      that.multipleSelectionDetails.forEach(function (e) {
+        that.tableDeleteChangeDetails += e.OG_ID + ','
+      })
+    },
+    deleteTableDetails() {
+      const that = this
+      if (
+        that.multipleSelectionDetails == undefined ||
+        that.multipleSelectionDetails.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('确认删除吗?这将会删除分组及其明细数据', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await deleteData(that.tableDeleteChangeDetails)
+            that.tableDeleteChangeDetails = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
     },
   },
 }

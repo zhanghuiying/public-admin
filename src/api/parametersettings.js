@@ -10,6 +10,14 @@ export function getParameterData(query) {
     params: query
   })
 }
+export function getSysinfoKeyMap(query) {
+  return request({
+    url: URL_PUBLIC+'/getSysinfoKeyMap.do',
+    method: 'post',
+    params: query
+  })
+}
+
 //添加参数
 export function addParameterSave(data) {
   return request({
@@ -26,7 +34,7 @@ export function addSystemParameterSave(data) {
     data: qs.stringify(data)
   })
 }
-//删除
+//删除/勾选删除
 export function deleteParameter(ids) {
   return request({
     url: URL_PUBLIC+'/deleteByIds.do',
