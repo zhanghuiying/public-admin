@@ -76,13 +76,13 @@
                 <i class="el-icon-unlock"></i>
               </div>
 
-              <div class="public_table_tool_inline" >
+              <div class="public_table_tool_inline" @click="bindRole()">
                 <i class="el-icon-coordinate"></i>
               </div>
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="bindFeatures()">
                 <i class="el-icon-document"></i>
               </div>
-              <div class="public_table_tool_inline">
+              <div class="public_table_tool_inline" @click="bindMechanism()">
                 <i class="el-icon-s-check"></i>
               </div>
 
@@ -223,9 +223,76 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">提交</el-button>
-        <el-button @click="resetQuery">重置</el-button>
+        <el-button @click="resetQuery(0)">重置</el-button>
       </div>
     </el-dialog>
+
+
+    <el-dialog
+      title="绑定角色"
+      :visible.sync="bindRoleDialog"
+      width="50%"
+      append-to-body
+    >
+      <div style="width: 100%; text-align: center">
+        <div style="text-align: left;">
+          <span class="checkbox_span" v-for="(item, index) in userRoleList" :key="index">
+            <input type="checkbox" :id="index" :value='item.ROLE_ID' v-model="userRoleSelection">
+            <label for="item">{{ item.ROLE_NAME }}</label>
+          </span>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitBindRole">提交</el-button>
+        <el-button @click="resetQuery(1)">重置</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      title="绑定功能组"
+      :visible.sync="bindFeaturesDialog"
+      width="50%"
+      append-to-body
+    >
+      <div style="width: 100%; text-align: center">
+        <div style="text-align: left;">
+          <span class="checkbox_span" v-for="(item, index) in userOpgList" :key="index">
+            <input type="checkbox" :id="index" :value='item.RES_ID' v-model="userOpgSelection">
+            <label for="item.RES_ID">{{ item.RES_NAME }}</label>
+          </span>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitBindFeatures">提交</el-button>
+        <el-button @click="resetQuery(2)">重置</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+      title="更换机构"
+      :visible.sync="bindMechanismDialog"
+      width="50%"
+      append-to-body
+    >
+      <div style="width: 100%; text-align: center">
+        <el-tree
+          :data="followNodData"
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          :expand-on-click-node="false"
+          >
+          <span class="custom_tree_node" slot-scope="{ data }">
+            <span>{{ data.ORG_NAME }}</span>
+          </span>
+        </el-tree>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitBindMechanism">提交</el-button>
+        <el-button @click="resetQuery(3)">重置</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -238,6 +305,9 @@ import {
   disableUser,
   enableUser,
   resetPasswordUser,
+  saveUserRoles,
+  saveUserOperate,
+  saveUserOrg,
   getUserPageData,
   getFollowNod,
   addFollowNod,
@@ -257,6 +327,9 @@ export default {
     disableUser,
     enableUser,
     resetPasswordUser,
+    saveUserRoles,
+    saveUserOperate,
+    saveUserOrg,
     getUserPageData,
     getFollowNod,
     addFollowNod,
@@ -302,6 +375,9 @@ export default {
       },
       multipleSelection: [],
       editTableDialog: false,
+      bindRoleDialog: false,
+      bindFeaturesDialog: false,
+      bindMechanismDialog: false,
       editForm: {
         USER_ID: '',
         ORG_ID: '',
@@ -363,6 +439,14 @@ export default {
       tableDeleteChange:'',//勾选选中列表id
       userRoleSelection: [],//角色绑定表单选中id
       userOpgSelection: [],//权限绑定表单选中id
+      queryParamsRole: {
+        USER_IDS: '',
+        roleIds: '',
+      },
+      queryParamsFeatures: {
+        USER_IDS: '',
+        operateIds: '',
+      },
     }
   },
 
@@ -550,9 +634,21 @@ export default {
       this.editForm = []
       this.editTableDialog = false
     },
-    resetQuery() {
-      this.resetForm('editForm')
-      this.editTableDialog = false
+    resetQuery(index) {
+      if(index == 0){
+        this.resetForm('editForm')
+        this.editTableDialog = false
+      }else if(index == 1){
+        this.queryParamsRole.roleIds = ''
+        this.userRoleSelection = ''
+        this.bindRoleDialog = false
+      }else if(index == 2){
+        this.queryParamsRole.operateIds = ''
+        this.userOpgSelection = ''
+        this.bindFeaturesDialog = false
+      }else if(index == 3){
+        this.bindMechanismDialog = false
+      }
     },
     editTable(from) {
       this.dialogType = 'edit'
@@ -565,9 +661,38 @@ export default {
         this.$message({message: '请先选择组织机构',type: 'warning',center: true});
       }else{
         this.dialogType = 'new'
+        // this.userRoleSelection = ''
+        // this.userOpgSelection = ''
         this.editTableDialog = true
       }
     },
+    bindRole() {
+      if(this.org_id ===''){
+        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
+      }else{
+        // this.userRoleSelection = ''
+        this.bindRoleDialog = true
+      }
+    },
+    bindFeatures() {
+      if(this.org_id ===''){
+        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
+      }else{
+        // this.userOpgSelection = ''
+        this.bindFeaturesDialog = true
+      }
+    },
+    bindMechanism() {
+      if(this.org_id ===''){
+        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
+      }else{
+        getFollowNod(this.followNodData).then((response) => {
+          this.followNodData = response
+        })
+        this.bindMechanismDialog = true
+      }
+    },
+
     //删除勾选的列表用户
     deleteTable(){
       const that = this;
@@ -668,6 +793,38 @@ export default {
           })
       }
     },
+
+    submitBindRole(){
+      const that = this;
+      that.queryParamsRole.roleIds = ''
+      console.log(that.userRoleSelection);
+      that.userRoleSelection.forEach(function(e) {
+        that.queryParamsRole.roleIds += e + ",";
+      });
+      saveUserRoles(that.queryParamsRole).then((response) => {
+        that.userRoleSelection = ''
+        that.getList()
+        that.bindRoleDialog = false
+      })
+    },
+    submitBindFeatures(){
+      const that = this;
+      that.queryParamsFeatures.operateIds = ''
+      that.userOpgSelection.forEach(function(e) {
+        that.queryParamsFeatures.operateIds += e + ",";
+      });
+      saveUserOperate(this.queryParamsFeatures).then((response) => {
+        that.userOpgSelection = ''
+        that.getList()
+        that.bindFeaturesDialog = false
+      })
+    },
+    submitBindMechanism(){
+      
+      // this.getList()
+      // this.bindMechanismDialog = false
+    }
+
   },
 }
 </script>

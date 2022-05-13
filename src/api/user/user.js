@@ -70,7 +70,35 @@ export function resetPasswordUser(ids) {
   })
 }
 
-//菜单树 获取跟节点
+//绑定角色 dialog
+export function saveUserRoles(data) {
+  return request({
+    url: URL_PUBLIC+ '/saveUserRoles.do',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
+//绑定功能组 dialog
+export function saveUserOperate(data) {
+  return request({
+    url: URL_PUBLIC+ '/saveUserOperate.do',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
+//更换机构 dialog
+export function saveUserOrg(query) {
+  return request({
+    url: '/lui_sys/pim/user!saveUserOrg.action',
+    method: 'post',
+    params: query
+  })
+}
+// ids: 2cdb783527c74ed09c9c5264ededfe7d
+// OLDORG_ID: 
+// ORG_ID: 69832
+
+//菜单树 获取跟节点--------------------
 export function getFollowNod(query) {
   return request({
     url: '/lui_sys/pim/org/getOrg.do',
@@ -78,8 +106,6 @@ export function getFollowNod(query) {
     params: query
   })
 }
-
-// action?ORG_CODE=19181&ORG_ID=19181&ORG_PID=69604&ORG_NAME=new%20node1
 
 //菜单树 get添加跟节点
 export function addFollowNod(query) {
@@ -106,7 +132,7 @@ export function updateFollowNod(query) {
     params: query
   })
 }
-
+//菜单树 删除跟节点名称
 export function deleteFollowNod(ORG_ID) {
   return request({
     url: '/lui_sys/pim/org!delete.action?ORG_ID=' + `${ORG_ID}`,
