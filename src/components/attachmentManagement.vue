@@ -169,7 +169,7 @@ export default {
       appendixForm: {
         filename: 'sdadmin',
         newfilename: 'sdadmin',
-        path: 'hnshandy.com',
+        path: 'hnshendy.com',
         size: '1024',
         state: '',
         uploadtime: '2021-05-28 22:01:59',

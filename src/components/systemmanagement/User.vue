@@ -99,7 +99,7 @@
             >
               <el-table-column fixed="left" type="selection" width="45" />
 
-              <el-table-column prop="USER_ACCOUNT" label="登录账号" />
+              <el-table-column prop="USER_ACCOUNT" label="登录账号" width="100"/>
               <el-table-column prop="USER_NAME" label="姓名" />
 
               <el-table-column prop="ORG_NAME" label="机构" />
@@ -203,30 +203,21 @@
             </el-select>
           </el-form-item>
           <el-form-item label="角色绑定">
-            <el-checkbox-group v-model="editForm.roleIds">
-              <el-checkbox
-                v-for="(item, index) in userRoleList"
-                :key="index"
-                :label="index"
-                @change="changeUserRole(item.ROLE_ID)"
-                >{{ item.ROLE_NAME }}</el-checkbox
-              >
-            </el-checkbox-group>
+            <div style="text-align: left;">
+              <span class="checkbox_span" v-for="(item, index) in userRoleList" :key="index">
+                <input type="checkbox" :id="index" :value='item.ROLE_ID' v-model="userRoleSelection">
+                <label for="item">{{ item.ROLE_NAME }}</label>
+              </span>
+            </div>
           </el-form-item>
 
           <el-form-item label="权限绑定">
-            <el-checkbox-group
-              v-model="editForm.operateIds"
-              v-if="userOpgList.length > 0"
-            >
-              <el-checkbox
-                v-for="(item, index) in userOpgList"
-                :key="index"
-                :label="index"
-                @change="changeUserOpg(item.RES_ID)"
-                >{{ item.RES_NAME }}</el-checkbox
-              >
-            </el-checkbox-group>
+            <div style="text-align: left;">
+              <span class="checkbox_span" v-for="(item, index) in userOpgList" :key="index">
+                <input type="checkbox" :id="index" :value='item.RES_ID' v-model="userOpgSelection">
+                <label for="item.RES_ID">{{ item.RES_NAME }}</label>
+              </span>
+            </div>           
           </el-form-item>
         </el-form>
       </div>
@@ -319,8 +310,8 @@ export default {
         USER_PHONE: '',
         USER_SEX: '',
         USER_STATE: '',
-        roleIds: [],
-        operateIds: [],
+        roleIds: '',
+        operateIds: '',
       },
       editRules: {
         USER_ACCOUNT: [
@@ -349,27 +340,11 @@ export default {
         ],
         USER_STATE: [
           { required: true, message: '请选择状态', trigger: 'change' },
-        ],
-        roleIds: [
-          {
-            roleIds: 'array',
-            required: true,
-            message: '请至少选择一个角色绑定',
-            trigger: 'change',
-          },
-        ],
-        operateIds: [
-          {
-            operateIds: 'array',
-            required: true,
-            message: '请至少选择一个权限绑定',
-            trigger: 'change',
-          },
-        ],
+        ]
       },
       pageDataList: {},
-      userOpgList: [],
-      userRoleList: [],
+      userOpgList: [],//权限绑定
+      userRoleList: [],//角色绑定
       followNodData: [], //获取菜单跟节点
       equeryAddfollowParams: {
         ORG_CODE: '',
@@ -386,6 +361,8 @@ export default {
       modifyTreeInput: false,
       org_id:'',
       tableDeleteChange:'',//勾选选中列表id
+      userRoleSelection: [],//角色绑定表单选中id
+      userOpgSelection: [],//权限绑定表单选中id
     }
   },
 
@@ -418,7 +395,6 @@ export default {
         this.followNodData = response
       })
     },
-    
     treeChecked(node, data){
       this.queryParams.ORG_ID = data.ORG_ID
       getUserData(this.queryParams).then((response) => {
@@ -500,14 +476,7 @@ export default {
     //     </span>
     //   )
     // },
-    changeUserOpg(val) {
-      // this.editForm.roleIds = val
-      console.log(val)
-    },
-    changeUserRole(val) {
-      // this.editForm.operateIds = val
-      console.log(val)
-    },
+    
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
       this.getList()
@@ -516,7 +485,7 @@ export default {
       this.queryParams.page = newPage
       this.getList()
     },
-    handleSelectionChange(val,user_ID) {
+    handleSelectionChange(val) {
       const that = this;
       that.tableDeleteChange = ''
       that.multipleSelection = val
@@ -525,24 +494,35 @@ export default {
       });
     },
     submitForm: function () {
-      this.$refs['editForm'].validate((valid) => {
+      const that = this;
+      that.editForm.roleIds = ''
+      that.editForm.operateIds = ''
+      that.userRoleSelection.forEach(function(e) {
+        that.editForm.roleIds += e + ",";
+      });
+      that.userOpgSelection.forEach(function(e) {
+        that.editForm.operateIds += e + ",";
+      });
+      that.$refs['editForm'].validate((valid) => {
         if (valid) {
-          addUserSave(this.editForm)
+          addUserSave(that.editForm)
             .then((res) => {
               if (res.statusCode == 200) {
-                this.$notify.success({ title: '提示', message: '保存成功' })
+                that.$notify.success({ title: '提示', message: '保存成功' })
               } else {
-                this.$notify.error({ title: '错误', message: res.message })
+                that.$notify.error({ title: '错误', message: res.message })
               }
-              this.loading = false
-              this.editTableDialog = false
-              this.getList()
+              that.userRoleSelection = ''
+              that.userOpgSelection = ''
+              that.loading = false
+              that.editTableDialog = false
+              that.getList()
             })
             .catch((error) => {
-              this.loading = false
+              that.loading = false
             })
         } else {
-          this.loading = false
+          that.loading = false
           return false
         }
       })
@@ -586,7 +566,6 @@ export default {
       }else{
         this.dialogType = 'new'
         this.editTableDialog = true
-        addFollowNodPost(this.equeryAddfollowParams).then((response) => {})
       }
     },
     //删除勾选的列表用户
@@ -712,6 +691,7 @@ export default {
 <style lang='less' scoped>
 .el_pagination {
   margin-top: 30px;
+  
 }
 .custom_tree_node{
   // background-color: #fff;
@@ -723,5 +703,17 @@ export default {
   padding: 16px;
   // overflow:auto;
 }
-
+.checkbox_span{
+  display: inline-block;
+  height: 34px;
+  margin: 0 16px 10px 0;
+  padding: 0 10px 0 0;
+}
+.checkbox_span input{
+  width: 14px;
+  height: 14px;
+}
+.checkbox_span label{
+  margin-left:6px;
+}
 </style>

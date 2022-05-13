@@ -108,7 +108,7 @@
               <el-input
                 v-model="generateCodeForm.actionPackageName"
                 prefix-icon="iconfont icon-user"
-                placeholder="一般为 com.shandy.***.*** 会再该路径下生成Java文件"
+                placeholder="一般为 com.shendy.***.*** 会再该路径下生成Java文件"
               ></el-input>
             </el-form-item>
             <el-form-item prop="controllerName" label="控制器名">
