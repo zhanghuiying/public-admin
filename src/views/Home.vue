@@ -78,7 +78,7 @@
       </el-menu>
 
       <!-- <el-menu
-        :collapse="isOpen"
+        :collapse="isCollapse"
         :router="true"
         :collapse-transition="false"
         unique-opened
@@ -88,7 +88,7 @@
         text-color="#fff"
         active-text-color="#ffd04b"
       >
-        <Menu :menuData="menulist"></Menu>
+        <Menu :menuData="menuData"></Menu>
       </el-menu> -->
     </el-aside>
     <el-main>
@@ -124,7 +124,7 @@ export default {
   },
   data() {
     return {
-      menulist: [],
+      menuData: [],
       isCollapse: false,
       activePath: '',
     }
@@ -148,20 +148,19 @@ export default {
       let path = params != '' ? { name: url, params: params } : { name: url }
       this.$router.push(path)
     },
-
     // 获取所有的菜单
     getMenus() {
       getMenuData().then((response) => {
-        this.menulist = response
-        // console.log(this.menulist)
+        this.menuData = response
+        // console.log(this.menuData)
       })
     },
-
-    // async getMenus() {
-    //   let result = await getMenuList()
-    //   this.menulist = result
-    //   // console.log(this.menulist)
-    // },
+    handleOpen(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose(key, keyPath) {
+      console.log(key, keyPath);
+    },
     // 点击按钮，切换菜单的折叠与展开
     toggleCollapse() {
       this.isCollapse = !this.isCollapse

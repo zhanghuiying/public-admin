@@ -1,71 +1,127 @@
 <template>
   <div class="d-display">
     <div class="pb-main-left">
-      <p class="public_card_header">权限组</p>
-      <span class="public_card_header">添加权限组</span>
+      <p class="public_card_header">
+        权限组
+        <span
+          class="btn_expand-shrink"
+          style="margin-left: 10px"
+          @click="addPermission()"
+          >添加权限组</span
+        >
+      </p>
 
-      <el-tree
-        :data="data"
-        show-checkbox
-        node-key="id"
-        default-expand-all
-        :expand-on-click-node="false"
-        :render-content="renderContent"
-      >
-      </el-tree>
+      <div class="public-card-body">
+        <el-tree
+          :data="opgDataList"
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          :expand-on-click-node="false"
+          @node-click="treeClick"
+        >
+          <span class="custom_tree_node" slot-scope="{ node, data }">
+            <span>{{ data.RES_NAME }}</span>
+            <span>
+              <i
+                style="color: #333; margin-left: 6px"
+                class="el-icon-edit"
+                @click="() => modify(node, data)"
+              ></i>
+              <i
+                style="color: #333; margin-left: 6px"
+                class="el-icon-delete"
+                @click="() => remove(node, data)"
+              ></i>
+            </span>
+          </span>
+        </el-tree>
+      </div>
     </div>
     <div class="pb-main_pad-lf pb-main_pad-fr pb-main-mid">
       <div style="background: #fff; padding-bottom: 30px; height: 100%">
         <p class="public_card_header">
           功能点(点击菜单树节点切换选中菜单下的权限
           ，右键菜单节点追加选中菜单下的权限)
-          <span class="preservat_btn">保存</span>
+          <span class="preservat_btn" @click="saveCheckboxPermission"
+            >保存</span
+          >
         </p>
         <div class="authority_checkbox">
-          <el-checkbox
-            :indeterminate="isIndeterminate"
-            v-model="checkAll"
-            @change="handleCheckAllChange"
-            >全选</el-checkbox
-          >
-          <div class="auth_ck_box">
-            <el-checkbox-group v-model="opsChecked">
-              <el-checkbox
-                v-for="(item, index) in opsDataList"
-                :key="index"
-                :label="index"
-                @change="handleOpsChange(item.RES_ID)"
-                >{{ item.OP_NAME }}</el-checkbox
-              >
-            </el-checkbox-group>
+          <div style="margin: 0 0 30px 0">
+            <el-checkbox
+              :indeterminate="isIndeterminate"
+              v-model="checkAll"
+              @change="handleCheckAllChange"
+              >全选</el-checkbox
+            >
           </div>
+
+          <span
+            class="checkbox_span"
+            v-for="(item, index) in opsDataList"
+            :key="index"
+          >
+            <input
+              type="checkbox"
+              :id="index"
+              :value="item.OP_CODE"
+              v-model="opgSelection"
+            />
+            <label for="item.OP_CODE">{{ item.OP_NAME }}</label>
+          </span>
         </div>
       </div>
     </div>
     <div class="pb-main-left">
+      <p class="public_card_header">
+        菜单权限
+        <span
+          class="btn_expand-shrink"
+          style="margin-left: 10px"
+          @click="getMenuList()"
+          >刷新</span
+        >
+      </p>
+
       <p class="public_card_header">菜单权限</p>
-      <div>
-        <el-tree
-        :data="data"
+      <el-tree
+        :data="menuDataList"
         show-checkbox
         node-key="id"
-        :default-expanded-keys="[2, 3]"
-        :default-checked-keys="[5]"
-        :props="defaultProps"
+        default-expand-all
+        :expand-on-click-node="false"
+        @node-click="handleNodeClick"
       >
+        <span class="custom_tree_node" slot-scope="{ data }">
+          <span>{{ data.MENU_NAME }}</span>
+        </span>
       </el-tree>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { getPageData } from '../../api/authority/authority'
+import {
+  getPageData,
+  findOperate,
+  saveOperations,
+  insertGroup,
+  saveGroup,
+  deleteGroup,
+  getSelectallMenu,
+} from '../../api/authority/authority'
 
 let id = 1000
 export default {
   components: {
     getPageData,
+    findOperate,
+    saveOperations,
+    insertGroup,
+    saveGroup,
+    deleteGroup,
+    getSelectallMenu,
   },
   data() {
     const data = [
@@ -92,64 +148,27 @@ export default {
 
       opgDataList: [],
       opsDataList: [],
+      menuDataList: [],
+      opgSelection: [], //权限选中id
+
       checkAll: false,
       opsChecked: [],
       isIndeterminate: true,
-      menuTreeData: [
-        {
-          id: 1,
-          label: '系统管理',
-          children: [
-            {
-              id: 4,
-              label: '系统管理',
-              children: [
-                {
-                  id: 9,
-                  label: '用户管理',
-                },
-                {
-                  id: 10,
-                  label: '权限管理',
-                },
-                {
-                  id: 11,
-                  label: '角色管理',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: 2,
-          label: '参数设置',
-        },
-        {
-          id: 3,
-          label: '附件管理',
-        },
-        {
-          id: 4,
-          label: '定时任务',
-        },
-        {
-          id: 5,
-          label: '应用管理',
-        },
-        {
-          id: 6,
-          label: '代码生成',
-        },
-      ],
       defaultProps: {
-        children: 'children',
-        label: 'label',
+        // children: 'children',
+        MENU_NAME: 'MENU_NAME',
+      },
+      res_id: '',
+      queryParamsSave: {
+        RES_ID: '',
+        OP_CODE: '',
       },
     }
   },
 
   created() {
     this.getList()
+    this.getMenuList()
   },
 
   methods: {
@@ -157,56 +176,90 @@ export default {
       getPageData(data).then((response) => {
         this.opgDataList = response.opg
         this.opsDataList = response.ops
-        console.log(this.opgDataList)
-        console.log(this.opsDataList)
+        // console.log(this.opgDataList)
+        // console.log(this.opsDataList)
       })
     },
-    append(data) {
-      const newChild = { id: id++, label: 'new node1', children: [] }
-      if (!data.children) {
-        this.$set(data, 'children', [])
-      }
-      data.children.push(newChild)
+    getMenuList(data) {
+      getSelectallMenu(data).then((response) => {
+        this.menuDataList = response
+        // console.log(this.menuDataList)
+      })
+    },
+    addPermission() {
+      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
+      // if (!data.children) {
+      //   this.$set(data, 'children', [])
+      // }
+      // data.children.push(newChild)
     },
 
     remove(node, data) {
-      const parent = node.parent
-      const children = parent.data.children || parent.data
-      const index = children.findIndex((d) => d.id === data.id)
-      children.splice(index, 1)
+      this.$confirm('确认删除权限 "' + data.RES_NAME + '" 吗', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          await deleteGroup(data.RES_ID)
+          this.getList()
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     },
 
     modify(node, data) {},
 
-    renderContent(h, { node, data, store }) {
-      return (
-        <span class="custom_tree_node">
-          <span>{node.label}</span>
-          <span>
-            <i
-              style="color: #333;margin-left: 6px;"
-              class="el-icon-edit"
-              on-click={() => this.modify(node, data)}
-            ></i>
-            <i
-              style="color: #333;margin-left: 6px;"
-              class="el-icon-delete"
-              on-click={() => this.remove(node, data)}
-            ></i>
-          </span>
-        </span>
-      )
+    treeClick(data) {
+      this.res_id = data.RES_ID
+      this.queryParamsSave.RES_ID = data.RES_ID
+      findOperate(this.res_id).then((response) => {})
+    },
+    handleNodeClick(data) {
+      console.log(data)
+    },
+    saveCheckboxPermission() {
+      const that = this
+
+      if (this.res_id === '') {
+        this.$message({
+          message: '请在左边选择功能组！',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that.queryParamsSave.OP_CODE = ''
+        this.opgSelection.forEach(function (e) {
+          that.queryParamsSave.OP_CODE += e + ','
+        })
+        this.$confirm('确认保存相关权限吗？', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(async () => {
+            await saveOperations(this.queryParamsSave)
+            this.opgSelection = ''
+            this.getList()
+            this.$message({
+              type: 'success',
+              message: '保存成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
     },
     handleCheckAllChange(val) {
       this.opsDataList = val ? this.opsDataList : []
       this.isIndeterminate = false
       this.getList()
-    },
-    handleOpsChange(value) {
-      let checkedCount = value.length
-      this.checkAll = checkedCount === this.opsDataList.length
-      this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.opsDataList.length
     },
   },
 }
@@ -224,5 +277,20 @@ export default {
 .auth_ck_box {
   margin-top: 30px;
   margin-bottom: 15px;
+}
+.checkbox_span {
+  display: inline-block;
+  height: 34px;
+  margin: 0 60px 10px 0;
+  padding: 0 10px 0 0;
+  font-size: 14px;
+  color: #606266;
+}
+.checkbox_span input {
+  width: 14px;
+  height: 14px;
+}
+.checkbox_span label {
+  margin-left: 6px;
 }
 </style>

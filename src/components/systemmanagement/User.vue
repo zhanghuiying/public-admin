@@ -11,7 +11,7 @@
         >
       </p>
 
-      <div class="tree_body">
+      <div class="public-card-body">
         <el-tree
           :data="followNodData"
           show-checkbox
@@ -281,6 +281,7 @@
           node-key="id"
           default-expand-all
           :expand-on-click-node="false"
+          @node-click="handleNodeClick"
           >
           <span class="custom_tree_node" slot-scope="{ data }">
             <span>{{ data.ORG_NAME }}</span>
@@ -316,7 +317,6 @@ import {
   deleteFollowNod,
 } from '../../api/user/user'
 
-let id = 0
 export default {
   name: 'userManagement',
   components: {
@@ -339,31 +339,9 @@ export default {
     
   },
   data() {
-    const data = [
-      {
-        id: 1,
-        label: '顶级机构',
-        children: [
-          {
-            id: 4,
-            label: '盛鼎科技',
-            children: [
-              {
-                id: 9,
-                label: '超级管理员',
-              },
-              {
-                id: 10,
-                label: '普通用户',
-              },
-            ],
-          },
-        ],
-      },
-    ]
     return {
-      data: JSON.parse(JSON.stringify(data)),
-      data: JSON.parse(JSON.stringify(data)),
+      // data: JSON.parse(JSON.stringify(this.followNodData)),
+      // data: JSON.parse(JSON.stringify(this.followNodData)),
       dialogType: 'new',
       loading: false,
       tableData: [],
@@ -489,6 +467,13 @@ export default {
       getUserData(this.queryParams).then((response) => {
         this.org_id = response.ORG_ID
       })
+    },
+    addFollowNode(){
+      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
+      // if (!data.children) {
+      //   this.$set(data, 'children', [])
+      // }
+      // data.children.push(newChild)
     },
     append(data) {
       this.equeryAddfollowParams = data
@@ -699,7 +684,9 @@ export default {
         this.bindMechanismDialog = true
       }
     },
-
+    handleNodeClick(data) {
+      console.log(data);
+    },
     //删除勾选的列表用户
     deleteTable(){
       const that = this;
@@ -804,7 +791,6 @@ export default {
     submitBindRole(){
       const that = this;
       that.queryParamsRole.roleIds = ''
-      console.log(that.userRoleSelection);
       that.userRoleSelection.forEach(function(e) {
         that.queryParamsRole.roleIds += e + ",";
       });
@@ -827,7 +813,6 @@ export default {
       })
     },
     submitBindMechanism(){
-      // console.log(this.queryParamsSaveUserOrg);
       saveUserOrg(this.queryParamsSaveUserOrg).then((response) => {
         that.getList()
         that.bindMechanismDialog = false
@@ -855,17 +840,10 @@ export default {
 
 </style>
 <style lang='less' scoped>
-.el_pagination {
-  margin-top: 30px;
-  
-}
 .tree_checked{
   background-color: #e5e5e5;
 }
-.tree_body{
-  padding: 16px;
-  // overflow:auto;
-}
+
 .checkbox_span{
   display: inline-block;
   height: 34px;
