@@ -231,7 +231,7 @@ export default {
       tableName: '',
       tableInquireData: [
         {
-          fieldName: 'zdfsfs',
+          fieldName: 'APP_ID',
           fieldComment: '应用代码',
           maximumLength: '32',
           AllowEmpty: '10',

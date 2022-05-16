@@ -50,7 +50,7 @@
                     >
                     <span
                       class="public-table-btn table-btn-delete"
-                      @click="koopMenuPermissions(scope)"
+                      @click="koopMenuPermissions(scope.row.ROLE_ID)"
                       >保持菜单权限</span
                     >
                   </template>
@@ -87,7 +87,7 @@
           default-expand-all
           highlight-current
           :expand-on-click-node="false"
-          @node-click="handleNodeClick"
+          @check="handleNodeClick"
         >
           <span class="custom_tree_node" slot-scope="{ data }">
             <span class="custom_tree_id">{{ data.MENU_NAME }}</span>
@@ -202,6 +202,11 @@ export default {
       menuDataList: [],
       tableDeleteChange:'',//勾选选中列表id
       jsonDataTree: [],
+      menu_id:'',
+      saveMenuParams: {
+        ROLE_ID: '',
+        MENU_ID: '',
+      },
       
     }
   },
@@ -230,7 +235,6 @@ export default {
           'MENU_PID',
           'children'
         )
-        console.log(this.menuTreeData)
       })
     },
     handleSizeChange(newSize) {
@@ -306,21 +310,42 @@ export default {
       })
     },
 
-    koopMenuPermissions(row, mwnu_id) {
-      const ids = row.id || this.ids
+    koopMenuPermissions(id) {
+      this.saveMenuParams.ROLE_ID = id
+
+      this.saveMenuParams.MENU_ID = this.menu_id
+      console.log(this.saveMenuParams);
+
       this.$confirm('确定保存角色权限信息吗?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
         .then(async () => {
-          await saveMenuByRoleId(row.ROLE_ID, mwnu_id)
+          await saveMenuByRoleId(this.saveMenuParams)
           this.$message({
             type: 'success',
             message: '保存成功!',
           })
         })
         .catch(function () {})
+    },
+
+    handleNodeClick(data,checkData) {
+      const that = this;
+      that.menu_id = ''
+      checkData.checkedNodes.forEach(function(e) {
+        that.menu_id += e.MENU_ID + ",";
+      });
+      // that.saveMenuParams.MENU_ID = data.MENU_PID + that.menu_id
+      // console.log(that.saveMenuParams.MENU_ID)
+      console.log(that.menu_id)
+
+      // this.menu_id = data.MENU_PID + "," + data.MENU_ID
+      // this.menuIdSelection.forEach(function(e) {
+      //   this.menu_id += e.MENU_ID + ",";
+      // });
+      // console.log(checkData)
     },
     // 多选框选中数据
     handleSelectionChange(val) {
@@ -355,10 +380,6 @@ export default {
             console.error(err)
           })
       }
-    },
-    handleNodeClick(data) {
-      
-      console.log(data.MENU_ID)
     },
     /**
      * 存放的最终结果树数组

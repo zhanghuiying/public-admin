@@ -14,7 +14,6 @@
       <div class="public-card-body">
         <el-tree
           :data="jsonDataTree"
-          :props="defaultProps"
           :expand-on-click-node="false"
           show-checkbox
           ref="tree"

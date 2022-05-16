@@ -79,7 +79,7 @@
         </p>
         <div class="authority_checkbox">
           <div style="margin: 0 0 30px 0">
-            <el-checkbox
+           <el-checkbox
               :indeterminate="isIndeterminate"
               v-model="checkAll"
               @change="handleCheckAllChange"
@@ -87,19 +87,25 @@
             >
           </div>
 
-          <span
+           <span
             class="checkbox_span"
             v-for="(item, index) in opsDataList"
             :key="index"
           >
             <input
+              :checked="opgSelection"
               type="checkbox"
               :id="index"
               :value="item.OP_CODE"
               v-model="opgSelection"
+              @change="handleChange(item.OP_CODE)"
             />
             <label for="item.OP_CODE">{{ item.OP_NAME }}</label>
           </span>
+          <!-- <el-checkbox-group v-model="opgSelection" @change="handleCheckedCitiesChange">
+            <el-checkbox v-for="(item, index) in opsDataList" :key="index"
+             :label="item.OP_CODE" >{{item.OP_NAME}}</el-checkbox>
+          </el-checkbox-group> -->
         </div>
       </div>
     </div>
@@ -246,6 +252,12 @@ export default {
       this.isIndeterminate = false
       this.getList()
     },
+      // handleCheckedCitiesChange(value) {
+      //   let checkedCount = value.length;
+      //   this.checkAll = checkedCount === this.opsDataList.length;
+      //   this.isIndeterminate = checkedCount > 0 && checkedCount < this.opsDataList.length;
+      // },
+
     addPermission() {
       var timestamp = uuidv4()
 
@@ -276,12 +288,27 @@ export default {
     },
 
     permissionClick(data) {
+      const that = this
       this.RES_ID = data.RES_ID
       this.queryParamsSave.RES_ID = data.RES_ID
+      
+
       findOperate(this.RES_ID).then((response) => {
         this.findOperateData = response
-        console.log(this.findOperateData)
+        console.log(this.findOperateData);
+        // this.opgSelection = ''
+        // that.findOperateData.forEach(function (e) {
+        //   that.opgSelection += e.OP_CODE + ','
+
+        //   console.log("----------"+that.opgSelection);
+        // })
+        
       })
+
+    },
+    handleChange(e){
+      console.log("___________"+e);
+      // console.log(this.opgSelection);
     },
     handleNodeClick(data) {
       console.log(data)
@@ -354,14 +381,15 @@ export default {
   height: 34px;
   margin: 0 60px 10px 0;
   padding: 0 10px 0 0;
-  font-size: 14px;
-  color: #606266;
 }
 .checkbox_span input {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  margin: 10px 8px 3px 4px;
+  background-color: #2d8cf0;
 }
 .checkbox_span label {
-  margin-left: 6px;
+  font-size: 14px;
+  color: #606266;
 }
 </style>

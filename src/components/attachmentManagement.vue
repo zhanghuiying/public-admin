@@ -88,7 +88,7 @@
               </el-form-item>
               <el-form-item prop="uploadtime" label="上传时间">
                 <el-date-picker
-                  v-model="uploadtime"
+                  v-model="appendixForm.uploadtime"
                   type="date"
                   placeholder="选择日期"
                 >

@@ -37,14 +37,11 @@ export function selectMenuByRoleId(id) {
   })
 }
 //保存菜单权限
-export function saveMenuByRoleId(ROLE_ID,MENU_ID) {
+export function saveMenuByRoleId(data) {
   return request({
-    url: URL_PUBLIC+`/saveMenuByRoleId.do`,
+    url: URL_PUBLIC + '/saveMenuByRoleId.do',
     method: 'post',
-    params: {
-      ROLE_ID,
-      MENU_ID
-    }
+    data: qs.stringify(data)
   })
 }
 //获取角色 菜单权限
