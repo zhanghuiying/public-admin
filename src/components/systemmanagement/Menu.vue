@@ -14,18 +14,21 @@
         <span class="btn_expand-shrink">展开/收缩</span>
       </div>
 
-      <el-tree
-        :data="menuTreeData"
-        show-checkbox
-        node-key="id"
-        default-expand-all
-        :expand-on-click-node="false"
-        @node-click="handleNodeClick"
-      >
-        <span class="custom_tree_node" slot-scope="{ data }">
-          <span>{{ data.MENU_NAME }}</span>
-        </span>
-      </el-tree>
+      <div class="public-card-body">
+        <el-tree
+          :data="jsonDataTree"
+          show-checkbox
+          node-key="id"
+          default-expand-all
+          highlight-current
+          :expand-on-click-node="false"
+          @node-click="handleNodeClick"
+        >
+          <span class="custom_tree_node" slot-scope="{ data }">
+            <span class="custom_tree_id">{{ data.MENU_NAME }}</span>
+          </span>
+        </el-tree>
+      </div>
     </div>
     <div class="pb-main-menu-right pb-main_pad-lf">
       <div class="pb-bg pb-main-padding-bt pb-main-margin-b">
@@ -274,7 +277,8 @@ export default {
       },
       isShowCheckbox: false,
       loading: false,
-      menuTreeData: [],
+      menuDataList: [],
+      jsonDataTree: [],
     }
   },
 
@@ -294,8 +298,14 @@ export default {
     },
     getMenuList() {
       getMenu(this.queryParams).then((response) => {
-        this.menuTreeData = response
-        console.log(this.menuTreeData)
+        this.menuDataList = response
+        this.jsonDataTree = this.transData(
+          this.menuDataList,
+          'MENU_ID',
+          'MENU_PID',
+          'children'
+        )
+        console.log(this.menuDataList)
       })
     },
     editingCheckbox() {
@@ -345,6 +355,33 @@ export default {
     },
     handleNodeClick(data) {
       console.log(data.MENU_ID)
+    },
+    /**
+     * 存放的最终结果树数组
+     * 遍历得到以id为键名的对象(建立整棵树的索引)
+     * hashItem当前项还没有children属性，则添加该属性并设置为空数组
+     */
+    transData(jsonArr, idStr, pidStr, childrenStr) {
+      const result = []
+      const id = idStr
+      const pid = pidStr
+      const children = childrenStr
+      const len = jsonArr.length
+      const hash = {}
+      jsonArr.forEach((item) => {
+        hash[item[id]] = item
+      })
+      for (let j = 0; j < len; j++) {
+        const jsonArrItem = jsonArr[j]
+        const hashItem = hash[jsonArrItem[pid]]
+        if (hashItem) {
+          !hashItem[children] && (hashItem[children] = [])
+          hashItem[children].push(jsonArrItem)
+        } else {
+          result.push(jsonArrItem)
+        }
+      }
+      return result
     },
   },
 }

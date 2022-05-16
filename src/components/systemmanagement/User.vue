@@ -13,37 +13,63 @@
 
       <div class="public-card-body">
         <el-tree
-          :data="followNodData"
-          show-checkbox
-          node-key="id"
-          default-expand-all
+          :data="jsonDataTree"
+          :props="defaultProps"
           :expand-on-click-node="false"
+          show-checkbox
+          ref="tree"
+          node-key="ORG_ID"
+          default-expand-all
+          highlight-current
+          @node-click="handleNodeClick"
         >
-        <!-- :class="queryParams.ORG_ID != ''?'tree_checked custom_tree_node' : 'custom_tree_node'" -->
-          <span class="custom_tree_node"
-            slot-scope="{ node, data }"
-          @click="() => treeChecked(node, data)">
-            <el-input v-if="modifyTreeInput"
-            v-model="treeInput"
-            @blur="treeInputBlur"
-            @change="treeInputChange"></el-input>
-            <span v-else>{{ data.ORG_NAME }}</span>
-            <span>
-              <i
-                style="color: #333; margin-left: 6px"
-                class="el-icon-folder-add"
-                @click="() => append(data)"
-              ></i>
-              <i
-                style="color: #333; margin-left: 6px"
-                class="el-icon-edit"
-                @click="() => modify(node, data)"
-              ></i>
-              <i
-                style="color: #333; margin-left: 6px"
-                class="el-icon-delete"
-                @click="() => remove(node, data)"
-              ></i>
+
+          <span class="custom_tree_node" slot-scope="{ node, data }">
+            <template v-if="data.ORG_ID != modifyTreeInput">
+              <span class="custom_tree_id">{{ data.ORG_NAME }}</span>
+              <span>
+                <i
+                  style="color: #333; margin-left: 6px"
+                  class="el-icon-folder-add"
+                  @click="() => append(data)"
+                ></i>
+                <i
+                  style="color: #333; margin-left: 6px"
+                  class="el-icon-edit"
+                  @click="() => modify(data)"
+                ></i>
+                <i
+                  style="color: #333; margin-left: 6px"
+                  class="el-icon-delete"
+                  @click="() => remove(node, data)"
+                ></i>
+              </span>
+            </template>
+            <span v-else>
+              <el-input
+                style="width: 90px; height: 22px"
+                size="mini"
+                ref="inputVal"
+                :value="data.ORG_NAME"
+                @blur="sureChange(data)"
+                @input="(a) => treeInputInp(a, data)"
+              >
+              </el-input>
+              <span
+                style="margin-left: 20px"
+                v-if="data.ORG_ID != 100 ? true : false"
+              >
+                <i
+                  style="color: #333; margin-left: 6px"
+                  class="el-icon-circle-check"
+                  @click="() => sureChange(data)"
+                ></i>
+                <i
+                  style="color: #333; margin-left: 6px"
+                  class="el-icon-circle-close"
+                  @click="() => chancelChange()"
+                ></i>
+              </span>
             </span>
           </span>
         </el-tree>
@@ -72,7 +98,10 @@
               <div class="public_table_tool_inline" @click="enableTable()">
                 <i class="el-icon-check"></i>
               </div>
-              <div class="public_table_tool_inline" @click="rechargePasswordTable()">
+              <div
+                class="public_table_tool_inline"
+                @click="rechargePasswordTable()"
+              >
                 <i class="el-icon-unlock"></i>
               </div>
 
@@ -99,7 +128,11 @@
             >
               <el-table-column fixed="left" type="selection" width="45" />
 
-              <el-table-column prop="USER_ACCOUNT" label="登录账号" width="100"/>
+              <el-table-column
+                prop="USER_ACCOUNT"
+                label="登录账号"
+                width="100"
+              />
               <el-table-column prop="USER_NAME" label="姓名" />
 
               <el-table-column prop="ORG_NAME" label="机构" />
@@ -203,21 +236,39 @@
             </el-select>
           </el-form-item>
           <el-form-item label="角色绑定">
-            <div style="text-align: left;">
-              <span class="checkbox_span" v-for="(item, index) in userRoleList" :key="index">
-                <input type="checkbox" :id="index" :value='item.ROLE_ID' v-model="userRoleSelection">
+            <div style="text-align: left">
+              <span
+                class="checkbox_span"
+                v-for="(item, index) in userRoleList"
+                :key="index"
+              >
+                <input
+                  type="checkbox"
+                  :id="index"
+                  :value="item.ROLE_ID"
+                  v-model="userRoleSelection"
+                />
                 <label for="item">{{ item.ROLE_NAME }}</label>
               </span>
             </div>
           </el-form-item>
 
           <el-form-item label="权限绑定">
-            <div style="text-align: left;">
-              <span class="checkbox_span" v-for="(item, index) in userOpgList" :key="index">
-                <input type="checkbox" :id="index" :value='item.RES_ID' v-model="userOpgSelection">
+            <div style="text-align: left">
+              <span
+                class="checkbox_span"
+                v-for="(item, index) in userOpgList"
+                :key="index"
+              >
+                <input
+                  type="checkbox"
+                  :id="index"
+                  :value="item.RES_ID"
+                  v-model="userOpgSelection"
+                />
                 <label for="item.RES_ID">{{ item.RES_NAME }}</label>
               </span>
-            </div>           
+            </div>
           </el-form-item>
         </el-form>
       </div>
@@ -227,7 +278,6 @@
       </div>
     </el-dialog>
 
-
     <el-dialog
       title="绑定角色"
       :visible.sync="bindRoleDialog"
@@ -235,9 +285,18 @@
       append-to-body
     >
       <div style="width: 100%; text-align: center">
-        <div style="text-align: left;">
-          <span class="checkbox_span" v-for="(item, index) in userRoleList" :key="index">
-            <input type="checkbox" :id="index" :value='item.ROLE_ID' v-model="userRoleSelection">
+        <div style="text-align: left">
+          <span
+            class="checkbox_span"
+            v-for="(item, index) in userRoleList"
+            :key="index"
+          >
+            <input
+              type="checkbox"
+              :id="index"
+              :value="item.ROLE_ID"
+              v-model="userRoleSelection"
+            />
             <label for="item">{{ item.ROLE_NAME }}</label>
           </span>
         </div>
@@ -255,9 +314,18 @@
       append-to-body
     >
       <div style="width: 100%; text-align: center">
-        <div style="text-align: left;">
-          <span class="checkbox_span" v-for="(item, index) in userOpgList" :key="index">
-            <input type="checkbox" :id="index" :value='item.RES_ID' v-model="userOpgSelection">
+        <div style="text-align: left">
+          <span
+            class="checkbox_span"
+            v-for="(item, index) in userOpgList"
+            :key="index"
+          >
+            <input
+              type="checkbox"
+              :id="index"
+              :value="item.RES_ID"
+              v-model="userOpgSelection"
+            />
             <label for="item.RES_ID">{{ item.RES_NAME }}</label>
           </span>
         </div>
@@ -276,13 +344,15 @@
     >
       <div style="width: 100%; text-align: center">
         <el-tree
-          :data="followNodData"
-          show-checkbox
-          node-key="id"
-          default-expand-all
+          :data="jsonDataTree"
           :expand-on-click-node="false"
+          show-checkbox
+          ref="tree"
+          node-key="ORG_ID"
+          default-expand-all
+          highlight-current
           @node-click="handleNodeClick"
-          >
+        >
           <span class="custom_tree_node" slot-scope="{ data }">
             <span>{{ data.ORG_NAME }}</span>
           </span>
@@ -293,12 +363,12 @@
         <el-button @click="resetQuery(3)">重置</el-button>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
+import { v4 as uuidv4 } from 'uuid'
 import {
   getUserData,
   addUserSave,
@@ -336,12 +406,9 @@ export default {
     addFollowNodPost,
     updateFollowNod,
     deleteFollowNod,
-    
   },
   data() {
     return {
-      // data: JSON.parse(JSON.stringify(this.followNodData)),
-      // data: JSON.parse(JSON.stringify(this.followNodData)),
       dialogType: 'new',
       loading: false,
       tableData: [],
@@ -394,11 +461,11 @@ export default {
         ],
         USER_STATE: [
           { required: true, message: '请选择状态', trigger: 'change' },
-        ]
+        ],
       },
       pageDataList: {},
-      userOpgList: [],//权限绑定
-      userRoleList: [],//角色绑定
+      userOpgList: [], //权限绑定
+      userRoleList: [], //角色绑定
       followNodData: [], //获取菜单跟节点
       equeryAddfollowParams: {
         ORG_CODE: '',
@@ -411,12 +478,11 @@ export default {
         ORG_PID: '',
         ORG_NAME: '',
       },
-      treeInput: '',
       modifyTreeInput: false,
-      org_id:'',
-      tableDeleteChange:'',//勾选选中列表id
-      userRoleSelection: [],//角色绑定表单选中id
-      userOpgSelection: [],//权限绑定表单选中id
+      org_id: '',
+      tableDeleteChange: '', //勾选选中列表id
+      userRoleSelection: [], //角色绑定表单选中id
+      userOpgSelection: [], //权限绑定表单选中id
       queryParamsRole: {
         USER_IDS: '',
         roleIds: '',
@@ -426,15 +492,15 @@ export default {
         operateIds: '',
       },
       queryParamsSaveUserOrg: {
-        ids:'',
+        ids: '',
         OLDORG_ID: '',
         ORG_ID: '',
       },
+      jsonDataTree: [],
     }
   },
 
   created() {
-    this.modifyTreeInput = false
     this.getList()
     this.getPageDataList()
     this.getFollowNodList()
@@ -453,48 +519,115 @@ export default {
       getUserPageData(this.pageDataList).then((response) => {
         this.userOpgList = response.opgList
         this.userRoleList = response.roleList
-        // console.log(this.userOpgList)
-        // console.log(this.userRoleList)
       })
     },
     getFollowNodList() {
       getFollowNod(this.followNodData).then((response) => {
         this.followNodData = response
+        this.jsonDataTree = this.transData(
+          this.followNodData,
+          'ORG_ID',
+          'ORG_PID',
+          'children'
+        )
       })
     },
-    treeChecked(node, data){
+    /**
+     * 存放的最终结果树数组
+     * 遍历得到以id为键名的对象(建立整棵树的索引)
+     * hashItem当前项还没有children属性，则添加该属性并设置为空数组
+    */
+    transData(jsonArr, idStr, pidStr, childrenStr) {
+      const result = []
+      const id = idStr
+      const pid = pidStr
+      const children = childrenStr
+      const len = jsonArr.length
+      const hash = {}
+      jsonArr.forEach((item) => {
+        hash[item[id]] = item
+      })
+      for (let j = 0; j < len; j++) {
+        const jsonArrItem = jsonArr[j]
+        const hashItem = hash[jsonArrItem[pid]]
+        if (hashItem) {
+          !hashItem[children] && (hashItem[children] = [])
+          hashItem[children].push(jsonArrItem)
+        } else {
+          result.push(jsonArrItem)
+        }
+      }
+      return result
+    },
+    // tree节点单击事件
+    handleNodeClick(data) {
       this.queryParams.ORG_ID = data.ORG_ID
       getUserData(this.queryParams).then((response) => {
         this.org_id = response.ORG_ID
       })
     },
-    addFollowNode(){
-      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
-      // if (!data.children) {
-      //   this.$set(data, 'children', [])
-      // }
-      // data.children.push(newChild)
+    addFollowNode() {
+      var timestamp = uuidv4()
+      this.equeryAddfollowParams.ORG_CODE = timestamp
+      this.equeryAddfollowParams.ORG_ID = timestamp
+      this.equeryAddfollowParams.ORG_PID = 0
+      this.equeryAddfollowParams.ORG_NAME = 'new node'
+      addFollowNod(this.equeryAddfollowParams).then((response) => {
+        this.getFollowNodList()
+      })
     },
     append(data) {
-      this.equeryAddfollowParams = data
-      this.equeryAddfollowParams.ORG_CODE = data.ORG_ID
-      // console.log(this.equeryAddfollowParams);
-      addFollowNod(this.equeryAddfollowParams).then((response) => {})
-
-      // data.children.push(newChild)
-      // data.ORG_ID data.ORG_NAME data.ORG_PID this.ORG_ID
-      // const newChild = { id: id++, label: 'new node' + `${id}`, children: [] }
-      // if (!data.children) {
-      //   this.$set(data, 'children', [])
-      // }
-      // data.children.push(newChild)
+      var timestamp = uuidv4()
+      const newChild = {
+        ORG_ID: timestamp,
+        ORG_NAME: timestamp,
+        ORG_PID: data.ORG_PID,
+        children: [],
+      }
+      this.equeryAddfollowParams.ORG_CODE = timestamp
+      this.equeryAddfollowParams.ORG_ID = timestamp
+      this.equeryAddfollowParams.ORG_PID = data.ORG_ID
+      this.equeryAddfollowParams.ORG_NAME = 'new node'
+      addFollowNod(this.equeryAddfollowParams).then((response) => {
+        this.getFollowNodList()
+      })
+      if (!data.children) {
+        this.$set(data, 'children', [])
+      }
+      data.children.push(newChild)
+    },
+    modify(data) {
+      this.modifyTreeInput = data.ORG_ID
+    },
+    treeInputInp(value, data) {
+      data.ORG_NAME = value
+    },
+    sureChange(data) {
+      this.equeryUpdatefollowParams = data
+      updateFollowNod(this.equeryUpdatefollowParams).then((response) => {
+        if (response.statusCode == 200) {
+          this.$notify.success({ title: '提示', message: '修改成功' })
+          this.modifyTreeInput = ''
+          this.getFollowNodList()
+        }
+      })
+    },
+    // 取消修改按钮
+    chancelChange() {
+      this.modifyTreeInput = false
     },
     remove(node, data) {
-      this.$confirm('确认删除部门 "' + data.ORG_NAME + '" 吗（该组织机构下的用户也会被删除）?', "警告", {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
+      this.$confirm(
+        '确认删除部门 "' +
+          data.ORG_NAME +
+          '" 吗（该组织机构下的用户也会被删除）?',
+        '警告',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
         .then(async () => {
           await deleteFollowNod(data.ORG_ID)
           this.getFollowNodList()
@@ -506,51 +639,7 @@ export default {
         .catch((err) => {
           console.error(err)
         })
-      // const parent = node.parent
-      // const children = parent.data.children || parent.data
-      // const index = children.findIndex((d) => d.id === data.id)
-      // children.splice(index, 1)
     },
-
-    modify(node, data) {
-      this.modifyTreeInput = true
-      this.treeInput = data.ORG_NAME
-      // console.log(this.modifyTreeInput,this.treeInput);
-      // console.log("000000"+this.modifyTreeInput);
-    },
-    treeInputChange(){
-      this.modifyTreeInput = false
-      // console.log("1111111"+this.modifyTreeInput);
-    },
-    treeInputBlur(){
-      this.modifyTreeInput = false
-      // console.log("222222"+this.modifyTreeInput);
-    },
-    // renderContent(h, { node, data, store }) {
-    //   return (
-    //     <span class="custom_tree_node">
-    //       <span>{node.label}</span>
-    //       <span>
-    //         <i
-    //           style="color: #333;margin-left: 6px;"
-    //           class="el-icon-folder-add"
-    //           on-click={() => this.append(data)}
-    //         ></i>
-    //         <i
-    //           style="color: #333;margin-left: 6px;"
-    //           class="el-icon-edit"
-    //           on-click={() => this.modify(node, data)}
-    //         ></i>
-    //         <i
-    //           style="color: #333;margin-left: 6px;"
-    //           class="el-icon-delete"
-    //           on-click={() => this.remove(node, data)}
-    //         ></i>
-    //       </span>
-    //     </span>
-    //   )
-    // },
-    
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
       this.getList()
@@ -560,25 +649,25 @@ export default {
       this.getList()
     },
     handleSelectionChange(val) {
-      const that = this;
+      const that = this
       that.tableDeleteChange = ''
       that.queryParamsSaveUserOrg.ids = ''
       that.multipleSelection = val
-      that.multipleSelection.forEach(function(e) {
-        that.tableDeleteChange += e.USER_ID + ",";
-        that.queryParamsSaveUserOrg.ids+= e.USER_ID + ",";
-      });
+      that.multipleSelection.forEach(function (e) {
+        that.tableDeleteChange += e.USER_ID + ','
+        that.queryParamsSaveUserOrg.ids += e.USER_ID + ','
+      })
     },
     submitForm: function () {
-      const that = this;
+      const that = this
       that.editForm.roleIds = ''
       that.editForm.operateIds = ''
-      that.userRoleSelection.forEach(function(e) {
-        that.editForm.roleIds += e + ",";
-      });
-      that.userOpgSelection.forEach(function(e) {
-        that.editForm.operateIds += e + ",";
-      });
+      that.userRoleSelection.forEach(function (e) {
+        that.editForm.roleIds += e + ','
+      })
+      that.userOpgSelection.forEach(function (e) {
+        that.editForm.operateIds += e + ','
+      })
       that.$refs['editForm'].validate((valid) => {
         if (valid) {
           addUserSave(that.editForm)
@@ -627,18 +716,18 @@ export default {
       this.editTableDialog = false
     },
     resetQuery(index) {
-      if(index == 0){
+      if (index == 0) {
         this.resetForm('editForm')
         this.editTableDialog = false
-      }else if(index == 1){
+      } else if (index == 1) {
         this.queryParamsRole.roleIds = ''
         this.userRoleSelection = ''
         this.bindRoleDialog = false
-      }else if(index == 2){
+      } else if (index == 2) {
         this.queryParamsRole.operateIds = ''
         this.userOpgSelection = ''
         this.bindFeaturesDialog = false
-      }else if(index == 3){
+      } else if (index == 3) {
         this.bindMechanismDialog = false
       }
     },
@@ -649,9 +738,13 @@ export default {
     },
 
     addNameList() {
-      if(this.org_id ===''){
-        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
-      }else{
+      if (this.org_id === '') {
+        this.$message({
+          message: '请先选择组织机构',
+          type: 'warning',
+          center: true,
+        })
+      } else {
         this.dialogType = 'new'
         // this.userRoleSelection = ''
         // this.userOpgSelection = ''
@@ -659,45 +752,62 @@ export default {
       }
     },
     bindRole() {
-      if(this.org_id ===''){
-        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
-      }else{
+      if (this.org_id === '') {
+        this.$message({
+          message: '请先选择组织机构',
+          type: 'warning',
+          center: true,
+        })
+      } else {
         // this.userRoleSelection = ''
         this.bindRoleDialog = true
       }
     },
     bindFeatures() {
-      if(this.org_id ===''){
-        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
-      }else{
+      if (this.org_id === '') {
+        this.$message({
+          message: '请先选择组织机构',
+          type: 'warning',
+          center: true,
+        })
+      } else {
         // this.userOpgSelection = ''
         this.bindFeaturesDialog = true
       }
     },
     bindMechanism() {
-      if(this.org_id ===''){
-        this.$message({message: '请先选择组织机构',type: 'warning',center: true});
-      }else{
+      if (this.org_id === '') {
+        this.$message({
+          message: '请先选择组织机构',
+          type: 'warning',
+          center: true,
+        })
+      } else {
         getFollowNod(this.followNodData).then((response) => {
           this.followNodData = response
         })
         this.bindMechanismDialog = true
       }
     },
-    handleNodeClick(data) {
-      console.log(data);
-    },
     //删除勾选的列表用户
-    deleteTable(){
-      const that = this;
-      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
-        that.$message({message: '请勾选择要删除的数据',type: 'warning',center: true});
-      }else{
-        that.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+    deleteTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
           type: 'warning',
+          center: true,
         })
+      } else {
+        that
+          .$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
           .then(async () => {
             await deleteUser(that.tableDeleteChange)
             that.tableDeleteChange = ''
@@ -713,16 +823,24 @@ export default {
       }
     },
     //禁用勾选的列表用户
-    disabledTable(){
-      const that = this;
-      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
-        that.$message({message: '请先勾选择要操作的数据',type: 'warning',center: true});
-      }else{
-        that.$confirm('禁用该用户, 是否继续?', '信息', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+    disabledTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请先勾选择要操作的数据',
           type: 'warning',
+          center: true,
         })
+      } else {
+        that
+          .$confirm('禁用该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
           .then(async () => {
             await disableUser(that.tableDeleteChange)
             that.tableDeleteChange = ''
@@ -738,16 +856,24 @@ export default {
       }
     },
     //启用勾选的列表用户
-    enableTable(){
-      const that = this;
-      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
-        that.$message({message: '请先勾选择要操作的数据',type: 'warning',center: true});
-      }else{
-        that.$confirm('启用该用户, 是否继续?', '信息', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+    enableTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请先勾选择要操作的数据',
           type: 'warning',
+          center: true,
         })
+      } else {
+        that
+          .$confirm('启用该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
           .then(async () => {
             await enableUser(that.tableDeleteChange)
             that.tableDeleteChange = ''
@@ -763,23 +889,32 @@ export default {
       }
     },
     //重置密码勾选的列表用户
-    rechargePasswordTable(){
-      const that = this;
-      if(that.multipleSelection == undefined || that.multipleSelection.length <= 0){
-        that.$message({message: '请先勾选择要操作的数据',type: 'warning',center: true});
-      }else{
-        that.$confirm('重置密码该用户, 是否继续?', '信息', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
+    rechargePasswordTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请先勾选择要操作的数据',
           type: 'warning',
+          center: true,
         })
+      } else {
+        that
+          .$confirm('重置密码该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
           .then(async (res) => {
             await resetPasswordUser(that.tableDeleteChange)
             that.tableDeleteChange = ''
             that.getList()
             that.$message({
               type: 'success',
-              message: '密码重置成功！新密码为Qq123456用户首次登陆后需要修改密码!',
+              message:
+                '密码重置成功！新密码为Qq123456用户首次登陆后需要修改密码!',
             })
           })
           .catch((err) => {
@@ -788,38 +923,37 @@ export default {
       }
     },
 
-    submitBindRole(){
-      const that = this;
+    submitBindRole() {
+      const that = this
       that.queryParamsRole.roleIds = ''
-      that.userRoleSelection.forEach(function(e) {
-        that.queryParamsRole.roleIds += e + ",";
-      });
+      that.userRoleSelection.forEach(function (e) {
+        that.queryParamsRole.roleIds += e + ','
+      })
       saveUserRoles(that.queryParamsRole).then((response) => {
         that.userRoleSelection = ''
         that.getList()
         that.bindRoleDialog = false
       })
     },
-    submitBindFeatures(){
-      const that = this;
+    submitBindFeatures() {
+      const that = this
       that.queryParamsFeatures.operateIds = ''
-      that.userOpgSelection.forEach(function(e) {
-        that.queryParamsFeatures.operateIds += e + ",";
-      });
+      that.userOpgSelection.forEach(function (e) {
+        that.queryParamsFeatures.operateIds += e + ','
+      })
       saveUserOperate(this.queryParamsFeatures).then((response) => {
         that.userOpgSelection = ''
         that.getList()
         that.bindFeaturesDialog = false
       })
     },
-    submitBindMechanism(){
+    submitBindMechanism() {
       saveUserOrg(this.queryParamsSaveUserOrg).then((response) => {
         that.getList()
         that.bindMechanismDialog = false
-      });
+      })
     },
-
-  }
+  },
 }
 </script>
 
@@ -832,29 +966,19 @@ export default {
 .el-checkbox-group {
   text-align: left;
 }
-.custom_tree_node .el-input__inner,
-.tree_checked .el-input__inner{
-  height: 24px;
-  line-height: 24px;
-}
-
 </style>
 <style lang='less' scoped>
-.tree_checked{
-  background-color: #e5e5e5;
-}
-
-.checkbox_span{
+.checkbox_span {
   display: inline-block;
   height: 34px;
   margin: 0 16px 10px 0;
   padding: 0 10px 0 0;
 }
-.checkbox_span input{
+.checkbox_span input {
   width: 14px;
   height: 14px;
 }
-.checkbox_span label{
-  margin-left:6px;
+.checkbox_span label {
+  margin-left: 6px;
 }
 </style>

@@ -81,15 +81,16 @@
           >
         </p>
         <el-tree
-          :data="menuTreeData"
+          :data="jsonDataTree"
           show-checkbox
           node-key="id"
           default-expand-all
+          highlight-current
           :expand-on-click-node="false"
           @node-click="handleNodeClick"
         >
           <span class="custom_tree_node" slot-scope="{ data }">
-            <span>{{ data.MENU_NAME }}</span>
+            <span class="custom_tree_id">{{ data.MENU_NAME }}</span>
           </span>
         </el-tree>
       </div>
@@ -178,82 +179,6 @@ export default {
       loading: false,
       multipleSelection: [],
       addRoleDialog: false,
-      // menuTreeData: [
-      //   {
-      //     id: 1,
-      //     label: '系统管理',
-      //     children: [
-      //       {
-      //         id: 11,
-      //         label: '系统管理',
-      //         children: [
-      //           {
-      //             id: 111,
-      //             label: '用户管理',
-      //           },
-      //           {
-      //             id: 112,
-      //             label: '权限管理',
-      //           },
-      //           {
-      //             id: 113,
-      //             label: '角色管理',
-      //           },
-      //           {
-      //             id: 114,
-      //             label: '日志管理',
-      //           },
-      //           {
-      //             id: 11,
-      //             label: '数据字典',
-      //           },
-      //           {
-      //             id: 115,
-      //             label: '菜单管理',
-      //           },
-      //         ],
-      //       },
-      //     ],
-      //   },
-      //   {
-      //     id: 2,
-      //     label: '消息管理',
-      //     children: [
-      //       {
-      //         id: 221,
-      //         label: '消息通知',
-      //       },
-      //       {
-      //         id: 222,
-      //         label: '我的消息',
-      //       },
-      //     ],
-      //   },
-      //   {
-      //     id: 3,
-      //     label: '参数设置',
-      //   },
-      //   {
-      //     id: 4,
-      //     label: '附件管理',
-      //   },
-      //   {
-      //     id: 5,
-      //     label: '定时任务',
-      //   },
-      //   {
-      //     id: 6,
-      //     label: '应用管理',
-      //   },
-      //   {
-      //     id: 7,
-      //     label: '代码生成',
-      //   },
-      // ],
-      // defaultProps: {
-      //   children: 'children',
-      //   label: 'label',
-      // },
       dialogType: 'new',
       addRoleFormObj: {},
       addRoleForm: {
@@ -274,8 +199,9 @@ export default {
           { required: true, message: '请输入角色备注', trigger: 'blur' },
         ],
       },
-      menuTreeData: [],
+      menuDataList: [],
       tableDeleteChange:'',//勾选选中列表id
+      jsonDataTree: [],
       
     }
   },
@@ -297,7 +223,13 @@ export default {
     //获取角色 菜单权限
     getRoleMenuList(data) {
       getRoleMenu(data).then((response) => {
-        this.menuTreeData = response
+        this.menuDataList = response
+        this.jsonDataTree = this.transData(
+          this.menuDataList,
+          'MENU_ID',
+          'MENU_PID',
+          'children'
+        )
         console.log(this.menuTreeData)
       })
     },
@@ -427,6 +359,33 @@ export default {
     handleNodeClick(data) {
       
       console.log(data.MENU_ID)
+    },
+    /**
+     * 存放的最终结果树数组
+     * 遍历得到以id为键名的对象(建立整棵树的索引)
+     * hashItem当前项还没有children属性，则添加该属性并设置为空数组
+    */
+    transData(jsonArr, idStr, pidStr, childrenStr) {
+      const result = []
+      const id = idStr
+      const pid = pidStr
+      const children = childrenStr
+      const len = jsonArr.length
+      const hash = {}
+      jsonArr.forEach((item) => {
+        hash[item[id]] = item
+      })
+      for (let j = 0; j < len; j++) {
+        const jsonArrItem = jsonArr[j]
+        const hashItem = hash[jsonArrItem[pid]]
+        if (hashItem) {
+          !hashItem[children] && (hashItem[children] = [])
+          hashItem[children].push(jsonArrItem)
+        } else {
+          result.push(jsonArrItem)
+        }
+      }
+      return result
     },
   },
 }

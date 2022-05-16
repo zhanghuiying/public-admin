@@ -96,14 +96,13 @@ export function saveUserOrg(data) {
 }
 
 //菜单树 获取跟节点--------------------
-export function getFollowNod(query) {
+export function getFollowNod(data) {
   return request({
     url: '/lui_sys/pim/org/getOrg.do',
     method: 'post',
-    params: query
+    data: qs.stringify(data)
   })
 }
-
 //菜单树 get添加跟节点
 export function addFollowNod(query) {
   return request({
