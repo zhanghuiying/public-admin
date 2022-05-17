@@ -1,7 +1,7 @@
 import request from '../../utils/request'
 import qs from 'qs'
 
-const URL_PUBLIC = "/lui_sys/xtgl/app/";
+const URL_PUBLIC = "/lui_sys/xtgl/app";
 
 export function getAppData(query) {
   return request({
@@ -39,5 +39,28 @@ export function deleteApp(ids) {
     }
   })
 }
+
+//禁用勾选列表
+export function disableUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/updateStatusByIds.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
+
+//启用勾选列表
+export function enableUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/updateStatusByIds.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
+
 
 

@@ -140,7 +140,7 @@
                 v-model="generateCodeForm.typeData"
                 placeholder="请选择数据类型"
               >
-                <el-option label="sqlserver" value="0"></el-option>
+                <el-option label="sqlserver数据库" value="0"></el-option>
                 <el-option label="达梦数据库" value="1"></el-option>
                 <el-option label="oracle数据库" value="2"></el-option>
               </el-select>
@@ -198,7 +198,7 @@
         <el-button
           type="primary"
           icon="el-icon-check"
-          @click="submitForm('form')"
+          @click="submitForm"
           >生成</el-button
         >
         <el-button type="warning" @click="resetQuery">重置</el-button>
@@ -209,10 +209,11 @@
 </template>
 
 <script>
-import { getCodeData } from '../api/codeproduction'
+import { getCodeData,addCodeProduction } from '../api/codeproduction'
 export default {
   components: {
     getCodeData,
+    addCodeProduction
   },
   data() {
     return {
@@ -325,9 +326,9 @@ export default {
       this.multipleSelection = val
     },
     submitForm: function () {
-      this.$refs['parameterForm'].validate((valid) => {
+      this.$refs['generateCodeForm'].validate((valid) => {
         if (valid) {
-          addParameterSave(this.parameterForm)
+          addCodeProduction(this.generateCodeForm)
             .then((res) => {
               if (res.statusCode == 200) {
                 this.$notify.success({ title: '提示', message: '保存成功' })
@@ -335,7 +336,7 @@ export default {
                 this.$notify.error({ title: '错误', message: res.message })
               }
               this.loading = false
-              this.reviseTableDialog = false
+              this.generateCodeDialog = false
               this.getList()
             })
             .catch((error) => {
@@ -366,7 +367,6 @@ export default {
         })
         .catch(function () {})
     },
-    submitForm() {},
     close() {
       this.fieldInformationDialog = false
     },

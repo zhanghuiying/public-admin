@@ -212,7 +212,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitSettingForm('settingForm')"
+        <el-button type="primary" @click="submitSettingForm()"
           >提交</el-button
         >
         <el-button @click="resetQuery2">重置</el-button>
@@ -283,9 +283,7 @@ export default {
         iconClass: [
           { required: true, message: '请输入图标class', trigger: 'blur' },
         ],
-        logoImage: [
-          { required: true, message: '请输入logo图片', trigger: 'blur' },
-        ],
+        logoImage: [{ required: true, message: "请选择logo图片", trigger: "image" }],
         address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
         accessAddress: [
           { required: true, message: '请填写访问地址', trigger: 'blur' },

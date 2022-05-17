@@ -9,7 +9,14 @@ export function getCodeData(query) {
     params: query
   })
 }
-
+//添加生成代码
+export function addCodeProduction(data) {
+  return request({
+    url: URL_PUBLIC + '!code.action',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
 
 
 

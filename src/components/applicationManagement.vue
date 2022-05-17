@@ -5,21 +5,21 @@
         <div class="public_table_tool_inline" @click="getList">
           <i class="el-icon-refresh"></i>
         </div>
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="searchList()">
           <i class="el-icon-zoom-out"></i>
         </div>
-        <div class="public_table_tool_inline" @click="addNameList">
+        <div class="public_table_tool_inline" @click="addNameList()">
           <i class="el-icon-circle-plus-outline"></i>
         </div>
 
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="deleteTable()">
           <i class="el-icon-delete"></i>
         </div>
 
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="disabledTable()">
           <i class="el-icon-close"></i>
         </div>
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="enableTable()">
           <i class="el-icon-check"></i>
         </div>
 
@@ -74,7 +74,9 @@
 
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
-            <span class="public-table-btn table-btn-edit" @click="editTable(scope)"
+            <span
+              class="public-table-btn table-btn-edit"
+              @click="editTable(scope)"
               >编辑</span
             >
             <span
@@ -98,13 +100,13 @@
     </div>
 
     <el-dialog
-      title="附件修改"
+      :title="dialogText[dialogType]"
       :visible.sync="reviseTableDialog"
       width="50%"
       append-to-body
       @close="close"
     >
-      <div style="width: 100%; text-align: center">
+      <div style="width: 100%; text-align: left">
         <el-form
           :model="applicationForm"
           ref="applicationForm"
@@ -125,13 +127,6 @@
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-
-              <el-form-item prop="APP_ICON" label="图标">
-                <el-input
-                  v-model="applicationForm.APP_ICON"
-                  prefix-icon="iconfont icon-user"
-                ></el-input>
-              </el-form-item>
             </div>
             <div class="w50">
               <el-form-item prop="APP_SORT" label="排序">
@@ -149,15 +144,50 @@
                   <el-option label="启用" value="1"></el-option>
                 </el-select>
               </el-form-item>
-              
-              <el-form-item prop="APP_URL" label="访问地址">
-                <el-input
-                  v-model="applicationForm.APP_URL"
-                  prefix-icon="iconfont icon-user"
-                ></el-input>
-              </el-form-item>
             </div>
           </div>
+          <el-form-item prop="APP_ICON" label="图标" v-if="dialogType != '1'">
+            <el-upload
+              action="#"
+              list-type="picture-card"
+              :auto-upload="false">
+                <i slot="default" class="el-icon-plus"></i>
+                <div slot="file" slot-scope="{file}">
+                  <img
+                    class="el-upload-list__item-thumbnail"
+                    :src="file.url" alt=""
+                  >
+                  <span class="el-upload-list__item-actions">
+                    <span
+                      class="el-upload-list__item-preview"
+                      @click="handlePictureCardPreview(file)"
+                    >
+                      <i class="el-icon-zoom-in"></i>
+                    </span>
+                    <span
+                      v-if="!disabled"
+                      class="el-upload-list__item-delete"
+                      @click="handleDownload(file)"
+                    >
+                      <i class="el-icon-download"></i>
+                    </span>
+                    <span
+                      v-if="!disabled"
+                      class="el-upload-list__item-delete"
+                      @click="handleRemove(file)"
+                    >
+                      <i class="el-icon-delete"></i>
+                    </span>
+                  </span>
+                </div>
+            </el-upload>
+          </el-form-item>
+          <el-form-item prop="APP_URL" label="访问地址">
+            <el-input
+              v-model="applicationForm.APP_URL"
+              prefix-icon="iconfont icon-user"
+            ></el-input>
+          </el-form-item>
           <el-form-item prop="APP_REMARK" label="备注">
             <el-input
               type="textarea"
@@ -181,6 +211,8 @@ import {
   addAppSave,
   updateStatusByIds,
   deleteApp,
+  disableUser,
+  enableUser
 } from '../api/application'
 export default {
   name: 'application',
@@ -190,6 +222,8 @@ export default {
     addAppSave,
     updateStatusByIds,
     deleteApp,
+    disableUser,
+    enableUser
   },
   components: {
     tableMenutTool,
@@ -203,7 +237,6 @@ export default {
         page: 1,
         limit: 10,
       },
-      multipleSelection: [],
       reviseTableDialog: false,
       operatingStatus: '',
       applicationForm: {
@@ -227,17 +260,25 @@ export default {
           { required: true, message: '请输入访问地址', trigger: 'blur' },
         ],
         APP_SORT: [{ required: true, message: '请输入排序', trigger: 'blur' }],
-        APP_ICON: [{ required: true, message: '请选择图标', trigger: 'change' }],
-        APP_ZT: [
-          { required: true, message: '请选择状态', trigger: 'change' },
+        // APP_ICON: [{ required: true, message: "请选择图标", trigger: "image" }],
+        APP_ZT: [{ required: true, message: '请选择状态', trigger: 'change' }],
+        APP_REMARK: [
+          { required: true, message: '请输入备注', trigger: 'blur' },
         ],
-        APP_REMARK: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
       isShowCheckbox: false,
-      dialogType: 'new',
+      dialogType: '0',
+      dialogText: { 0: '添加应用', 1: '查询应用', 2: '修改应用' },
       querySwitch: {
         ids: '',
         APP_ZT: '',
+      },
+      dialogVisible: false,
+      disabled: false,
+      multipleSelection: [],
+      tableDeleteChange: '', //勾选选中列表id
+      queryParamsSaveUserOrg: {
+        ids: '',
       },
     }
   },
@@ -255,6 +296,7 @@ export default {
         this.loading = false
       })
     },
+
     submitForm: function () {
       this.$refs['applicationForm'].validate((valid) => {
         if (valid) {
@@ -278,6 +320,159 @@ export default {
         }
       })
     },
+
+    searchList() {
+      this.dialogType = '1'
+      return (this.reviseTableDialog = true)
+    },
+
+    resetQuery() {
+      this.resetForm('applicationForm')
+      this.reviseTableDialog = false
+    },
+    addNameList() {
+      this.dialogType = '0'
+      return (this.reviseTableDialog = true)
+    },
+    editTable(from) {
+      this.dialogType = '2'
+      this.reviseTableDialog = true
+      this.applicationForm = from.row
+    },
+    handleDelete({ $index, row }) {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          await deleteApp(row.APP_ID)
+          this.tableData.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
+    //删除勾选的列表用户
+    deleteTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await deleteApp(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    //禁用勾选的列表用户
+    disabledTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请先勾选择要操作的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('禁用该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await disableUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '禁用成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    //启用勾选的列表用户
+    enableTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请先勾选择要操作的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('启用该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await enableUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '启用成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
+    },
+    // 开关事件
+    changeStatus(e, row, index) {
+      this.querySwitch.ids = row.APP_ID
+      if (e == true) {
+        this.querySwitch.APP_ZT = '1'
+      } else {
+        this.querySwitch.APP_ZT = '0'
+      }
+      console.log(this.querySwitch.ids, this.querySwitch.APP_ZT)
+      updateStatusByIds(this.querySwitch).then((response) => {
+        if (response.statusCode !== 200) {
+          this.$message.error(response.message)
+        } else {
+          this.$message.error(response.message)
+        }
+      })
+    },
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -290,61 +485,30 @@ export default {
       this.getList()
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val
+      const that = this
+      that.tableDeleteChange = ''
+      that.queryParamsSaveUserOrg.ids = ''
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function (e) {
+        that.tableDeleteChange += e.APP_ID + ','
+        that.queryParamsSaveUserOrg.ids += e.APP_ID + ','
+      })
+
     },
     close() {
       this.applicationForm = []
       this.reviseTableDialog = false
     },
-    editTable(from) {
-      this.dialogType = 'edit'
-      this.reviseTableDialog = true
-      this.applicationForm = from.row
-    },
-    resetQuery() {
-      this.resetForm('applicationForm')
-      this.reviseTableDialog = false
-    },
-    addNameList() {
-      this.dialogType = 'new'
-      return (this.reviseTableDialog = true)
-    },
-
-    handleDelete({ $index, row }) {
-      this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(async () => {
-          await deleteApp(row.ROLE_ID)
-          this.tableData.splice($index, 1)
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
-          })
-        })
-        .catch((err) => {
-          console.error(err)
-        })
-    },
-    // 开关事件
-    changeStatus(e, row, index) {
-      this.querySwitch.ids = row.APP_ID
-      if (e == true) {
-        this.querySwitch.APP_ZT = '1'
-      } else {
-        this.querySwitch.APP_ZT = '0'
+    handleRemove(file) {
+        console.log(file);
+      },
+      handlePictureCardPreview(file) {
+        this.applicationForm.APP_ICON = file.url;
+        this.dialogVisible = true;
+      },
+      handleDownload(file) {
+        console.log(file);
       }
-      console.log(this.querySwitch.ids,this.querySwitch.APP_ZT)
-      updateStatusByIds(this.querySwitch).then((response) => {
-        if (response.statusCode !== 200) {
-          this.$message.error(response.message)
-        } else {
-          this.$message.error(response.message)
-        }
-      })
-    },
   },
 }
 </script>
