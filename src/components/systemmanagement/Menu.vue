@@ -3,15 +3,30 @@
     <div class="pb-main-menu-left">
       <div class="menu_column">
         菜单树
-        <el-popover placement="bottom" width="100" trigger="click">
+        <!-- <el-popover placement="bottom" width="100" trigger="click">
           <span slot="reference" class="menu_btn"
             >菜单操作<i class="el-icon-arrow-down"></i
           ></span>
           <div :key="index" v-for="(item, index) in menuOptions">
             <p class="hd-nav-btn">{{ item.label }}</p>
           </div>
-        </el-popover>
-        <span class="btn_expand-shrink">展开/收缩</span>
+        </el-popover> -->
+        <el-dropdown @command="handleCommand">
+          <span class="menu_btn">
+            菜单操作<i class="el-icon-arrow-down el-icon--right"></i>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="add">添加根菜单</el-dropdown-item>
+            <el-dropdown-item command="addchildren"
+              >添加子菜单</el-dropdown-item
+            >
+            <el-dropdown-item command="delete">删除选中</el-dropdown-item>
+            <el-dropdown-item command="disabled">禁用选中</el-dropdown-item>
+            <el-dropdown-item command="enable">启用选中</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+
+        <span class="btn_expand-shrink" @click="expandHandle">展开/收缩</span>
       </div>
 
       <div class="public-card-body">
@@ -19,10 +34,11 @@
           :data="jsonDataTree"
           show-checkbox
           node-key="id"
-          default-expand-all
+          ref="tree"
           highlight-current
           :expand-on-click-node="false"
-          @node-click="handleNodeClick"
+          :default-expand-all="expandAll"
+          @check="handleNodeClick"
         >
           <span class="custom_tree_node" slot-scope="{ data }">
             <span class="custom_tree_id">{{ data.MENU_NAME }}</span>
@@ -41,19 +57,19 @@
         >
           <div class="d-display pb-main-padding-t pb-main-padding-fr">
             <div class="w25">
-              <el-form-item prop="name" label="分组代码">
+              <el-form-item prop="MENU_NAME" label="菜单名称">
                 <el-input
-                  v-model="munuForm.name"
+                  v-model="munuForm.MENU_NAME"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
             </div>
             <div class="w25">
-              <el-form-item prop="address" label="访问地址">
+              <el-form-item prop="MENU_URL" label="访问地址">
                 <el-popover placement="bottom" width="100" trigger="click">
                   <el-input
                     slot="reference"
-                    v-model="addressText[munuForm.address]"
+                    v-model="addressText[munuForm.MENU_URL]"
                     prefix-icon="iconfont icon-user"
                   ></el-input>
                   <div :key="index" v-for="(item, index) in addressOptions">
@@ -65,17 +81,17 @@
               </el-form-item>
             </div>
             <div class="w25">
-              <el-form-item prop="number" label="排序号">
+              <el-form-item prop="MENU_SORT" label="排序号">
                 <el-input
-                  v-model="munuForm.number"
+                  v-model="munuForm.MENU_SORT"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
             </div>
             <div class="w25">
-              <el-form-item prop="code" label="菜单编码">
+              <el-form-item prop="APP_CODE" label="菜单编码">
                 <el-input
-                  v-model="munuForm.code"
+                  v-model="munuForm.APP_CODE"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
@@ -83,8 +99,8 @@
           </div>
           <div class="d-display pb-main-padding-fr">
             <div class="w25">
-              <el-form-item label="分组状态">
-                <el-select v-model="munuForm.state" placeholder="菜单状态">
+              <el-form-item label="菜单状态">
+                <el-select v-model="munuForm.MENU_STATE" placeholder="菜单状态">
                   <el-option label="停用" value="0"></el-option>
                   <el-option label="启用" value="1"></el-option>
                   <el-option label="初始" value="2"></el-option>
@@ -96,28 +112,28 @@
                 <el-popover placement="bottom" width="100" trigger="click">
                   <el-input
                     slot="reference"
-                    v-model="munuForm.icon"
+                    v-model="munuForm.MENU_ICON"
                     prefix-icon="iconfont icon-user"
                   ></el-input>
-                  <div :key="index" v-for="(item, index) in addressOptions">
+                  <!-- <div :key="index" v-for="(item, index) in addressOptions">
                     <p class="hd-nav-btn" @click="addressOptionsClick(index)">
                       {{ item.label }}
                     </p>
-                  </div>
+                  </div> -->
                 </el-popover>
               </el-form-item>
             </div>
             <div class="w50">
-              <el-form-item prop="remark" label="备注">
+              <el-form-item prop="MENU_REMARK" label="备注">
                 <el-input
-                  v-model="munuForm.remark"
+                  v-model="munuForm.MENU_REMARK"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
             </div>
           </div>
           <div>
-            <el-button type="primary" @click="submitFor">保存</el-button>
+            <el-button type="primary" @click="submitForm">保存</el-button>
             <el-button @click="resetQuery">重置</el-button>
           </div>
         </el-form>
@@ -149,21 +165,21 @@
               </div>
             </div>
             <el-table
-              :data="tableData"
+              :data="menuDataList"
               style="width: 100%"
               @selection-change="handleSelectionChange"
             >
               <el-table-column fixed="left" type="selection" width="45" />
               <el-table-column label="#" type="index" width="45" />
 
-              <el-table-column prop="name" label="菜单名称" />
-              <el-table-column prop="address" label="菜单地址" />
-              <el-table-column prop="sort" label="排序" />
-              <el-table-column prop="icon" label="图标" />
+              <el-table-column prop="MENU_NAME" label="菜单名称" />
+              <el-table-column prop="MENU_REMARK" label="菜单地址" />
+              <el-table-column prop="MENU_SORT" label="排序" />
+              <el-table-column prop="MENU_ICON" label="图标" />
 
               <el-table-column label="状态">
                 <template slot-scope="scope">
-                  {{ stateText[scope.row.state] }}
+                  {{ stateText[scope.row.MENU_STATE] }}
                 </template>
               </el-table-column>
             </el-table>
@@ -186,45 +202,25 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
-import { getMenuData, getMenu, addMenuSave } from '../../api/menu/menu'
+import {
+  getMenu,
+  addMenuSave,
+  updateSta,
+  deleteMenu,
+} from '../../api/menu/menu'
 export default {
   name: 'datadictionary',
   components: {
     getMenu,
     addMenuSave,
+    updateSta,
+    deleteMenu,
   },
   components: {
     tableMenutTool,
   },
   data() {
     return {
-      menuOptions: [
-        {
-          label: '添加根菜单',
-        },
-        {
-          label: '添加子菜单',
-        },
-        {
-          label: '删除选中',
-        },
-        {
-          label: '禁用选中',
-        },
-        {
-          label: '启用选中',
-        },
-      ],
-      menuValue: '',
-      tableData: [
-        {
-          name: 'CBDKXXZT',
-          address: '23',
-          sort: '1',
-          state: '1',
-          icon: '',
-        },
-      ],
       total: 0,
       queryParams: {
         page: 1,
@@ -237,27 +233,26 @@ export default {
         label: 'label',
       },
       munuForm: {
-        name: '',
-        address: '',
-        number: '',
-        code: '',
-        state: '1',
-        icon: '',
-        remark: '',
+        MENU_ID: '',
+        MENU_PID: '',
+        MENU_NAME: '',
+        MENU_URL: '',
+        MENU_SORT: '',
+        APP_CODE: '',
+        MENU_STATE: '1',
+        MENU_ICON: '',
+        MENU_REMARK: '',
       },
       munuRules: {
-        code: [{ required: true, message: '请输入分组代码', trigger: 'blur' }],
-        name: [
-          { required: true, message: '请输入分组名称', trigger: 'blur' },
-          {
-            min: 3,
-            max: 10,
-            message: '长度在 3 到 10 个字符',
-            trigger: 'blur',
-          },
+        MENU_NAME: [
+          { required: true, message: '请输入菜单名称', trigger: 'blur' },
         ],
-        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
-        state: [{ required: true, message: '请选择状态', trigger: 'change' }],
+        MENU_REMARK: [
+          { required: true, message: '请输入备注', trigger: 'blur' },
+        ],
+        MENU_STATE: [
+          { required: true, message: '请选择状态', trigger: 'change' },
+        ],
       },
       addressOptions: [
         {
@@ -277,26 +272,23 @@ export default {
       },
       isShowCheckbox: false,
       loading: false,
+      expandAll: false,
       menuDataList: [],
       jsonDataTree: [],
+      updateStaqueryParams: {
+        ids: '',
+        MENU_STATE: '',
+      },
+      _IDS: '',
     }
   },
 
   created() {
     this.getList()
-    this.getMenuList('')
   },
 
   methods: {
     getList() {
-      this.loading = true
-      getMenuData(this.queryParams).then((response) => {
-        this.tableData = response.data
-        this.total = response.count
-        this.loading = false
-      })
-    },
-    getMenuList() {
       getMenu(this.queryParams).then((response) => {
         this.menuDataList = response
         this.jsonDataTree = this.transData(
@@ -305,9 +297,9 @@ export default {
           'MENU_PID',
           'children'
         )
-        console.log(this.menuDataList)
       })
     },
+
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -323,6 +315,10 @@ export default {
       this.multipleSelection = val
     },
     submitForm: function () {
+      if (this._IDS != '' || this._IDS != undefined) {
+        this.munuForm.MENU_PID = this._IDS
+      }
+
       this.$refs['munuForm'].validate((valid) => {
         if (valid) {
           addMenuSave(this.munuForm)
@@ -344,6 +340,63 @@ export default {
         }
       })
     },
+    handleCommand(index) {
+      let command = index
+
+      if (command == 'add') {
+        this.resetForm('munuForm')
+      } else if (command == 'addchildren') {
+        if (this._IDS == '' || this._IDS == undefined) {
+          this.$message({
+            message: '请勾选菜单节点',
+            type: 'warning',
+            center: true,
+          })
+        } else {
+          this.resetForm('munuForm')
+        }
+      } else if (command == 'delete') {
+        if (this._IDS == '' || this._IDS == undefined) {
+          this.$message({
+            message: '请勾选菜单节点',
+            type: 'warning',
+            center: true,
+          })
+        } else {
+          deleteMenu(this._IDS).then((response) => {
+            this.getList()
+          })
+        }
+      } else if (command == 'disabled') {
+        if (this._IDS == '' || this._IDS == undefined) {
+          this.$message({
+            message: '请勾选菜单节点',
+            type: 'warning',
+            center: true,
+          })
+        } else {
+          this.updateStaqueryParams.ids = this._IDS
+          this.updateStaqueryParams.MENU_STATE = '0'
+          updateSta(this.updateStaqueryParams).then((response) => {
+            this.getList()
+          })
+        }
+      } else if (command == 'enable') {
+        if (this._IDS == '' || this._IDS == undefined) {
+          this.$message({
+            message: '请勾选菜单节点',
+            type: 'warning',
+            center: true,
+          })
+        } else {
+          this.updateStaqueryParams.ids = this._IDS
+          this.updateStaqueryParams.MENU_STATE = '1'
+          updateSta(this.updateStaqueryParams).then((response) => {
+            this.getList()
+          })
+        }
+      }
+    },
     close() {
       this.munuForm = []
     },
@@ -351,10 +404,26 @@ export default {
       this.resetForm('munuForm')
     },
     addressOptionsClick(index) {
-      this.munuForm.address = index
+      this.munuForm.MENU_URL = index
     },
     handleNodeClick(data) {
-      console.log(data.MENU_ID)
+      this._IDS = data.MENU_ID
+      console.log(this._IDS)
+    },
+    expandHandle() {
+      // console.log(this.$refs.tree.store);
+      this.expandAll = !this.expandAll;
+      this.expandNodes(this.$refs.tree.store.root);
+    },
+    // 遍历树形数据，设置每一项的expanded属性，实现展开收起
+    expandNodes(node) {
+      node.expanded = this.expandAll;
+      for (let i = 0; i < node.childNodes.length; i++) {
+        node.childNodes[i].expanded = this.expandAll;
+        if (node.childNodes[i].childNodes.length > 0) {
+          this.expandNodes(node.childNodes[i]);
+        }
+      }
     },
     /**
      * 存放的最终结果树数组
@@ -408,7 +477,7 @@ export default {
   display: inline-block;
   height: 40px;
   line-height: 40px;
-  padding: 0 10px;
+  padding: 0 20px;
   color: #01aaed;
   cursor: pointer;
 }
