@@ -99,7 +99,7 @@
               :value="item.value">
             </el-option>
           </el-select> -->
-           <el-input v-model="parameterForm.CODE"></el-input>
+            <el-input v-model="parameterForm.CODE"></el-input>
             <!-- <div class="input_popover">
               <el-input v-model="parameterForm.CODE"></el-input>
               <div class="popover_div" >
@@ -139,15 +139,15 @@
         >
           <div class="d-display">
             <div class="w50">
-              <el-form-item prop="homeName" label="首页名称">
+              <el-form-item prop="title" label="首页名称">
                 <el-input
-                  v-model="settingForm.homeName"
+                  v-model="settingForm.title"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="iconClass" label="图标class">
+              <el-form-item prop="icon" label="图标class">
                 <el-input
-                  v-model="settingForm.iconClass"
+                  v-model="settingForm.icon"
                   prefix-icon="iconfont icon-user"
                 ></el-input>
               </el-form-item>
@@ -168,7 +168,7 @@
             </div>
           </div>
 
-          <el-form-item prop="logoImage" label="logo图片">
+          <el-form-item prop="image" label="logo图片">
             <el-upload action="#" list-type="picture-card" :auto-upload="false">
               <i slot="default" class="el-icon-plus"></i>
               <div slot="file" slot-scope="{ file }">
@@ -202,9 +202,9 @@
               </div>
             </el-upload>
           </el-form-item>
-          <el-form-item prop="accessAddress" label="访问地址">
+          <el-form-item prop="href" label="访问地址">
             <el-input
-              v-model="settingForm.accessAddress"
+              v-model="settingForm.href"
               prefix-icon="iconfont icon-user"
               placeholder="点击logo跳转的地址"
             ></el-input>
@@ -212,15 +212,13 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitSettingForm()"
-          >提交</el-button
-        >
+        <el-button type="primary" @click="submitSettingForm()">提交</el-button>
         <el-button @click="resetQuery2">重置</el-button>
       </div>
     </el-dialog>
 
     <el-dialog :visible.sync="dialogVisible">
-      <img width="100%" :src="settingForm.logoImage" alt="" />
+      <img width="100%" :src="settingForm.image" alt="" />
     </el-dialog>
   </div>
 </template>
@@ -230,6 +228,7 @@ import tableMenutTool from '@/views/tools/tableMenutTool'
 import {
   getParameterData,
   addParameterSave,
+  addsystemSave,
   deleteParameter,
   addSystemParameterSave,
   getSysinfoKeyMap,
@@ -240,6 +239,7 @@ export default {
     tableMenutTool,
     getParameterData,
     addParameterSave,
+    addsystemSave,
     deleteParameter,
     addSystemParameterSave,
     getSysinfoKeyMap,
@@ -265,29 +265,40 @@ export default {
         CODE: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
         JSONSTR: [{ required: true, message: '请填写参数值', trigger: 'blur' }],
       },
+      // JSONSTR: [
+      //   {
+      //     homeInfo: {
+      //       title: '首页22',
+      //       icon: 'layui-icon layui-icon-home',
+      //       href: '/pim/main/xtxz.do',
+      //     },
+      //     logoInfo: {
+      //       title: '农经综合平台',
+      //       image: '../logo.png',
+      //       href: '萨达',
+      //     },
+      //   },
+      // ],
+
       settingForm: {
-        homeName: 'sdadmin',
+        title: 'sdadmin',
         systemName: 'sfdf',
-        iconClass: 'element-ui-icon element-ui-icon-home',
-        logoImage: '',
+        icon: 'element-ui-icon element-ui-icon-home',
+        image: '',
         address: 'sdadmin',
-        accessAddress: 'sdadmin',
+        href: 'sdadmin',
       },
       settingRules: {
-        homeName: [
-          { required: true, message: '请输入首页名称', trigger: 'blur' },
-        ],
+        title: [{ required: true, message: '请输入首页名称', trigger: 'blur' }],
         systemName: [
           { required: true, message: '请输入系统名称', trigger: 'blur' },
         ],
-        iconClass: [
-          { required: true, message: '请输入图标class', trigger: 'blur' },
+        icon: [{ required: true, message: '请输入图标class', trigger: 'blur' }],
+        image: [
+          { required: true, message: '请选择logo图片', trigger: 'image' },
         ],
-        logoImage: [{ required: true, message: "请选择logo图片", trigger: "image" }],
         address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-        accessAddress: [
-          { required: true, message: '请填写访问地址', trigger: 'blur' },
-        ],
+        href: [{ required: true, message: '请填写访问地址', trigger: 'blur' }],
       },
       isShowCheckbox: false,
       dialogVisible: false,
@@ -295,6 +306,8 @@ export default {
       dialogType: 'new',
       tableDeleteChange: '', //勾选选中列表id
       sysinfoKeyMapData: [], //add 参数名称 集合
+      CODE: '系统参数', //系统参数
+      systemParametersData: [], //系统参数列表
     }
   },
 
@@ -413,7 +426,10 @@ export default {
     },
 
     editingSetting() {
-      return (this.SettingFromDialog = true)
+      addsystemSave(this.CODE).then((response) => {
+        this.systemParametersData = response
+        this.SettingFromDialog = true
+      })
     },
     addNameList() {
       this.dialogType = 'new'
@@ -423,7 +439,7 @@ export default {
       console.log(file)
     },
     handlePictureCardPreview(file) {
-      this.settingForm.logoImage = file.url
+      this.settingForm.image = file.url
       this.dialogVisible = true
     },
     handleDownload(file) {
@@ -475,19 +491,18 @@ export default {
 }
 </script>
 <style>
-
 </style>
 <style lang='less' scoped>
-.dialog_div{
+.dialog_div {
   // width: 100%;
   // text-align: center
 }
-.input_popover{
+.input_popover {
   // text-align: left;
   position: relative;
   background: red;
 }
-.popover_div{
+.popover_div {
   // position: absolute;
   // left: 0;
   // bottom: -180px;
@@ -496,15 +511,15 @@ export default {
   // z-index: 999;
   // background: yellow;
 }
-.popover_div_p{
+.popover_div_p {
   height: 36px;
   line-height: 36px;
   padding: 0 10px;
   cursor: pointer;
 }
-.popover_div_p:hover{
+.popover_div_p:hover {
   font-weight: bold;
   color: #2d8cf0;
-  background: #F6F6F6;
+  background: #f6f6f6;
 }
 </style>

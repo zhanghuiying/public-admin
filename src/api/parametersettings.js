@@ -26,6 +26,17 @@ export function addParameterSave(data) {
     data: qs.stringify(data)
   })
 }
+//添加参数
+export function addsystemSave(CODE) {
+  return request({
+    url: URL_PUBLIC + '/getObj.do',
+    method: 'post',
+    params: {
+      CODE
+    }
+  })
+}
+
 //添加系统参数设置
 export function addSystemParameterSave(data) {
   return request({

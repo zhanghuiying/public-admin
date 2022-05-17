@@ -201,6 +201,13 @@
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :visible.sync="dialogVisible">
+        <img width="100%" :src="applicationForm.APP_ICON" alt="">
+      </el-dialog>
+
+
+    
   </div>
 </template>
 
