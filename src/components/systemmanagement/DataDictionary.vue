@@ -38,22 +38,24 @@
           <el-table
             :data="tableData"
             style="width: 100%"
+            @cell-click="goTableClick"
             @selection-change="handleSelectionChange"
           >
             <el-table-column fixed="left" type="selection" width="45" />
             <el-table-column label="分组代码">
               <template slot-scope="scope">
-                <el-input
-                  v-model="scope.row.OG_CODE"
-                  onfocus="inputOnfocusFrom()"
-                  onblur="inputOnblurFrom()"
-                  onchange="inputOnchangeFrom()"
-                ></el-input>
+                {{ scope.row.OG_CODE }}
+                <!-- <el-input
+                  :value="scope.row.OG_CODE"
+                  @blur="sureChange(scope)"
+                  @input="(a) => tableInputInp(a, scope)"
+                >
+              </el-input> -->
               </template>
             </el-table-column>
             <el-table-column label="分组名称">
               <template slot-scope="scope">
-                <el-input v-model="scope.row.OG_NAME"></el-input>
+                {{ scope.row.OG_NAME }}
               </template>
             </el-table-column>
 
@@ -120,7 +122,7 @@
           </div>
           <div>
             <el-button type="primary" @click="submitForm">保存</el-button>
-            <el-button @click="resetQuery">重置</el-button>
+            <el-button @click="resetQuery(1)">重置</el-button>
           </div>
         </el-form>
       </div>
@@ -201,17 +203,17 @@
             v-show="total > 0"
             @size-change="handleSizeChange2"
             @current-change="handleCurrentChange2"
-            :current-page="queryParams2.page"
-            :page-size="queryParams2.limit"
+            :current-page="queryParamsDetails.page"
+            :page-size="queryParamsDetails.limit"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="total2"
+            :total="totalDetails"
           ></el-pagination>
         </div>
       </div>
     </div>
 
     <el-dialog
-      title="明细详情"
+      :title="dialogType === 'edit' ? '修改明细详情' : '添加明细详情'"
       :visible.sync="addDigitalDialog"
       width="50%"
       append-to-body
@@ -268,7 +270,7 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitAddDigita">提交</el-button>
-        <el-button @click="resetQuery2">重置</el-button>
+        <el-button @click="resetQuery(2)">重置</el-button>
       </div>
     </el-dialog>
   </div>
@@ -283,6 +285,7 @@ import {
   addDataSave,
   deleteData,
   deleteByIds,
+  reviseTableInput,
 } from '../../api/datadictionary/datadictionary'
 export default {
   name: 'datadictionary',
@@ -293,6 +296,7 @@ export default {
     addDataSave,
     deleteData,
     deleteByIds,
+    reviseTableInput,
   },
   data() {
     return {
@@ -304,8 +308,8 @@ export default {
         page: 1,
         limit: 10,
       },
-      total2: 0,
-      queryParams2: {
+      totalDetails: 0,
+      queryParamsDetails: {
         page: 1,
         limit: 10,
         OG_ID: '',
@@ -319,7 +323,6 @@ export default {
         OG_CODE: '',
         OG_NAME: '',
         OG_STATE: '',
-        OG_REMARK: '',
       },
       groupingRules: {
         OG_CODE: [
@@ -337,7 +340,6 @@ export default {
         OG_STATE: [
           { required: true, message: '请选择状态', trigger: 'change' },
         ],
-        OG_REMARK: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
       isShowCheckbox: false,
       isShowCheckbox2: false,
@@ -362,10 +364,19 @@ export default {
         OD_STATE: [
           { required: true, message: '请选择状态', trigger: 'change' },
         ],
-        OD_REMARK: [{ required: true, message: '请输入备注', trigger: 'blur' }],
       },
+      dialogType: 'new',
       tableDeleteChange: '', //勾选选中列表id
       tableDeleteChangeDetails: '', //勾选详情老板选中列表id
+      nameInputParams: {
+        OG_NAME: '',
+        OG_STATE: '',
+        OG_PID: '',
+        OG_ID: '',
+        OG_REMARK: '',
+        OG_CODE: '',
+      },
+      gotable: false,
     }
   },
 
@@ -385,15 +396,22 @@ export default {
     },
     getGroupingList() {
       this.loading = true
-      getListJsonByOgid(this.queryParams2).then((response) => {
+      // this.queryParamsDetails.OG_ID =''
+      getListJsonByOgid(this.queryParamsDetails).then((response) => {
         this.groupingDetailsData = response.data
-        this.total2 = response.count
+        this.totalDetails = response.count
         this.loading = false
       })
     },
-    inputOnfocusFrom() {},
-    inputOnblurFrom() {},
-    inputOnchangeFrom() {},
+    // tableInputInp(value, data) {
+    //   this.nameInputParams.OG_NAME = value
+    //   console.log(data.row);
+    // },
+    // sureChange(data) {
+    //   this.nameInputParams = data.row
+    //   reviseTableInput(this.nameInputParams).then((response) => {
+    //   })
+    // },
 
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
@@ -410,29 +428,45 @@ export default {
       this.getList()
     },
     handleSizeChange2(newSize) {
-      this.queryParams2.limit = newSize
+      this.queryParamsDetails.limit = newSize
       this.getGroupingList()
     },
     handleCurrentChange2(newPage) {
-      this.queryParams2.page = newPage
+      this.queryParamsDetails.page = newPage
       this.getGroupingList()
     },
     submitForm: function () {
       this.$refs['groupingForm'].validate((valid) => {
         if (valid) {
-          addDataSave(this.groupingForm)
-            .then((res) => {
-              if (res.statusCode == 200) {
-                this.$notify.success({ title: '提示', message: '保存成功' })
-              } else {
-                this.$notify.error({ title: '错误', message: res.message })
-              }
-              this.loading = false
-              this.getList()
-            })
-            .catch((error) => {
-              this.loading = false
-            })
+          if (this.gotable == true) {
+            reviseTableInput(this.groupingForm)
+              .then((res) => {
+                if (res.statusCode == 200) {
+                  this.$notify.success({ title: '提示', message: '保存成功' })
+                } else {
+                  this.$notify.error({ title: '错误', message: res.message })
+                }
+                this.loading = false
+                this.getList()
+              })
+              .catch((error) => {
+                this.loading = false
+              })
+          } else {
+            addDataSave(this.groupingForm)
+              .then((res) => {
+                if (res.statusCode == 200) {
+                  this.$notify.success({ title: '提示', message: '保存成功' })
+                } else {
+                  this.$notify.error({ title: '错误', message: res.message })
+                }
+                this.loading = false
+                this.getList()
+              })
+              .catch((error) => {
+                this.loading = false
+              })
+          }
         } else {
           this.loading = false
           return false
@@ -451,7 +485,8 @@ export default {
               }
               this.loading = false
               this.addDigitalDialog = false
-              this.getList()
+              // this.getList()
+              this.getGroupingList()
             })
             .catch((error) => {
               this.loading = false
@@ -465,13 +500,21 @@ export default {
     close() {
       this.groupingForm = []
     },
-    resetQuery() {
-      this.resetForm('groupingForm')
-      this.addDigitalDialog = false
+    resetQuery(index) {
+      if (index == '1') {
+        if (this.gotable == true) {
+          this.resetForm('groupingForm')
+          this.getList();
+        }else{
+          this.resetForm('groupingForm')
+          this.addDigitalDialog = false
+        }
+      } else {
+        this.resetForm('addDigitaForm')
+        this.addDigitalDialog = false
+      }
     },
-    resetQuery2() {
-      this.resetForm('addDigitaForm')
-    },
+
     addDetaList() {
       this.resetForm('groupingForm')
       this.$message({
@@ -481,30 +524,26 @@ export default {
       })
     },
     addDigitalDetails() {
-      return (this.addDigitalDialog = true)
-    },
-    handleDelete({ $index, row }) {
-      this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(async () => {
-          await deleteData(row.ROLE_ID)
-          this.groupingDetailsData.splice($index, 1)
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
-          })
-        })
-        .catch((err) => {
-          console.error(err)
-        })
+      this.dialogType = 'new'
+      this.resetForm('addDigitaForm')
+      this.addDigitalDialog = true
     },
     editTable(from) {
       this.dialogType = 'edit'
-      this.editTableDialog = true
+      this.addDigitalDialog = true
       this.addDigitaForm = from.row
+    },
+    goTableClick(row) {
+      this.gotable = true
+      this.groupingForm = row
+      this.queryParamsDetails.OG_ID = row.OG_ID
+      this.addDigitaForm.OG_ID = row.OG_ID
+
+      getListJsonByOgid(this.queryParamsDetails).then((response) => {
+        this.groupingDetailsData = response.data
+        this.totalDetails = response.count
+        console.log(this.groupingDetailsData)
+      })
     },
     handleSelectionChange(val) {
       const that = this
@@ -546,13 +585,31 @@ export default {
           })
       }
     },
+    handleDelete({ $index, row }) {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          await deleteData(row.OD_ID)
+          this.groupingDetailsData.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+        })
+    },
     groupingChange(val) {
       this.multipleSelectionDetails = val
       const that = this
       that.tableDeleteChangeDetails = ''
       that.multipleSelectionDetails = val
       that.multipleSelectionDetails.forEach(function (e) {
-        that.tableDeleteChangeDetails += e.OG_ID + ','
+        that.tableDeleteChangeDetails += e.OD_ID + ','
       })
     },
     deleteTableDetails() {
@@ -576,7 +633,7 @@ export default {
           .then(async () => {
             await deleteData(that.tableDeleteChangeDetails)
             that.tableDeleteChangeDetails = ''
-            that.getList()
+            that.getGroupingList()
             that.$message({
               type: 'success',
               message: '删除成功!',

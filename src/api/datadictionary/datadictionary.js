@@ -11,10 +11,19 @@ export function getData(query) {
   })
 }
 
-export function getListJsonByOgid() {
+// export function getListJsonByOgid(query) {
+//   return request({
+//     url: '/lui_sys/pim/optionGroup/listJson.do',
+//     method: 'post',
+//     params: query
+//   })
+// }
+
+export function getListJsonByOgid(query) {
   return request({
     url: URL_PUBLIC+'/listJsonByOgid.do',
-    method: 'post'
+    method: 'post',
+    params: query
   })
 }
 
@@ -26,6 +35,16 @@ export function addDataSave(data) {
     data: qs.stringify(data)
   })
 }
+
+//修改添加 双击table表单列表 
+export function reviseTableInput(data) {
+  return request({
+    url: '/lui_sys/pim/optionGroup/save.do',
+    method: 'post',
+    data: qs.stringify(data)
+  })
+}
+
 //删除
 export function deleteData(ids) {
   return request({
