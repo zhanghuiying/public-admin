@@ -9,7 +9,7 @@
           <i class="el-icon-circle-plus-outline"></i>
         </div>
 
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="deleteTable()">
           <i class="el-icon-delete"></i>
         </div>
         <div
@@ -93,7 +93,7 @@
     </div>
 
     <el-dialog
-      :title="dialogType === 'edit' ? '附件修改' : '添加附件修改'"
+      :title="dialogType === 'edit' ? '修改定时任务' : '添加定时任务'"
       :visible.sync="reviseTableDialog"
       width="50%"
       append-to-body
@@ -145,7 +145,7 @@
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('timedTaskForm')">保存</el-button>
+        <el-button type="primary" @click="submitForm()">保存</el-button>
         <el-button @click="resetQuery">重置</el-button>
       </div>
     </el-dialog>
@@ -159,6 +159,7 @@ import {
   getTaskClass,
   addTimedtaskSave,
   deleteTimedtask,
+  deleteUser,
   editSwitchChange,
   exeTaskOnece,
 } from '../api/timedtask'
@@ -170,6 +171,7 @@ export default {
     getTaskClass,
     addTimedtaskSave,
     deleteTimedtask,
+    deleteUser,
     editSwitchChange,
     exeTaskOnece,
   },
@@ -182,14 +184,13 @@ export default {
         page: 1,
         limit: 10,
       },
-      multipleSelection: [],
       reviseTableDialog: false,
       timedTaskForm: {
+        YXZT: '',
         ID: '',
         CLASSPATH: '',
         NAME: '',
         CRONSTR: '',
-        YXZT: '',
         BZ: '',
       },
       timedTaskRules: {
@@ -209,6 +210,11 @@ export default {
       querySwitch: {
         ID: '',
         YXZT: '',
+      },
+      multipleSelection: [],
+      tableDeleteChange: '', //勾选选中列表id
+      queryParamsSaveUserOrg: {
+        ids: '',
       },
     }
   },
@@ -269,7 +275,14 @@ export default {
       this.getList()
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val
+      const that = this
+      that.tableDeleteChange = ''
+      that.queryParamsSaveUserOrg.ids = ''
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function (e) {
+        that.tableDeleteChange += e.ID + ','
+        that.queryParamsSaveUserOrg.ids += e.ID + ','
+      })
     },
     close() {
       this.timedTaskForm = []
@@ -297,7 +310,7 @@ export default {
         type: 'warning',
       })
         .then(async () => {
-          await deleteTimedtask(row.ROLE_ID)
+          await deleteTimedtask(row.ID)
           this.tableData.splice($index, 1)
           this.$message({
             type: 'success',
@@ -307,6 +320,39 @@ export default {
         .catch((err) => {
           console.error(err)
         })
+    },
+    //删除勾选的列表用户
+    deleteTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await deleteUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
     },
     // 开关事件
     changeStatus(e, row, index) {
@@ -334,7 +380,7 @@ export default {
         .then(async () => {
           exeTaskOnece(this.timedTaskForm).then((response) => {
             if (response.statusCode !== 200) {
-              this.$message.error(response.message)
+              this.$notify.success({ title: '提示', message: '保存成功' })
             } else {
               this.$message.error(response.message)
             }

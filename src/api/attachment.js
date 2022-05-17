@@ -19,4 +19,15 @@ export function addAttachmentSave(data) {
   })
 }
 
+//删除勾选列表
+export function deleteUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/delete.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
+
 

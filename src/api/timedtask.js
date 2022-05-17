@@ -46,6 +46,16 @@ export function deleteTimedtask(ids) {
     }
   })
 }
+//删除勾选列表
+export function deleteUser(ids) {
+  return request({
+    url: URL_PUBLIC+'/deleteByIds.do',
+    method: 'post',
+    params: {
+      ids
+    }
+  })
+}
 
 //执行一次
 export function exeTaskOnece(data) {

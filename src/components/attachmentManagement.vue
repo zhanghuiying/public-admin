@@ -9,12 +9,25 @@
           <i class="el-icon-circle-plus-outline"></i>
         </div>
 
-        <div class="public_table_tool_inline">
+        <div class="public_table_tool_inline" @click="deleteTable()">
           <i class="el-icon-delete"></i>
         </div>
-        <div :class="isShowCheckbox===true?'public_editing_checkbox pb-checked-bg' : 'public_editing_checkbox'" 
-        @click="editingCheckbox()">开启编辑
-          <i :class="isShowCheckbox===true?'el-icon-check pb-checked-i' : 'el-icon-check'"></i>
+        <div
+          :class="
+            isShowCheckbox === true
+              ? 'public_editing_checkbox pb-checked-bg'
+              : 'public_editing_checkbox'
+          "
+          @click="editingCheckbox()"
+        >
+          开启编辑
+          <i
+            :class="
+              isShowCheckbox === true
+                ? 'el-icon-check pb-checked-i'
+                : 'el-icon-check'
+            "
+          ></i>
         </div>
         <div class="pos_tool_tb">
           <table-menut-tool />
@@ -35,12 +48,14 @@
         <el-table-column prop="storagelocation" label="存储位置" />
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
-            <span class="public-table-btn table-btn-edit" @click="reviseTable"
-              >修改</span
+            <span
+              class="public-table-btn table-btn-edit"
+              @click="editTable(scope)"
+              >编辑</span
             >
             <span
               class="public-table-btn table-btn-delete"
-              @click="handleDelete(scope.row)"
+              @click="handleDelete(scope)"
               >删除</span
             >
           </template>
@@ -59,7 +74,7 @@
     </div>
 
     <el-dialog
-      title="附件修改"
+      :title="dialogType === 'edit' ? '修改附件' : '添加附件'"
       :visible.sync="reviseTableDialog"
       width="50%"
       append-to-body
@@ -147,13 +162,18 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
-import { getAttachmentData,addAttachmentSave } from '../api/attachment'
+import {
+  getAttachmentData,
+  addAttachmentSave,
+  deleteUser,
+} from '../api/attachment'
 export default {
   name: 'attachment',
   components: {
     tableMenutTool,
     getAttachmentData,
-    addAttachmentSave
+    addAttachmentSave,
+    deleteUser,
   },
   data() {
     return {
@@ -164,7 +184,6 @@ export default {
         page: 1,
         limit: 10,
       },
-      multipleSelection: [],
       reviseTableDialog: false,
       appendixForm: {
         filename: 'sdadmin',
@@ -178,16 +197,39 @@ export default {
         filelocation: '',
       },
       appendixRules: {
-        filename: [{ required: true, message: '请输入文件名', trigger: 'blur' }],
-        newfilename: [{ required: true, message: '请输入新文件名', trigger: 'blur' }],
+        filename: [
+          { required: true, message: '请输入文件名', trigger: 'blur' },
+        ],
+        newfilename: [
+          { required: true, message: '请输入新文件名', trigger: 'blur' },
+        ],
         path: [{ required: true, message: '请输入路径', trigger: 'blur' }],
         size: [{ required: true, message: '请输入大小', trigger: 'blur' }],
-        uploadtime: [{ type: 'date', required: true, message: '请选择上传日期', trigger: 'change' }],
-        uploaduser: [{ required: true, message: '请输入上传用户', trigger: 'blur' }],
-        extensionname: [{ required: true, message: '请输入扩展名', trigger: 'blur' }],
-        filelocation: [{ required: true, message: '请输入文件位置', trigger: 'blur' }],
+        uploadtime: [
+          {
+            type: 'date',
+            required: true,
+            message: '请选择上传日期',
+            trigger: 'change',
+          },
+        ],
+        uploaduser: [
+          { required: true, message: '请输入上传用户', trigger: 'blur' },
+        ],
+        extensionname: [
+          { required: true, message: '请输入扩展名', trigger: 'blur' },
+        ],
+        filelocation: [
+          { required: true, message: '请输入文件位置', trigger: 'blur' },
+        ],
       },
       isShowCheckbox: false,
+      dialogType: 'new',
+      multipleSelection: [],
+      tableDeleteChange: '', //勾选选中列表id
+      queryParamsSaveUserOrg: {
+        ids: '',
+      },
     }
   },
 
@@ -227,8 +269,8 @@ export default {
         }
       })
     },
-    editingCheckbox(){
-      this.isShowCheckbox = !this.isShowCheckbox;
+    editingCheckbox() {
+      this.isShowCheckbox = !this.isShowCheckbox
     },
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
@@ -239,39 +281,82 @@ export default {
       this.getList()
     },
     handleSelectionChange(val) {
-      this.multipleSelection = val
+      const that = this
+      that.tableDeleteChange = ''
+      that.queryParamsSaveUserOrg.ids = ''
+      that.multipleSelection = val
+      that.multipleSelection.forEach(function (e) {
+        that.tableDeleteChange += e.USER_ID + ','
+        that.queryParamsSaveUserOrg.ids += e.USER_ID + ','
+      })
     },
     close() {
       this.appendixForm = []
       this.reviseTableDialog = false
     },
     resetQuery() {
-      this.resetForm("appendixForm");
+      this.resetForm('appendixForm')
       this.reviseTableDialog = false
     },
-    reviseTable() {
-      return (this.reviseTableDialog = true)
+    editTable(from) {
+      this.dialogType = 'edit'
+      this.reviseTableDialog = true
+      this.appendixForm = from.row
     },
     addNameList() {
-      this.resetForm("appendixForm");
-      return (this.reviseTableDialog = true)
+      this.dialogType = 'new'
+      this.reviseTableDialog = true
     },
-
-    handleDelete(row) {
-      const ids = row.id || this.ids
+    handleDelete({ $index, row }) {
       this.$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
-        .then(function () {
-          // return delCRestaurants(ids)
+        .then(async () => {
+          await deleteUser(row.APP_ID)
+          this.tableData.splice($index, 1)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
         })
-        .then(() => {
-          this.getList()
-          this.msgSuccess('删除成功')
+        .catch((err) => {
+          console.error(err)
         })
-        .catch(function () {})
+    },
+    //删除勾选的列表用户
+    deleteTable() {
+      const that = this
+      if (
+        that.multipleSelection == undefined ||
+        that.multipleSelection.length <= 0
+      ) {
+        that.$message({
+          message: '请勾选择要删除的数据',
+          type: 'warning',
+          center: true,
+        })
+      } else {
+        that
+          .$confirm('此操作将永久删除该用户, 是否继续?', '信息', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          })
+          .then(async () => {
+            await deleteUser(that.tableDeleteChange)
+            that.tableDeleteChange = ''
+            that.getList()
+            that.$message({
+              type: 'success',
+              message: '删除成功!',
+            })
+          })
+          .catch((err) => {
+            console.error(err)
+          })
+      }
     },
   },
 }
@@ -283,7 +368,6 @@ export default {
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
 }
-  
 </style>
 <style lang='less' scoped>
 </style>

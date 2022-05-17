@@ -493,7 +493,6 @@ export default {
         that.tableDeleteChange += e.APP_ID + ','
         that.queryParamsSaveUserOrg.ids += e.APP_ID + ','
       })
-
     },
     close() {
       this.applicationForm = []
