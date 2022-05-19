@@ -283,6 +283,9 @@ export default {
         that.tableDeleteChange += e.ID + ','
         that.queryParamsSaveUserOrg.ids += e.ID + ','
       })
+      that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
+      that.queryParamsSaveUserOrg.ids = that.queryParamsSaveUserOrg.ids.substr(0, that.queryParamsSaveUserOrg.ids.length-1)
+
     },
     close() {
       this.timedTaskForm = []

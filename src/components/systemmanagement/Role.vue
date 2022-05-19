@@ -45,7 +45,7 @@
                     >
                     <span
                       class="public-table-btn table-btn-check"
-                      @click="checkMenuPermissions(scope.row.ROLE_ID)"
+                      @click="checkMenuPermissions(scope.row)"
                       >查看菜单权限</span
                     >
                     <span
@@ -80,14 +80,17 @@
             >刷新</span
           >
         </p>
+        <!-- :default-checked-keys="defKeys" -->
         <el-tree
           :data="jsonDataTree"
           show-checkbox
-          node-key="id"
           default-expand-all
           highlight-current
+          node-key="id"
+          ref="rightsTree"
           :expand-on-click-node="false"
           @check="handleNodeClick"
+          :default-checked-keys="defKeys"
         >
           <span class="custom_tree_node" slot-scope="{ data }">
             <span class="custom_tree_id">{{ data.MENU_NAME }}</span>
@@ -207,7 +210,8 @@ export default {
         ROLE_ID: '',
         MENU_ID: '',
       },
-      
+      defKeys: [],
+      selectMenu: [],
     }
   },
 
@@ -303,11 +307,33 @@ export default {
       this.dialogType = 'new'
       return (this.addRoleDialog = true)
     },
-    checkMenuPermissions(id) {
-      selectMenuByRoleId(id).then((response) => {
-        let selectMenu = response
-        console.log(selectMenu)
+    checkMenuPermissions(role) {
+      const that = this;
+      // this.getLeafKeys(role.ROLE_ID,this.defKeys)
+      that.defKeys = []
+      selectMenuByRoleId(role.ROLE_ID).then((response) => {
+        that.selectMenu = response
+        that.selectMenu.map((item) => {
+          that.defKeys.push(item.MENU_ID)
+        })
+          that.$nextTick(() =>{
+          that.$refs.rightsTree.setCheckedKeys(this.defKeys)
+        })
+
+        // that.selectMenu.forEach(function(e) {
+        //   that.defKeys += e.MENU_ID + ",";
+        // });
+        // that.defKeys = that.defKeys.substr(0, that.defKeys.length-1)
+        // this.getLeafKeys(role.ROLE_ID,this.defKeys)
+
+        console.log(that.defKeys)
       })
+    },
+    getLeafKeys(node,arr){
+      // node.forEach(item=> 
+      //   this.getLeafKeys(item,arr))
+        console.log(node,arr);
+      // return arr.push(node.MENU_ID)
     },
 
     koopMenuPermissions(id) {
@@ -337,14 +363,16 @@ export default {
       checkData.checkedNodes.forEach(function(e) {
         that.menu_id += e.MENU_ID + ",";
       });
+      that.menu_id = that.menu_id.substr(0, that.menu_id.length-1)
       // that.saveMenuParams.MENU_ID = data.MENU_PID + that.menu_id
       // console.log(that.saveMenuParams.MENU_ID)
-      console.log(that.menu_id)
+      // console.log(that.menu_id)
 
       // this.menu_id = data.MENU_PID + "," + data.MENU_ID
       // this.menuIdSelection.forEach(function(e) {
       //   this.menu_id += e.MENU_ID + ",";
       // });
+      // that.menu_id = that.menu_id.substr(0, that.menu_id.length-1)
       // console.log(checkData)
     },
     // 多选框选中数据
@@ -355,6 +383,7 @@ export default {
       that.multipleSelection.forEach(function(e) {
         that.tableDeleteChange += e.ROLE_ID + ",";
       });
+      that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
     },
     //删除勾选的列表用户
     deleteTable(){

@@ -656,6 +656,8 @@ export default {
         that.tableDeleteChange += e.USER_ID + ','
         that.queryParamsSaveUserOrg.ids += e.USER_ID + ','
       })
+      that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
+      that.queryParamsSaveUserOrg.ids = that.queryParamsSaveUserOrg.ids.substr(0, that.queryParamsSaveUserOrg.ids.length-1)
     },
     submitForm: function () {
       const that = this
@@ -664,9 +666,13 @@ export default {
       that.userRoleSelection.forEach(function (e) {
         that.editForm.roleIds += e + ','
       })
+      that.editForm.roleIds = that.editForm.roleIds.substr(0, that.editForm.roleIds.length-1)
+
       that.userOpgSelection.forEach(function (e) {
         that.editForm.operateIds += e + ','
       })
+      that.editForm.operateIds = that.editForm.operateIds.substr(0, that.editForm.operateIds.length-1)
+
       that.$refs['editForm'].validate((valid) => {
         if (valid) {
           addUserSave(that.editForm)
@@ -928,6 +934,8 @@ export default {
       that.userRoleSelection.forEach(function (e) {
         that.queryParamsRole.roleIds += e + ','
       })
+      that.queryParamsRole.roleIds = that.queryParamsRole.roleIds.substr(0, that.queryParamsRole.roleIds.length-1)
+
       saveUserRoles(that.queryParamsRole).then((response) => {
         that.userRoleSelection = ''
         that.getList()
@@ -940,6 +948,8 @@ export default {
       that.userOpgSelection.forEach(function (e) {
         that.queryParamsFeatures.operateIds += e + ','
       })
+      that.queryParamsFeatures.operateIds = that.queryParamsFeatures.operateIds.substr(0, that.queryParamsFeatures.operateIds.length-1)
+
       saveUserOperate(this.queryParamsFeatures).then((response) => {
         that.userOpgSelection = ''
         that.getList()

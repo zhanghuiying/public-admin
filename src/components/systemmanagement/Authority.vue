@@ -228,6 +228,8 @@ export default {
         this.opgSelection.forEach(function (e) {
           that.queryParamsSave.OP_CODE += e + ','
         })
+        that.queryParamsSave.OP_CODE = that.queryParamsSave.OP_CODE.substr(0, that.queryParamsSave.OP_CODE.length-1)
+      
         this.$confirm('确认保存相关权限吗？', '信息', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -302,6 +304,8 @@ export default {
 
         //   console.log("----------"+that.opgSelection);
         // })
+        // that.opgSelection = that.opgSelection.substr(0, that.opgSelection.length-1)
+
         
       })
 

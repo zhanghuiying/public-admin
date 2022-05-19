@@ -500,6 +500,8 @@ export default {
         that.tableDeleteChange += e.APP_ID + ','
         that.queryParamsSaveUserOrg.ids += e.APP_ID + ','
       })
+      that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
+      that.queryParamsSaveUserOrg.ids = that.queryParamsSaveUserOrg.ids.substr(0, that.queryParamsSaveUserOrg.ids.length-1)
     },
     close() {
       this.applicationForm = []

@@ -453,6 +453,7 @@ export default {
       that.multipleSelection.forEach(function (e) {
         that.tableDeleteChange += e.ID + ','
       })
+      that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
     },
     //删除勾选的列表用户
     deleteTable() {

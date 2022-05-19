@@ -552,6 +552,7 @@ export default {
       that.multipleSelection.forEach(function (e) {
         that.tableDeleteChange += e.OG_ID + ','
       })
+      that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
     },
     deleteTable() {
       const that = this
@@ -611,6 +612,8 @@ export default {
       that.multipleSelectionDetails.forEach(function (e) {
         that.tableDeleteChangeDetails += e.OD_ID + ','
       })
+      that.tableDeleteChangeDetails = that.tableDeleteChangeDetails.substr(0, that.tableDeleteChangeDetails.length-1)
+
     },
     deleteTableDetails() {
       const that = this
