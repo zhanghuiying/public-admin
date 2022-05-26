@@ -110,7 +110,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import countTo from 'vue-count-to';
 import '@/views/style/mainmodule.less'
 import { getPearData} from '../api/menu'
@@ -135,7 +135,7 @@ export default {
   },
 
   mounted() {
-    this.echarts('echarts')
+    this.charts('echarts')
   },
 
   methods: {
@@ -146,93 +146,181 @@ export default {
         console.log(this.pearlist)
       })
     },
-    echarts(id) {
-      // let myChart = echarts.init(document.getElementById(id))
-      // let option = {
-      //   tooltip: {
-      //     trigger: 'axis',
-      //   },
-      //   grid: {
-      //     left: '3%',
-      //     right: '4%',
-      //     bottom: '3%',
-      //     containLabel: true,
-      //   },
-      //   toolbox: {
-      //     feature: {
-      //       saveAsImage: {},
-      //     },
-      //   },
-      //   xAxis: {
-      //     type: 'category',
-      //     boundaryGap: false,
-      //     data: ['10:10', '10:10', '10:10', '10:30', '10:40', '10:10'],
-      //   },
-      //   yAxis: {
-      //     type: 'value',
-      //   },
-      //   series: [
-      //     {
-      //       name: '',
-      //       type: 'line',
-      //       stack: 'Total',
-      //       areaStyle: {
-      //         normal: {
-      //           color: new echarts.graphic.LinearGradient(
-      //             0,
-      //             0,
-      //             0,
-      //             1,
-      //             [
-      //               {
-      //                 offset: 0,
-      //                 color: 'rgba(155, 155, 226, 0.8)',
-      //               },
-      //               {
-      //                 offset: 1,
-      //                 color: 'rgba(155, 155, 226, 0)',
-      //               },
-      //             ],
-      //             false
-      //           ),
-      //           shadowColor: 'rgba(155, 155, 226, 0.8)',
-      //           shadowBlur: 20,
-      //         },
-      //       },
-      //       data: [120, 132, 101, 134, 90, 230, 210],
-      //     },
-      //     {
-      //       name: '',
-      //       type: 'line',
-      //       stack: 'Total',
-      //       areaStyle: {
-      //         normal: {
-      //           color: new echarts.graphic.LinearGradient(
-      //             0,
-      //             0,
-      //             0,
-      //             1,
-      //             [
-      //               {
-      //                 offset: 0,
-      //                 color: 'rgba(155, 155, 226, 0.8)',
-      //               },
-      //               {
-      //                 offset: 1,
-      //                 color: 'rgba(155, 155, 226, 0)',
-      //               },
-      //             ],
-      //             false
-      //           ),
-      //           shadowColor: 'rgba(155, 155, 226, 0.8)',
-      //           shadowBlur: 20,
-      //         },
-      //       },
-      //       data: [220, 182, 191, 234, 290, 330, 310],
-      //     },
-      //   ],
-      // }
-      // myChart.setOption(option)
+    charts(id) {
+      let myChart = echarts.init(document.getElementById(id))
+      const colorList = ["#FE6E71", '#4277F7']
+      let option = {
+        legend: {
+            icon: 'circle',
+            top: '5%',
+            right: '5%',
+            itemWidth: 6,
+            itemGap: 20,
+            textStyle: {
+                color: '#999999'
+            }
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                label: {
+                    show: true,
+                    backgroundColor: '#fff',
+                    color: '#999999',
+                    borderColor: 'rgba(0,0,0,0)',
+                    shadowColor: 'rgba(0,0,0,0)',
+                    shadowOffsetY: 0
+                },
+                lineStyle: {
+                    width: 0
+                }
+            },
+            backgroundColor: '#fff',
+            textStyle: {
+                color: '#5c6c7c'
+            },
+            padding: [10, 10],
+            extraCssText: 'box-shadow: 1px 0 2px 0 rgba(163,163,163,0.5)'
+        },
+        grid: {
+            top: '15%'
+        },
+        xAxis: [{
+            type: 'category',
+            data: ['10：00', '11：00', '12：00', '1：00', '2：00', '4：00'],
+            axisLine: {
+                lineStyle: {
+                    color: '#DCE2E8'
+                }
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                interval: 0,
+                textStyle: {
+                    color: '#556677'
+                },
+                fontSize: 12,
+                margin: 15
+            },
+            axisPointer: {
+                label: {
+                    padding: [0, 0, 10, 0],
+                    margin: 15,
+                    // 移入时的字体大小
+                    fontSize: 12,
+                    backgroundColor: {
+                        type: 'linear',
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [{
+                            offset: 0,
+                            color: '#fff' // 0% 处的颜色
+                        }, {
+                            offset: 0.86,
+                            color: '#fff' // 0% 处的颜色
+                        }, {
+                            offset: 0.86,
+                            color: '#4277F7' // 0% 处的颜色
+                        }, {
+                            offset: 1,
+                            color: '#4277F7' // 100% 处的颜色
+                        }],
+                        global: false // 缺省为 false
+                    }
+                }
+            },
+            boundaryGap: false
+        }],
+        yAxis: [{
+            type: 'value',
+            axisTick: {
+                show: false
+            },
+            axisLine: {
+                show: true,
+                lineStyle: {
+                    color: '#DCE2E8'
+                }
+            },
+            axisLabel: {
+                textStyle: {
+                    color: '#556677'
+                }
+            },
+            splitLine: {
+                show: false
+            }
+        }],
+        series: [{
+                name: '1',
+                type: 'line',
+                data: [10, 10, 30, 12, 15, 3],
+                symbolSize: 1,
+                symbol: 'circle',
+                smooth: true,
+                yAxisIndex: 0,
+                showSymbol: false,
+                lineStyle: {
+                    width: 5,
+                    color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
+                            offset: 0,
+                            color: '#FE6E71'
+                        },
+                        {
+                            offset: 1,
+                            color: '#FE6E71'
+                        }
+                    ]),
+                    shadowColor: 'rgba(158,135,255, 0.3)',
+                    shadowBlur: 10,
+                    shadowOffsetY: 20
+                },
+                itemStyle: {
+                    normal: {
+                        color: colorList[0],
+                        borderColor: colorList[0]
+                    }
+                }
+            }, {
+                name: '2',
+                type: 'line',
+                data: [5, 12, 11, 14, 25, 16],
+                symbolSize: 1,
+                symbol: 'circle',
+                smooth: true,
+                yAxisIndex: 0,
+                showSymbol: false,
+                lineStyle: {
+                    width: 5,
+                    color: new echarts.graphic.LinearGradient(1, 1, 0, 0, [{
+                            offset: 0,
+                            color: '#4277F7'
+                        },
+                        {
+                            offset: 1,
+                            color: '#4277F7'
+                        }
+                    ]),
+                    shadowColor: 'rgba(66,119,247, 0.3)',
+                    shadowBlur: 10,
+                    shadowOffsetY: 20
+                },
+                itemStyle: {
+                    normal: {
+                        color: colorList[1],
+                        borderColor: colorList[1]
+                    }
+                }
+            },
+
+        ]
+
+      }
+      myChart.setOption(option)
     },
   },
 }
