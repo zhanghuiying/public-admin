@@ -1,7 +1,7 @@
 <template>
   <div class="user_menu">
     <div class="nav_content_box">
-      <span class="hd-nav-item">
+      <span class="hd-nav-item" @click="screen">
         <i class="el-icon-rank"></i>
         <span class="hd-nav-bar"></span>
       </span>
@@ -88,6 +88,7 @@ export default {
       //弹出框
       openDialog: false,
       loading: false,
+      fullscreen: false,
       form: {
         Y_PWD: '',
         NEW_PWD: '',
@@ -174,6 +175,35 @@ export default {
     editOpen() {
       return (this.openDialog = true)
     },
+    screen(){
+      console.log("_________---");
+
+      let element = document.documentElement;
+      if (this.fullscreen) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitCancelFullScreen) {
+          document.webkitCancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } else {
+        if (element.requestFullscreen) {
+          element.requestFullscreen();
+        } else if (element.webkitRequestFullScreen) {
+          element.webkitRequestFullScreen();
+        } else if (element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+          // IE11
+          element.msRequestFullscreen();
+        }
+      }
+      this.fullscreen = !this.fullscreen;
+    }
+
   },
 }
 </script>
