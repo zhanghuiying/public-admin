@@ -2,13 +2,13 @@
   <div class="user_menu">
     <div class="nav_content_box">
       <span class="hd-nav-item" @click="screen">
-        <i class="el-icon-rank"></i>
+        <i :class="fullscreen == true?'el-icon-rank' : 'el-icon-full-screen'"></i>
         <span class="hd-nav-bar"></span>
       </span>
 
       <el-popover placement="bottom" trigger="hover">
         <span class="hd-nav-item" slot="reference">
-          <i class="el-icon-s-custom"></i>
+          <i class="el-icon-user"></i>
         </span>
         <p class="hd-nav-btn" @click="editOpen">修改密码</p>
         <p class="hd-nav-btn" @click="logout">注册登录</p>
@@ -176,8 +176,6 @@ export default {
       return (this.openDialog = true)
     },
     screen(){
-      console.log("_________---");
-
       let element = document.documentElement;
       if (this.fullscreen) {
         if (document.exitFullscreen) {

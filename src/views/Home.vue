@@ -99,7 +99,7 @@
             <span class="hd-nav-bar"></span>
           </span>
           <span class="hd-nav-item" @click="onReload">
-            <i class="el-icon-refresh"></i>
+            <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
             <span class="hd-nav-bar"></span>
           </span>
         </div>
@@ -127,22 +127,30 @@ export default {
       menuData: [],
       isCollapse: false,
       activePath: '',
+      isRefreshRouter: false,
     }
   },
 
   created() {
     this.getMenus()
   },
+  mounted() {
+    
+  },
 
   methods: {
     //刷新当前页面
     onReload() {
+      this.isRefreshRouter = !this.isRefreshRouter;
+      setTimeout(() => {
+        this.isRefreshRouter = !this.isRefreshRouter;
+      },1000)
       this.$router.replace({
-      path: '/refresh',
-      query: {
-        t: Date.now()
-      }
-    })
+        path: '/refresh',
+        query: {
+          t: Date.now()
+        }
+      })
     },
     routerUrlClick(url, params) {
       let path = params != '' ? { name: url, params: params } : { name: url }
@@ -237,5 +245,9 @@ export default {
 .el-submenu .el-menu--inline .el-menu-item.is-active {
   color: #fff !important;
   background: #2d8cf0 !important;
+}
+.refresh-go{
+  transform: rotate(360deg);
+  transition: all 1s;
 }
 </style>
