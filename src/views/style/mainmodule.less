@@ -4,25 +4,34 @@
     border-radius: 3px;
     background: #fff;
 }
+.v_module .public_card_header{
+    text-align: center!important;
+}
 
 .visit_col_space {
+    margin-top: 10px;
+    height: 58px;
     display: flex;
     justify-content: space-around;
 }
 
 .visit_col_space .col_space4_fl {
     width: 50%;
-}
-
-.top_panel_number {
-    line-height: 60px;
-    font-size: 29px;
+    line-height: 58px;
+    font-size: 28px;
     color: #28333E;
-    font-size: 26px;
     text-align: center;
     border-right: 1px solid #eceff9;
 }
-
+.visit_col_space .col_space_fr{
+    width: 50%;
+    height: 100%;
+}
+.visit_col_space .col_space_fr img{
+    width: 50px;
+    height: 50px;
+    margin-top: 3px;
+}
 .card_body {
     height: 100%;
     margin-top: 16px;
@@ -42,6 +51,7 @@
 .main_echarts {
     width: 100%;
     background: #fff;
+    margin-bottom: 15px;
     border-radius: 3px;
 }
 
@@ -69,14 +79,20 @@
     height: 40px;
     line-height: 40px;
 }
+.card_dynamic .admin-card-status .right .status_p span{
+        color: #2d8cf0!important;
+        margin: 0 4px;
+}
 
 .card_dynamic .admin-card-status .right span {
     color: #BBB;
 }
 
-.card_dynamic .admin-card-status .status_img {
-    height: 34px;
+.card_dynamic .admin-card-status .status_img{
+    width: 32px;
+    height: 32px;
     margin-top: 15px;
+    border-radius: 50px;
 }
 
 .card_list_item {
@@ -90,7 +106,7 @@
     height: 40px;
     line-height: 40px;
     color: gray;
-    padding: 0 0 0 15px;
+    padding: 3px 5px 0 15px;
     border-radius: 4px;
     margin-bottom: 6px;
     text-align: left;
@@ -122,9 +138,15 @@
     text-align: center;
     letter-spacing: 6px;
     cursor: pointer;
+    border-radius: 3px;
+}
+.card_link .card_body_btn a{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
     color: #fff;
     font-size: 16px;
-    border-radius: 3px;
+    text-decoration: none;
 }
 
 .pear-btn-primary {
@@ -143,10 +165,14 @@
     text-align: left;
     text-indent: 2em;
     line-height: 24px;
-    padding: 0 15px 15px 15px;
+    padding-bottom: 15px;
     background: #fff;
     border-radius: 3px;
     color: rgba(0, 0, 0, .85);
+}
+.card_message .message_conter{
+    line-height: 38px;
+    margin: 0 15px;
 }
 
 
@@ -156,6 +182,7 @@
 }
 .height_right_list {
     height: 385px;
+    padding: 10px 0;
 }
 .pub_scroll_list {
     width: 100%;

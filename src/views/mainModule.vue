@@ -4,8 +4,8 @@
       <div class="visit-w v_module">
         <p class="public_card_header">今日访问</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">
-            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          <div class="col_space4_fl">
+            <count-to :startVal='startVal' :decimals="2" :endVal='endVal' :duration='2000'></count-to>
             </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img1.png" alt="" />
@@ -15,8 +15,8 @@
       <div class="visit-w v_module">
         <p class="public_card_header">提交次数</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">
-            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          <div class="col_space4_fl">
+            <count-to :startVal='startVal' :decimals="2" :endVal='endVal2' :duration='2000'></count-to>
           </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img2.png" alt="" />
@@ -26,8 +26,8 @@
       <div class="visit-w v_module">
         <p class="public_card_header">下载数量</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">
-            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          <div class="col_space4_fl">
+            <count-to :startVal='startVal' :decimals="2" :endVal='endVal3' :duration='2000'></count-to>
           </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img3.png" alt="" />
@@ -37,8 +37,8 @@
       <div class="visit-w v_module">
         <p class="public_card_header">流量统计</p>
         <div class="visit_col_space">
-          <div class="col_space4_fl top_panel_number">
-            <count-to :startVal='startVal' :endVal='endVal' :duration='2000'></count-to>
+          <div class="col_space4_fl">
+            <count-to :startVal='startVal' :decimals="2" :endVal='endVal4' :duration='2000'></count-to>
           </div>
           <div class="col_space_fr">
             <img src="../assets/images/visit_card_img4.png" alt="" />
@@ -49,28 +49,65 @@
 
     <div class="d-display card_body">
       <div class="card_body_left">
-        <div id="echarts" style="height: 420px" class="main_echarts"></div>
+        <div id="echarts" style="height: 440px" class="main_echarts"></div>
 
         <div class="card_dynamic">
-          <p class="public_card_header" style="text-align: left">更 新</p>
+          <p class="public_card_header" style="text-align: left">动态</p>
 
           <div class="pub_scroll_list height_dynamic">
             <div class="pub_scroll_list_column">
-              <div
-                class="d-display admin-card-status"
-                v-for="item in 6"
-                :key="item"
-              >
+              <div class="d-display admin-card-status">
                 <div class="left">
-                  <img src="../assets/logo.png" class="status_img" />
+                  <img src="../assets/images/avatar.png" class="status_img" />
                 </div>
                 <div class="right">
-                  <p class="status_p">
-                    七彩枫叶 在
-                    <a href="/">Pear Admin 专区</a>
-                    回答问题
-                  </p>
+                  <p class="status_p">七彩枫叶 在<span>Pear Admin 专区</span>回答问题</p>
                   <span>几秒前</span>
+                </div>
+              </div>
+              <div class="d-display admin-card-status">
+                <div class="left">
+                  <img src="../assets/images/avatar.png" class="status_img" />
+                </div>
+                <div class="right">
+                  <p class="status_p">简 在<span>Pear Admin 专区</span>回答问题<span>提问</span></p>
+                  <span>2天前</span>
+                </div>
+              </div>
+              <div class="d-display admin-card-status">
+                <div class="left">
+                  <img src="../assets/images/avatar.png" class="status_img" />
+                </div>
+                <div class="right">
+                  <p class="status_p">恒宇少年 将<span>Pear Admin 专区</span>更新至 2.3.0 版本</p>
+                  <span>7天前</span>
+                </div>
+              </div>
+              <div class="d-display admin-card-status">
+                <div class="left">
+                  <img src="../assets/images/avatar.png" class="status_img" />
+                </div>
+                <div class="right">
+                  <p class="status_p">如花 在<span>Pear Admin 专区</span>社区 发布了<span>建议</span></p>
+                  <span>7天前</span>
+                </div>
+              </div>
+              <div class="d-display admin-card-status">
+                <div class="left">
+                  <img src="../assets/images/avatar.png" class="status_img" />
+                </div>
+                <div class="right">
+                  <p class="status_p">就眠仪式 在<span>Pear Admin 专区</span>社区 发布了<span>建议</span></p>
+                  <span>8天前</span>
+                </div>
+              </div>
+              <div class="d-display admin-card-status">
+                <div class="left">
+                  <img src="../assets/images/avatar.png" class="status_img" />
+                </div>
+                <div class="right">
+                  <p class="status_p">贤心 在<span>Pear Admin 专区</span>专区 进行了<span>提问</span></p>
+                  <span>8天前</span>
                 </div>
               </div>
             </div>
@@ -82,8 +119,36 @@
           <p class="public_card_header" style="text-align: left">更 新</p>
           <div class="pub_scroll_list height_right_list">
             <div class="pub_scroll_list_column">
-              <p class="list_item" v-for="item in 12" :key="item">
+              <p class="list_item">
                 <span class="text">优化代码格式</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">新增消息组件</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">移动端兼容</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">系统布局优化</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">兼容多系统菜单模式</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">兼容多标签页切换</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">扩展下拉组件</span>
+                <span class="data">2021-09-06 11:28</span>
+              </p>
+              <p class="list_item">
+                <span class="text">扩展卡片样式</span>
                 <span class="data">2021-09-06 11:28</span>
               </p>
             </div>
@@ -92,14 +157,14 @@
 
         <div class="card_link">
           <p class="public_card_header" style="text-align: left">链接</p>
-          <p class="card_body_btn pear-btn-primary">官网</p>
-          <p class="card_body_btn pear-btn-warming">下载</p>
-          <p class="card_body_btn pear-btn-danger">后端</p>
+          <p class="card_body_btn"><a class="pear-btn-primary" target="_blank" href="http://www.pearadmin.com/">官网</a></p>
+          <p class="card_body_btn"><a class="pear-btn-warming" target="_blank" href="https://gitee.com/pear-admin/Pear-Admin-Layui">下载</a></p>
+          <p class="card_body_btn"><a class="pear-btn-danger" target="_blank" href="https://gitee.com/pear-admin/Pear-Admin-Boot">后端</a></p>
         </div>
 
         <div class="card_message">
           <p class="public_card_header" style="text-align: left">寄语</p>
-          <p>
+          <p class="message_conter">
             原想将澎湃的爱平平稳稳放置你手心，奈何我徒有一股蛮劲，只顾向你跑去，一个不稳跌的满身脏兮兮。试图爬起的我，
             心想你会不会笑我 " 献爱献的这样笨拙, 怎么不知避开爱里的埋伏 "
           </p>
@@ -126,6 +191,9 @@ export default {
       startVal: 0,
       //数字结束
       endVal: 440.34,
+      endVal2: 236.30,
+      endVal3: 634.43,
+      endVal4: 373.23,
       pearlist: [],
     }
   },
@@ -183,7 +251,9 @@ export default {
             extraCssText: 'box-shadow: 1px 0 2px 0 rgba(163,163,163,0.5)'
         },
         grid: {
-            top: '15%'
+            top: '12%',
+            right: '4%',
+            left: '8%',
         },
         xAxis: [{
             type: 'category',
