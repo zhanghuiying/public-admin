@@ -3,14 +3,6 @@
     <div class="pb-main-menu-left">
       <div class="menu_column">
         菜单树
-        <!-- <el-popover placement="bottom" width="100" trigger="click">
-          <span slot="reference" class="menu_btn"
-            >菜单操作<i class="el-icon-arrow-down"></i
-          ></span>
-          <div :key="index" v-for="(item, index) in menuOptions">
-            <p class="hd-nav-btn">{{ item.label }}</p>
-          </div>
-        </el-popover> -->
         <el-dropdown @command="handleCommand">
           <span class="menu_btn">
             菜单操作<i class="el-icon-arrow-down el-icon--right"></i>
@@ -29,7 +21,7 @@
         <span class="btn_expand-shrink" @click="expandHandle">展开/收缩</span>
       </div>
 
-      <div class="public-card-body">
+      <div class="public-card-body menu-tree" style="margin: 0 6px">
         <el-tree
           :data="jsonDataTree"
           show-checkbox
@@ -38,6 +30,7 @@
           highlight-current
           :expand-on-click-node="false"
           :default-expand-all="expandAll"
+          @node-click="handleNodeClick"
           @check="handleNodeClick"
         >
           <span class="custom_tree_node" slot-scope="{ data }">
@@ -46,7 +39,7 @@
         </el-tree>
       </div>
     </div>
-    <div class="pb-main-menu-right pb-main_pad-lf">
+    <div class="pb-main-menu-right pb-main_pad-lf form_input">
       <div class="pb-bg pb-main-padding-bt pb-main-margin-b">
         <p class="public_card_header">菜单详情</p>
         <el-form
@@ -66,18 +59,25 @@
             </div>
             <div class="w25">
               <el-form-item prop="MENU_URL" label="访问地址">
-                <el-popover placement="bottom" width="100" trigger="click">
+                <template v-if="!addchildrenfl">
                   <el-input
-                    slot="reference"
-                    v-model="addressText[munuForm.MENU_URL]"
-                    prefix-icon="iconfont icon-user"
-                  ></el-input>
-                  <div :key="index" v-for="(item, index) in addressOptions">
-                    <p class="hd-nav-btn" @click="addressOptionsClick(index)">
-                      {{ item.label }}
-                    </p>
-                  </div>
-                </el-popover>
+                    v-model="munuForm.MENU_URL"
+                    prefix-icon="iconfont icon-user"></el-input>
+                </template>
+                <template v-else>
+                  <el-popover placement="bottom" width="100" trigger="click">
+                    <el-input
+                      slot="reference"
+                      v-model="addressText[munuForm.MENU_URL]"
+                      prefix-icon="iconfont icon-user"
+                    ></el-input>
+                    <div :key="index" v-for="(item, index) in addressOptions">
+                      <p class="hd-nav-btn" @click="addressOptionsClick(index)">
+                        {{ item.label }}
+                      </p>
+                    </div>
+                  </el-popover>
+                </template>
               </el-form-item>
             </div>
             <div class="w25">
@@ -161,10 +161,27 @@
                 ></i>
               </div>
               <div class="pos_tool_tb">
-                <table-menut-tool />
+                <div class="pos_table_tool">
+                  <el-popover placement="top" title="筛选列" trigger="hover" width="45">
+                    <div slot="reference" class="public_table_tool_inline">
+                      <i class="el-icon-data-analysis"></i>
+                    </div>
+                  </el-popover>
+                  <el-popover placement="top" title="导出" trigger="hover" width="36">
+                    <div slot="reference" class="public_table_tool_inline" @click="exportData">
+                      <i class="el-icon-receiving"></i>
+                    </div>
+                  </el-popover>
+                  <el-popover placement="top" title="打印" trigger="hover" width="36">
+                    <div slot="reference" class="public_table_tool_inline" @click="printJson">
+                      <i class="el-icon-printer"></i>
+                    </div>
+                  </el-popover>
+                </div>
               </div>
             </div>
             <el-table
+              ref="tableJson"
               :data="menuDataList"
               style="width: 100%"
               @selection-change="handleSelectionChange"
@@ -222,6 +239,7 @@ export default {
   data() {
     return {
       total: 0,
+      addchildrenfl:false,
       queryParams: {
         page: 1,
         limit: 10,
@@ -272,7 +290,7 @@ export default {
       },
       isShowCheckbox: false,
       loading: false,
-      expandAll: false,
+      expandAll: true,
       menuDataList: [],
       jsonDataTree: [],
       updateStaqueryParams: {
@@ -298,6 +316,13 @@ export default {
           'children'
         )
       })
+    },
+    exportData() {
+      this.download('/lui_sys/pim/menu/selectall.do', { ...this.menuDataList }, `菜单管理信息`)
+      // this.download(this.tableData, `用户信息.xlsx`)
+    },
+    printJson() {
+      this.$print(this.$refs.tableJson);
     },
 
     editingCheckbox() {
@@ -353,7 +378,9 @@ export default {
             center: true,
           })
         } else {
+          this.addchildrenfl = true
           this.resetForm('munuForm')
+          this.getList()
         }
       } else if (command == 'delete') {
         if (this._IDS == '' || this._IDS == undefined) {
@@ -407,8 +434,10 @@ export default {
       this.munuForm.MENU_URL = index
     },
     handleNodeClick(data) {
+      this.munuForm = data
+      console.log(this.munuForm);
       this._IDS = data.MENU_ID
-      console.log(this._IDS)
+      // console.log(this._IDS)
     },
     expandHandle() {
       // console.log(this.$refs.tree.store);
@@ -456,6 +485,72 @@ export default {
 }
 </script>
 <style>
+.menu-tree .custom_tree_node .el-input .el-input__inner{
+  width: 90px; 
+  height: 22px
+}
+.menu-tree .custom_tree_node{
+  padding-right: 16px;
+}
+.menu-tree .iconFolder::before{              
+  content:'';
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-image: url(../../assets/images/sprite.png);
+  background-position: -151px -46px;
+}
+.menu-tree .el-tree .is-expanded .el-tree-node__content .el-tree-node__children 
+.is-expanded .el-tree-node__content .is-expanded .el-tree-node__children .el-tree-node__content .is-leaf{
+  width: 24px!important;
+  height: 15px!important;
+  background-position: -106px -24px!important;
+}
+.menu-tree .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+    background-color: #e5e5e5;
+}
+.menu-tree .is-expanded .el-tree-node__content .expanded{
+  width: 24px!important;
+  height: 15px!important;
+  background-position: -106px -24px!important;
+}
+.menu-tree .el-tree-node__content .is-leaf{
+  width: 21px!important;
+  height: 46px!important;
+  background-position: -84px -32px!important;
+}
+.menu-tree .el-tree-node__expand-icon.expanded {
+    transform: rotate(0);
+}
+.menu-tree .el-tree-node__expand-icon.expanded:before {
+    content: "";
+}
+.menu-tree .el-tree-node__content .el-tree-node__expand-icon{
+  width: 24px;
+  height: 15px;
+  background-position: -127px -3px;
+}
+.menu-tree .el-tree-node__content .el-tree-node__expand-icon:before{
+  content: "";
+}
+.menu-tree .el-tree-node__content .el-tree-node__expand-icon{
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-image: url(../../assets/images/sprite.png);
+}
+
 .el-form-item__content .el-input,
 .el-select,
 .el-form-item__content .el-checkbox-group {
@@ -464,6 +559,17 @@ export default {
 .el-popover {
   padding: 10px 0 0 0 !important;
   margin-top: 0 !important;
+}
+.el-popover{
+  min-width: 36px!important;
+  text-align: center!important;
+  padding:6px 0!important;
+  border: 1px solid #ccc!important;
+}
+.el-popover .el-popover__title{
+  font-size: 12px!important;
+  margin: 0!important;
+  color: #333!important;
 }
 </style>
 <style lang='less' scoped>
@@ -486,5 +592,8 @@ export default {
 }
 .menu_column .menu_btn:hover {
   font-weight: bold;
+}
+.form_input .el-input--prefix .el-input__inner{
+  padding-left: 15px;
 }
 </style>

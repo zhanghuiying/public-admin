@@ -11,19 +11,19 @@
         >
       </p>
 
-      <div class="public-card-body">
+      <div class="public-card-body user-tree">
         <el-tree
           :data="jsonDataTree"
           :expand-on-click-node="false"
-          show-checkbox
           ref="tree"
           node-key="ORG_ID"
           default-expand-all
-          highlight-current
+          :highlight-current="showTree"
           @node-click="handleNodeClick"
         >
-
           <span class="custom_tree_node" slot-scope="{ node, data }">
+            <span  v-if="!data.children"  :class="file"></span>
+            <span v-else :class="folder"></span>
             <template v-if="data.ORG_ID != modifyTreeInput">
               <span class="custom_tree_id">{{ data.ORG_NAME }}</span>
               <span>
@@ -82,43 +82,76 @@
         <div class="public-card-body">
           <div class="public-card-body-border">
             <div class="public_table_tool">
-              <div class="public_table_tool_inline" @click="getList">
-                <i class="el-icon-refresh"></i>
-              </div>
-              <div class="public_table_tool_inline" @click="addNameList()">
-                <i class="el-icon-circle-plus-outline"></i>
-              </div>
-              <div class="public_table_tool_inline" @click="deleteTable()">
-                <i class="el-icon-delete"></i>
-              </div>
-              <div class="public_table_tool_inline" @click="disabledTable()">
-                <i class="el-icon-close"></i>
-              </div>
-              <div class="public_table_tool_inline" @click="enableTable()">
-                <i class="el-icon-check"></i>
-              </div>
-              <div
-                class="public_table_tool_inline"
-                @click="rechargePasswordTable()"
-              >
-                <i class="el-icon-unlock"></i>
-              </div>
+              <el-popover placement="top" title="刷新" trigger="hover" width="36">
+                <div slot="reference" class="public_table_tool_inline" @click="getList()">
+                  <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
+                </div>
+              </el-popover>
+              <el-popover placement="top" title="添加" trigger="hover" width="36">
+                <div slot="reference" class="public_table_tool_inline" @click="addNameList()">
+                  <i class="el-icon-circle-plus-outline"></i>
+                </div>
+              </el-popover>
+              <el-popover placement="top" title="删除" trigger="hover" width="36">
+                <div slot="reference" class="public_table_tool_inline" @click="deleteTable()">
+                  <i class="el-icon-delete"></i>
+                </div>
+              </el-popover>
+              <el-popover placement="top" title="禁用" trigger="hover" width="36">
+                <div slot="reference" class="public_table_tool_inline" @click="disabledTable()">
+                  <i class="el-icon-close"></i>
+                </div>
+              </el-popover>
+              <el-popover placement="top" title="启用" trigger="hover" width="36">
+                <div slot="reference" class="public_table_tool_inline" @click="enableTable()">
+                 <i class="el-icon-check"></i>
+                </div>
+              </el-popover>
 
-              <div class="public_table_tool_inline" @click="bindRole()">
-                <i class="el-icon-coordinate"></i>
-              </div>
-              <div class="public_table_tool_inline" @click="bindFeatures()">
-                <i class="el-icon-document"></i>
-              </div>
-              <div class="public_table_tool_inline" @click="bindMechanism()">
-                <i class="el-icon-s-check"></i>
-              </div>
+              <el-popover placement="top" title="重置密码" trigger="hover" width="56">
+                <div slot="reference" class="public_table_tool_inline" @click="rechargePasswordTable()">
+                 <i class="el-icon-unlock"></i>
+                </div>
+              </el-popover>
 
+              <el-popover placement="top" title="绑定角色" trigger="hover" width="56">
+                <div slot="reference" class="public_table_tool_inline" @click="bindRole()">
+                 <i class="el-icon-coordinate"></i>
+                </div>
+              </el-popover>
+              <el-popover placement="top" title="绑定功能组" trigger="hover" width="64">
+                <div slot="reference" class="public_table_tool_inline" @click="bindFeatures()">
+                 <i class="el-icon-document"></i>
+                </div>
+              </el-popover>
+              <el-popover placement="top" title="更换机构" trigger="hover" width="56">
+                <div slot="reference" class="public_table_tool_inline" @click="bindMechanism()">
+                  <i class="el-icon-s-check"></i>
+                </div>
+              </el-popover>
+              
               <div class="pos_tool_tb">
-                <table-menut-tool />
+                <div class="pos_table_tool">
+                  <el-popover placement="top" title="筛选列" trigger="hover" width="45">
+                    <div slot="reference" class="public_table_tool_inline">
+                      <i class="el-icon-data-analysis"></i>
+                    </div>
+                  </el-popover>
+                  <el-popover placement="top" title="导出" trigger="hover" width="36">
+                    <div slot="reference" class="public_table_tool_inline" @click="exportData">
+                      <i class="el-icon-receiving"></i>
+                    </div>
+                  </el-popover>
+                  <el-popover placement="top" title="打印" trigger="hover" width="36">
+                    <div slot="reference" class="public_table_tool_inline" @click="printJson">
+                      <i class="el-icon-printer"></i>
+                    </div>
+                  </el-popover>
+                </div>
               </div>
             </div>
             <el-table
+              ref="tableJson"
               :data="tableData"
               style="width: 100%"
               v-loading="loading"
@@ -139,7 +172,7 @@
               <el-table-column label="状态">
                 <template slot-scope="scope">
                   <span style="color: #1e9fff" v-if="(scope.row.USER_STATE = 1)"
-                    >启用</span
+                    >初始</span
                   >
                   <span style="color: #ff5722" v-else>停用</span>
                 </template>
@@ -236,25 +269,35 @@
           </el-form-item>
           <el-form-item label="角色绑定">
             <div style="text-align: left">
-              <span
+              <el-checkbox-group v-model="userRoleSelection" >
+                <el-checkbox v-for="(item, index) in userRoleList"
+                  :key="index" :label="item.ROLE_ID">{{item.ROLE_NAME}}</el-checkbox>
+              </el-checkbox-group>
+
+             <!-- <span
                 class="checkbox_span"
                 v-for="(item, index) in userRoleList"
                 :key="index"
               >
-                <input
+                 <input
                   type="checkbox"
                   :id="index"
                   :value="item.ROLE_ID"
                   v-model="userRoleSelection"
                 />
                 <label for="item">{{ item.ROLE_NAME }}</label>
-              </span>
+              </span>  -->
             </div>
           </el-form-item>
 
           <el-form-item label="权限绑定">
             <div style="text-align: left">
-              <span
+              <el-checkbox-group v-model="userOpgSelection" >
+                <el-checkbox v-for="(item, index) in userOpgList"
+                  :key="index" :label="item.RES_ID">{{item.RES_NAME}}</el-checkbox>
+              </el-checkbox-group>
+
+              <!-- <span
                 class="checkbox_span"
                 v-for="(item, index) in userOpgList"
                 :key="index"
@@ -266,7 +309,7 @@
                   v-model="userOpgSelection"
                 />
                 <label for="item.RES_ID">{{ item.RES_NAME }}</label>
-              </span>
+              </span> -->
             </div>
           </el-form-item>
         </el-form>
@@ -285,19 +328,10 @@
     >
       <div style="width: 100%; text-align: center">
         <div style="text-align: left">
-          <span
-            class="checkbox_span"
-            v-for="(item, index) in userRoleList"
-            :key="index"
-          >
-            <input
-              type="checkbox"
-              :id="index"
-              :value="item.ROLE_ID"
-              v-model="userRoleSelection"
-            />
-            <label for="item">{{ item.ROLE_NAME }}</label>
-          </span>
+          <el-checkbox-group v-model="userRoleSelection" >
+            <el-checkbox v-for="(item, index) in userRoleList"
+              :key="index" :label="item.ROLE_ID">{{item.ROLE_NAME}}</el-checkbox>
+          </el-checkbox-group>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -314,19 +348,10 @@
     >
       <div style="width: 100%; text-align: center">
         <div style="text-align: left">
-          <span
-            class="checkbox_span"
-            v-for="(item, index) in userOpgList"
-            :key="index"
-          >
-            <input
-              type="checkbox"
-              :id="index"
-              :value="item.RES_ID"
-              v-model="userOpgSelection"
-            />
-            <label for="item.RES_ID">{{ item.RES_NAME }}</label>
-          </span>
+          <el-checkbox-group v-model="userOpgSelection" >
+            <el-checkbox v-for="(item, index) in userOpgList"
+              :key="index" :label="item.RES_ID">{{item.RES_NAME}}</el-checkbox>
+          </el-checkbox-group>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -341,11 +366,10 @@
       width="50%"
       append-to-body
     >
-      <div style="width: 100%; text-align: center">
+      <div style="width: 100%; text-align: center" class="user-tree">
         <el-tree
           :data="jsonDataTree"
           :expand-on-click-node="false"
-          show-checkbox
           ref="tree"
           node-key="ORG_ID"
           default-expand-all
@@ -368,6 +392,7 @@
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
 import { v4 as uuidv4 } from 'uuid'
+// import utilWay from '../../../utils/privateIp'
 import {
   getUserData,
   addUserSave,
@@ -408,8 +433,12 @@ export default {
   },
   data() {
     return {
+      showTree: true,
+      folder:'iconFolder',
+      file:'iconFile',
       dialogType: 'new',
       loading: false,
+      isRefreshRouter: false,
       tableData: [],
       total: 0,
       queryParams: {
@@ -438,8 +467,8 @@ export default {
           { required: true, message: '请输入登录账号', trigger: 'blur' },
           {
             min: 3,
-            max: 10,
-            message: '长度在 3 到 10 个字符',
+            max: 20,
+            message: '长度在 3 到 20 个字符',
             trigger: 'blur',
           },
         ],
@@ -447,8 +476,8 @@ export default {
           { required: true, message: '请输入姓名', trigger: 'blur' },
           {
             min: 3,
-            max: 10,
-            message: '长度在 3 到 10 个字符',
+            max: 20,
+            message: '长度在 3 到 20 个字符',
             trigger: 'blur',
           },
         ],
@@ -496,6 +525,7 @@ export default {
         ORG_ID: '',
       },
       jsonDataTree: [],
+      from_ORG_ID:'',
     }
   },
 
@@ -507,12 +537,21 @@ export default {
 
   methods: {
     getList() {
-      this.loading = true
+      this.isRefreshRouter = !this.isRefreshRouter;
+      setTimeout(() => {
+        this.isRefreshRouter = !this.isRefreshRouter;
+      },1000)
       getUserData(this.queryParams).then((response) => {
         this.tableData = response.data
         this.total = response.count
-        this.loading = false
       })
+    },
+    exportData() {
+      this.download('/lui_sys/pim/user/listJson.do', { ...this.tableData }, `用户管理信息`)
+      // this.download(this.tableData, `用户信息.xlsx`)
+    },
+    printJson() {
+      this.$print(this.$refs.tableJson);
     },
     getPageDataList() {
       getUserPageData(this.pageDataList).then((response) => {
@@ -561,8 +600,15 @@ export default {
     // tree节点单击事件
     handleNodeClick(data) {
       this.queryParams.ORG_ID = data.ORG_ID
+      this.queryParamsSaveUserOrg.ORG_ID = data.ORG_ID
+
+      this.editForm.ORG_ID = data.ORG_ID
+      this.from_ORG_ID = data.ORG_ID
+
       getUserData(this.queryParams).then((response) => {
         this.org_id = response.ORG_ID
+        this.tableData = response.data
+        this.total = response.count
       })
     },
     addFollowNode() {
@@ -603,17 +649,22 @@ export default {
     },
     sureChange(data) {
       this.equeryUpdatefollowParams = data
-      updateFollowNod(this.equeryUpdatefollowParams).then((response) => {
-        if (response.statusCode == 200) {
-          this.$notify.success({ title: '提示', message: '修改成功' })
-          this.modifyTreeInput = ''
-          this.getFollowNodList()
-        }
-      })
+      if (!this.equeryUpdatefollowParams.ORG_NAME == '') {
+        updateFollowNod(this.equeryUpdatefollowParams).then((response) => {
+          if (response.statusCode == 200) {
+            this.$notify.success({ title: '提示', message: '修改成功' })
+            this.modifyTreeInput = ''
+            this.getFollowNodList()
+          }
+        })
+      } else {
+        this.$notify.error({ title: '提示', message: '组织结构不能为空!' })
+      }
     },
     // 取消修改按钮
     chancelChange() {
       this.modifyTreeInput = false
+      this.getFollowNodList()
     },
     remove(node, data) {
       this.$confirm(
@@ -651,16 +702,26 @@ export default {
       const that = this
       that.tableDeleteChange = ''
       that.queryParamsSaveUserOrg.ids = ''
+      that.queryParamsFeatures.USER_IDS = ''
+      that.queryParamsRole.USER_IDS = ''
+
       that.multipleSelection = val
       that.multipleSelection.forEach(function (e) {
         that.tableDeleteChange += e.USER_ID + ','
         that.queryParamsSaveUserOrg.ids += e.USER_ID + ','
+        that.queryParamsFeatures.USER_IDS += e.USER_ID + ','
+        that.queryParamsRole.USER_IDS += e.USER_ID + ','
       })
       that.tableDeleteChange = that.tableDeleteChange.substr(0, that.tableDeleteChange.length-1)
       that.queryParamsSaveUserOrg.ids = that.queryParamsSaveUserOrg.ids.substr(0, that.queryParamsSaveUserOrg.ids.length-1)
+      that.queryParamsFeatures.USER_IDS = that.queryParamsFeatures.USER_IDS.substr(0, that.queryParamsFeatures.USER_IDS.length - 1)
+      that.queryParamsRole.USER_IDS = that.queryParamsRole.USER_IDS.substr(0, that.queryParamsRole.USER_IDS.length - 1)
     },
     submitForm: function () {
       const that = this
+      that.editForm.ORG_ID = this.from_ORG_ID
+      console.log("____------"+ that.editForm.ORG_ID);
+
       that.editForm.roleIds = ''
       that.editForm.operateIds = ''
       that.userRoleSelection.forEach(function (e) {
@@ -682,11 +743,11 @@ export default {
               } else {
                 that.$notify.error({ title: '错误', message: res.message })
               }
-              that.userRoleSelection = ''
-              that.userOpgSelection = ''
+              that.userRoleSelection = []
+              that.userOpgSelection = []
               that.loading = false
-              that.editTableDialog = false
               that.getList()
+              that.editTableDialog = false
             })
             .catch((error) => {
               that.loading = false
@@ -725,15 +786,15 @@ export default {
         this.resetForm('editForm')
         this.editTableDialog = false
       } else if (index == 1) {
+        that.userRoleSelection = []
         this.queryParamsRole.roleIds = ''
-        this.userRoleSelection = ''
         this.bindRoleDialog = false
       } else if (index == 2) {
+        this.userOpgSelection = []
         this.queryParamsRole.operateIds = ''
-        this.userOpgSelection = ''
         this.bindFeaturesDialog = false
       } else if (index == 3) {
-        this.bindMechanismDialog = false
+        // this.bindMechanismDialog = false
       }
     },
     editTable(from) {
@@ -751,48 +812,20 @@ export default {
         })
       } else {
         this.dialogType = 'new'
-        // this.userRoleSelection = ''
-        // this.userOpgSelection = ''
         this.editTableDialog = true
       }
     },
     bindRole() {
-      if (this.org_id === '') {
-        this.$message({
-          message: '请先选择组织机构',
-          type: 'warning',
-          center: true,
-        })
-      } else {
-        // this.userRoleSelection = ''
-        this.bindRoleDialog = true
-      }
+      this.bindRoleDialog = true
     },
     bindFeatures() {
-      if (this.org_id === '') {
-        this.$message({
-          message: '请先选择组织机构',
-          type: 'warning',
-          center: true,
-        })
-      } else {
-        // this.userOpgSelection = ''
-        this.bindFeaturesDialog = true
-      }
+      this.bindFeaturesDialog = true
     },
     bindMechanism() {
-      if (this.org_id === '') {
-        this.$message({
-          message: '请先选择组织机构',
-          type: 'warning',
-          center: true,
-        })
-      } else {
-        getFollowNod(this.followNodData).then((response) => {
-          this.followNodData = response
-        })
-        this.bindMechanismDialog = true
-      }
+      getFollowNod(this.followNodData).then((response) => {
+        this.followNodData = response
+      })
+      this.bindMechanismDialog = true
     },
     //删除勾选的列表用户
     deleteTable() {
@@ -930,36 +963,59 @@ export default {
 
     submitBindRole() {
       const that = this
-      that.queryParamsRole.roleIds = ''
-      that.userRoleSelection.forEach(function (e) {
-        that.queryParamsRole.roleIds += e + ','
-      })
-      that.queryParamsRole.roleIds = that.queryParamsRole.roleIds.substr(0, that.queryParamsRole.roleIds.length-1)
-
-      saveUserRoles(that.queryParamsRole).then((response) => {
-        that.userRoleSelection = ''
-        that.getList()
+      if (this.queryParamsRole.USER_IDS === '') {
+        this.$message({
+          message: '请选择要绑定的列表',
+          type: 'warning',
+          center: true,
+        })
         that.bindRoleDialog = false
-      })
+        that.userRoleSelection = []
+      } else {
+        that.queryParamsRole.roleIds = ''
+        that.userRoleSelection.forEach(function (e) {
+          that.queryParamsRole.roleIds += e + ','
+        })
+        that.queryParamsRole.roleIds = that.queryParamsRole.roleIds.substr(0, that.queryParamsRole.roleIds.length - 1)
+        saveUserRoles(that.queryParamsRole).then((response) => {
+          that.userRoleSelection = []
+          that.getList()
+          that.bindRoleDialog = false
+        })
+      }
     },
     submitBindFeatures() {
       const that = this
-      that.queryParamsFeatures.operateIds = ''
-      that.userOpgSelection.forEach(function (e) {
-        that.queryParamsFeatures.operateIds += e + ','
-      })
-      that.queryParamsFeatures.operateIds = that.queryParamsFeatures.operateIds.substr(0, that.queryParamsFeatures.operateIds.length-1)
-
-      saveUserOperate(this.queryParamsFeatures).then((response) => {
-        that.userOpgSelection = ''
-        that.getList()
+      if (this.queryParamsFeatures.USER_IDS === '') {
+        this.$message({
+          message: '请选择要绑定的列表',
+          type: 'warning',
+          center: true,
+        })
         that.bindFeaturesDialog = false
-      })
+        that.userOpgSelection = []
+      } else {
+        that.queryParamsFeatures.operateIds = ''
+        that.userOpgSelection.forEach(function (e) {
+          that.queryParamsFeatures.operateIds += e + ','
+        })
+        that.queryParamsFeatures.operateIds = that.queryParamsFeatures.operateIds.substr(0, that.queryParamsFeatures.operateIds.length-1)
+
+        saveUserOperate(this.queryParamsFeatures).then((response) => {
+          that.userOpgSelection = []
+          that.getList()
+          that.bindFeaturesDialog = false
+        })
+      }
     },
     submitBindMechanism() {
       saveUserOrg(this.queryParamsSaveUserOrg).then((response) => {
-        that.getList()
-        that.bindMechanismDialog = false
+        if (response.statusCode == '300') {
+          this.$notify.error({ title: '提示', message: '操作失败!' })
+        } else { 
+          this.getList()
+          this.bindMechanismDialog = false
+        }
       })
     },
   },
@@ -967,6 +1023,78 @@ export default {
 </script>
 
 <style >
+.user-tree .custom_tree_node .el-input .el-input__inner{
+  width: 90px; 
+  height: 22px
+}
+.user-tree .custom_tree_node{
+  padding-right: 16px;
+}
+.user-tree .iconFolder::before{              
+  content:'';
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-image: url(../../assets/images/sprite.png);
+  background-position: -151px -22px;
+}
+.user-tree .iconFile::before{            
+  content:'';
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-image: url(../../assets/images/sprite.png);
+  background-position: -151px -46px;
+}
+.user-tree .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+    background-color: #e5e5e5;
+}
+.user-tree .is-expanded .el-tree-node__content .expanded{
+  width: 24px!important;
+  height: 15px!important;
+  background-position: -106px -24px!important;
+}
+.user-tree .el-tree-node__content .is-leaf{
+  width: 21px!important;
+  height: 46px!important;
+  background-position: -84px -32px!important;
+}
+.user-tree .el-tree-node__expand-icon.expanded {
+    transform: rotate(0);
+}
+.user-tree .el-tree-node__expand-icon.expanded:before {
+    content: "";
+}
+.user-tree .el-tree-node__content .el-tree-node__expand-icon{
+  width: 24px;
+  height: 15px;
+  background-position: -127px -3px;
+}
+.user-tree .el-tree-node__content .el-tree-node__expand-icon:before{
+  content: "";
+}
+.user-tree .el-tree-node__content .el-tree-node__expand-icon{
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-image: url(../../assets/images/sprite.png);
+}
+
+
 .el-form-item__content .el-input,
 .el-select,
 .el-form-item__content .el-checkbox-group {
@@ -974,6 +1102,17 @@ export default {
 }
 .el-checkbox-group {
   text-align: left;
+}
+.el-popover{
+  min-width: 36px!important;
+  text-align: center!important;
+  padding:6px 0!important;
+  border: 1px solid #ccc!important;
+}
+.el-popover .el-popover__title{
+  font-size: 12px!important;
+  margin: 0!important;
+  color: #333!important;
 }
 </style>
 <style lang='less' scoped>

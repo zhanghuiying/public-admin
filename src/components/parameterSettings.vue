@@ -1,21 +1,27 @@
 <template>
   <div class="pb-main-height">
-    <div class="">
+    <div class="pb-bg">
       <div class="public_table_tool">
-        <div class="public_table_tool_inline" @click="getList()">
-          <i class="el-icon-refresh"></i>
-        </div>
-
-        <div class="public_table_tool_inline" @click="addNameList">
-          <i class="el-icon-circle-plus-outline"></i>
-        </div>
-
-        <div class="public_table_tool_inline" @click="deleteTable">
-          <i class="el-icon-delete"></i>
-        </div>
-        <div class="public_table_tool_inline">
-          <i class="el-icon-setting" @click="editingSetting()"></i>
-        </div>
+        <el-popover placement="top" title="刷新" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="getList()">
+                    <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
+                  </div>
+                </el-popover>
+                <el-popover placement="top" title="添加" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="addNameList()">
+                    <i class="el-icon-circle-plus-outline"></i>
+                  </div>
+                </el-popover>
+                <el-popover placement="top" title="删除" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="deleteTable()">
+                    <i class="el-icon-delete"></i>
+                  </div>
+                </el-popover>
+            <el-popover placement="top" title="设置" trigger="hover" width="36">
+            <div slot="reference" class="public_table_tool_inline" @click="editingSetting()">
+              <i class="el-icon-setting"></i>
+            </div>
+          </el-popover>
         <div
           :class="
             isShowCheckbox === true
@@ -34,11 +40,28 @@
           ></i>
         </div>
         <div class="pos_tool_tb">
-          <table-menut-tool />
+          <div class="pos_table_tool">
+            <el-popover placement="top" title="筛选列" trigger="hover" width="45">
+              <div slot="reference" class="public_table_tool_inline">
+                <i class="el-icon-data-analysis"></i>
+              </div>
+            </el-popover>
+            <el-popover placement="top" title="导出" trigger="hover" width="36">
+              <div slot="reference" class="public_table_tool_inline" @click="exportData">
+                <i class="el-icon-receiving"></i>
+              </div>
+            </el-popover>
+            <el-popover placement="top" title="打印" trigger="hover" width="36">
+              <div slot="reference" class="public_table_tool_inline" @click="printJson">
+                <i class="el-icon-printer"></i>
+              </div>
+            </el-popover>
+          </div>
         </div>
       </div>
 
       <el-table
+        ref="tableJson"
         :data="tableData"
         style="width: 100%"
         v-loading="loading"
@@ -91,23 +114,16 @@
           label-width="120px"
         >
           <el-form-item prop="name" label="参数名称">
-            <!-- <el-select v-model="parameterForm.CODE" clearable placeholder="请选择">
-            <el-option
-              v-for="item in sysinfoKeyMapData"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select> -->
-            <el-input v-model="parameterForm.CODE"></el-input>
-            <!-- <div class="input_popover">
-              <el-input v-model="parameterForm.CODE"></el-input>
-              <div class="popover_div" >
-                <div v-for="item in sysinfoKeyMapData" :key="item">
-                  <p class="popover_div_p">{{item}}</p>
-                </div>
-              </div>
-            </div> -->
+            <el-select @change="selectSysinfoKey" v-model="parameterForm.CODE" placeholder="请选择">
+              <el-option
+                v-for="item in sysinfoKeyData"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+                <span style="float: left">{{ item.label }}</span>
+              </el-option>
+            </el-select>
+            <!-- <el-input v-model="parameterForm.CODE"></el-input> -->
           </el-form-item>
 
           <el-form-item prop="parameter" label="参数值">
@@ -247,6 +263,7 @@ export default {
   data() {
     return {
       loading: false,
+      isRefreshRouter: false,
       tableData: [],
       total: 0,
       queryParams: {
@@ -265,28 +282,13 @@ export default {
         CODE: [{ required: true, message: '请输入参数名称', trigger: 'blur' }],
         JSONSTR: [{ required: true, message: '请填写参数值', trigger: 'blur' }],
       },
-      // JSONSTR: [
-      //   {
-      //     homeInfo: {
-      //       title: '首页22',
-      //       icon: 'layui-icon layui-icon-home',
-      //       href: '/pim/main/xtxz.do',
-      //     },
-      //     logoInfo: {
-      //       title: '农经综合平台',
-      //       image: '../logo.png',
-      //       href: '萨达',
-      //     },
-      //   },
-      // ],
-
       settingForm: {
-        title: 'sdadmin',
-        systemName: 'sfdf',
-        icon: 'element-ui-icon element-ui-icon-home',
+        title: '',
+        systemName: '',
+        icon: '',
         image: '',
-        address: 'sdadmin',
-        href: 'sdadmin',
+        address: '',
+        href: '',
       },
       settingRules: {
         title: [{ required: true, message: '请输入首页名称', trigger: 'blur' }],
@@ -308,6 +310,37 @@ export default {
       sysinfoKeyMapData: [], //add 参数名称 集合
       CODE: '系统参数', //系统参数
       systemParametersData: [], //系统参数列表
+      sysinfoKeyData: [{
+          label: '文件上传路径 - file.path',
+          value: 'file.path'
+        }, {
+          label: '允许上传文件类型,多种用;号分开 - file.type',
+          value: 'file.type'
+        }, {
+          label: '未登录跳转地址 - nosess',
+          value: 'nosess'
+        }, {
+          label: '系统基础参数 - 系统参数',
+          value: '系统参数'
+        }, {
+          label: '登录出地址,如果启用单点登录 - logoutUrl',
+          value: 'logoutUrl'
+        }, {
+          label: '连续登录失败几次后次数后锁定用户，默认5次，设置小于0的表示不限制。 - loginFailTimes',
+          value: 'loginFailTimes'
+        }, {
+          label: '无权限跳转地址 - nopms',
+          value: 'nopms'
+        }, {
+          label: '登录界面文字 - loginTitle',
+          value: 'loginTitle'
+        }, {
+          label: '子系统选择界面的标题 - casMainTitle',
+          value: 'casMainTitle'
+        }, {
+          label: '登录是否需要验证码 - needCaptcha',
+          value: 'needCaptcha'
+        }],
     }
   },
 
@@ -318,17 +351,37 @@ export default {
 
   methods: {
     getList() {
-      this.loading = true
+      this.isRefreshRouter = !this.isRefreshRouter;
+      setTimeout(() => {
+        this.isRefreshRouter = !this.isRefreshRouter;
+      },1000)
       getParameterData(this.queryParams).then((response) => {
         this.tableData = response.data
         this.total = response.count
-        this.loading = false
       })
+    },
+    exportData() {
+      this.download('/lui_sys/xtgl/info/listJson.do', { ...this.tableData }, `参数设置信息`)
+      // this.download(this.tableData, `参数设置.xlsx`)
+    },
+    printJson() {
+      this.$print(this.$refs.tableJson);
     },
     getSysinfoKeyMapList() {
       getSysinfoKeyMap(this.sysinfoKeyMapData).then((response) => {
         this.sysinfoKeyMapData = response
-        console.log(this.sysinfoKeyMapData)
+        // let obj = {}
+        // obj.label = name
+        // obj.value = value
+        // var str = "系统参数:file.type"
+        // console.log(this.sysinfoKeyMapData.split(':')[1])    // 后面   你是外国人
+        // console.log(this.sysinfoKeyMapData.split(':')[0]) 
+      })
+    },
+    selectSysinfoKey(value) {
+      this.CODE = value
+      addsystemSave(this.CODE).then((response) => {
+        this.parameterForm = response.data
       })
     },
     submitForm: function () {
@@ -492,8 +545,25 @@ export default {
 }
 </script>
 <style>
+.el-select{
+  width: 100%;
+}
+.el-popover{
+  min-width: 36px!important;
+  text-align: center!important;
+  padding:6px 0!important;
+  border: 1px solid #ccc!important;
+}
+.el-popover .el-popover__title{
+  font-size: 12px!important;
+  margin: 0!important;
+  color: #333!important;
+}
 </style>
 <style lang='less' scoped>
+.pb-bg {
+  padding-bottom: 20px;
+}
 .dialog_div {
   // width: 100%;
   // text-align: center

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="h100 pb-bg">
     <div class="code-production">
       <el-table
         :data="tableData"
@@ -205,6 +206,7 @@
         <el-button type="warning" @click="previewClick()">预览</el-button>
       </div>
     </el-dialog>
+    </div>
   </div>
 </template>
 

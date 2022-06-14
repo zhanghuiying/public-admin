@@ -1,15 +1,35 @@
 <template>
-  <div class="pb-main-height">
+<div>
+  <div class="pb-bg">
     <div class="public_table_tool">
-      <div class="public_table_tool_inline" @click="getList">
-        <i class="el-icon-refresh"></i>
-      </div>
+      <el-popover placement="top" title="刷新" trigger="hover" width="36">
+        <div slot="reference" class="public_table_tool_inline" @click="getList()">
+          <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
+        </div>
+      </el-popover>
       <div class="pos_tool_tb">
-        <table-menut-tool />
+        <div class="pos_table_tool">
+            <el-popover placement="top" title="筛选列" trigger="hover" width="45">
+              <div slot="reference" class="public_table_tool_inline">
+                <i class="el-icon-data-analysis"></i>
+              </div>
+            </el-popover>
+            <el-popover placement="top" title="导出" trigger="hover" width="36">
+              <div slot="reference" class="public_table_tool_inline" @click="exportData">
+                <i class="el-icon-receiving"></i>
+              </div>
+            </el-popover>
+            <el-popover placement="top" title="打印" trigger="hover" width="36">
+              <div slot="reference" class="public_table_tool_inline" @click="printJson">
+                <i class="el-icon-printer"></i>
+              </div>
+            </el-popover>
+          </div>
       </div>
     </div>
 
     <el-table
+      ref="tableJson"
       :data="tableData"
       style="width: 100%"
       @selection-change="handleSelectionChange"
@@ -34,6 +54,7 @@
       :total="total"
     ></el-pagination>
   </div>
+</div>
 </template>
 
 <script>
@@ -48,6 +69,7 @@ export default {
   data() {
     return {
       loading: false,
+      isRefreshRouter: false,
       tableData: [],
       total: 0,
       queryParams: {
@@ -64,12 +86,21 @@ export default {
 
   methods: {
     getList() {
-      this.loading = true
+      this.isRefreshRouter = !this.isRefreshRouter;
+      setTimeout(() => {
+        this.isRefreshRouter = !this.isRefreshRouter;
+      },1000)
       getLogsData(this.queryParams).then((response) => {
         this.tableData = response.data
         this.total = response.count
-        this.loading = false
       })
+    },
+    exportData() {
+      this.download('/lui_sys/pim/logs/listJson.do', { ...this.tableData }, `日志管理信息`)
+      // this.download(this.tableData, `日志信息.xlsx`)
+    },
+    printJson() {
+      this.$print(this.$refs.tableJson);
     },
     handleSizeChange(newSize) {
       this.queryParams.limit = newSize
@@ -86,5 +117,16 @@ export default {
 }
 </script>
 
-<style lang='less' scoped>
+<style>
+.el-popover{
+  min-width: 36px!important;
+  text-align: center!important;
+  padding:6px 0!important;
+  border: 1px solid #ccc!important;
+}
+.el-popover .el-popover__title{
+  font-size: 12px!important;
+  margin: 0!important;
+  color: #333!important;
+}
 </style>

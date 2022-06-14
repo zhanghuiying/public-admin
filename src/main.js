@@ -3,14 +3,16 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
-// import { VueAxios } from './../utils/request'
+import { download } from '../utils/request'
 import Pagination from './components/Pagination'
 import 'element-ui/lib/theme-chalk/index.css'
 import './views/style/global.less'
-import { parseTime, resetForm, addDateRange, selectDictLabel, download, handleTree } from './../utils/ruoyi'
-
+import { parseTime, resetForm, addDateRange, selectDictLabel, handleTree } from './../utils/ruoyi'
+import Print from 'vue-printjs'
+Vue.use(Print)
 
 // 全局方法挂载
+Vue.prototype.download = download
 Vue.prototype.parseTime = parseTime
 Vue.prototype.resetForm = resetForm
 Vue.prototype.addDateRange = addDateRange

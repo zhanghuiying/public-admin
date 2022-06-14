@@ -1,26 +1,49 @@
 <template>
   <div class="">
-    <div class="d-display">
+    <div class="h100 d-display">
       <div class="pb-main-right pb-main_pad-fr">
         <div class="pb-main-height">
           <div class="public-card-body">
             <div class="public-card-body-border">
               <div class="public_table_tool">
-                <div class="public_table_tool_inline" @click="getList()">
-                  <i class="el-icon-refresh"></i>
-                </div>
-                <div class="public_table_tool_inline" @click="addRole()">
-                  <i class="el-icon-circle-plus-outline"></i>
-                </div>
-                <div class="public_table_tool_inline" @click="deleteTable()">
-                  <i class="el-icon-delete"></i>
-                </div>
+                <el-popover placement="top" title="刷新" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="getList()">
+                    <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
+                  </div>
+                </el-popover>
+                <el-popover placement="top" title="添加" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="addRole()">
+                    <i class="el-icon-circle-plus-outline"></i>
+                  </div>
+                </el-popover>
+                <el-popover placement="top" title="删除" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="deleteTable()">
+                    <i class="el-icon-delete"></i>
+                  </div>
+                </el-popover>
                 <div class="pos_tool_tb">
-                  <table-menut-tool />
+                  <div class="pos_table_tool">
+                    <el-popover placement="top" title="筛选列" trigger="hover" width="45">
+                      <div slot="reference" class="public_table_tool_inline">
+                        <i class="el-icon-data-analysis"></i>
+                      </div>
+                    </el-popover>
+                    <el-popover placement="top" title="导出" trigger="hover" width="36">
+                      <div slot="reference" class="public_table_tool_inline" @click="exportData">
+                        <i class="el-icon-receiving"></i>
+                      </div>
+                    </el-popover>
+                    <el-popover placement="top" title="打印" trigger="hover" width="36">
+                      <div slot="reference" class="public_table_tool_inline" @click="printJson">
+                        <i class="el-icon-printer"></i>
+                      </div>
+                    </el-popover>
+                  </div>
                 </div>
               </div>
 
               <el-table
+                ref="tableJson"
                 :data="tableData"
                 style="width: 100%"
                 v-loading="loading"
@@ -81,7 +104,8 @@
           >
         </p>
         <!-- :default-checked-keys="defKeys" -->
-        <el-tree
+        <div class="role-tree" style="margin: 0 16px">
+          <el-tree
           :data="jsonDataTree"
           show-checkbox
           default-expand-all
@@ -96,6 +120,7 @@
             <span class="custom_tree_id">{{ data.MENU_NAME }}</span>
           </span>
         </el-tree>
+        </div>
       </div>
     </div>
     <el-dialog
@@ -167,6 +192,8 @@ export default {
   },
   data() {
     return {
+      loading: false,
+      isRefreshRouter: false,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -179,7 +206,6 @@ export default {
         page: 1,
         limit: 10,
       },
-      loading: false,
       multipleSelection: [],
       addRoleDialog: false,
       dialogType: 'new',
@@ -222,12 +248,21 @@ export default {
 
   methods: {
     getList() {
-      this.loading = true
+      this.isRefreshRouter = !this.isRefreshRouter;
+      setTimeout(() => {
+        this.isRefreshRouter = !this.isRefreshRouter;
+      },1000)
       getRoleData(this.queryParams).then((response) => {
         this.tableData = response.data
         this.total = response.count
-        this.loading = false
       })
+    },
+    exportData() {
+      this.download('/lui_sys/pim/role/listJson.do', { ...this.tableData }, `角色管理信息`)
+      // this.download(this.tableData, `角色信息.xlsx`)
+    },
+    printJson() {
+      this.$print(this.$refs.tableJson);
     },
     //获取角色 菜单权限
     getRoleMenuList(data) {
@@ -357,23 +392,13 @@ export default {
         .catch(function () {})
     },
 
-    handleNodeClick(data,checkData) {
+    handleNodeClick(data, checkData) {
       const that = this;
       that.menu_id = ''
       checkData.checkedNodes.forEach(function(e) {
         that.menu_id += e.MENU_ID + ",";
       });
-      that.menu_id = that.menu_id.substr(0, that.menu_id.length-1)
-      // that.saveMenuParams.MENU_ID = data.MENU_PID + that.menu_id
-      // console.log(that.saveMenuParams.MENU_ID)
-      // console.log(that.menu_id)
-
-      // this.menu_id = data.MENU_PID + "," + data.MENU_ID
-      // this.menuIdSelection.forEach(function(e) {
-      //   this.menu_id += e.MENU_ID + ",";
-      // });
-      // that.menu_id = that.menu_id.substr(0, that.menu_id.length-1)
-      // console.log(checkData)
+      that.menu_id = that.menu_id.substr(0, that.menu_id.length - 1)
     },
     // 多选框选中数据
     handleSelectionChange(val) {
@@ -441,5 +466,62 @@ export default {
 }
 </script>
 
-<style lang='less' scoped>
+<style>
+.role-tree .el-tree .is-expanded .el-tree-node__content .is-leaf{
+  width: 24px!important;
+  height: 15px!important;
+  background-position: -106px -24px!important;
+}
+.role-tree .el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content {
+    background-color: #e5e5e5;
+}
+.role-tree .is-expanded .el-tree-node__content .expanded{
+  width: 24px!important;
+  height: 15px!important;
+  background-position: -106px -24px!important;
+}
+.role-tree .el-tree-node__content .is-leaf{
+  width: 21px!important;
+  height: 46px!important;
+  background-position: -84px -32px!important;
+}
+.role-tree .el-tree-node__expand-icon.expanded {
+    transform: rotate(0);
+}
+.role-tree .el-tree-node__expand-icon.expanded:before {
+    content: "";
+}
+.role-tree .el-tree-node__content .el-tree-node__expand-icon{
+  width: 24px;
+  height: 15px;
+  background-position: -127px -3px;
+}
+.role-tree .el-tree-node__content .el-tree-node__expand-icon:before{
+  content: "";
+}
+.role-tree .el-tree-node__content .el-tree-node__expand-icon{
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+    border: 0 none;
+    cursor: pointer;
+    outline: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-image: url(../../assets/images/sprite.png);
+}
+.el-popover{
+  min-width: 36px!important;
+  text-align: center!important;
+  padding:6px 0!important;
+  border: 1px solid #ccc!important;
+}
+.el-popover .el-popover__title{
+  font-size: 12px!important;
+  margin: 0!important;
+  color: #333!important;
+}
 </style>

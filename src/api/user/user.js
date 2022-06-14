@@ -119,15 +119,15 @@ export function addFollowNodPost(query) {
     params: query
   })
 }
-
 //菜单树 修改跟节点名称
-export function updateFollowNod(query) {
+export function updateFollowNod(data) {
   return request({
     url: '/lui_sys/pim/org/update.do',
     method: 'post',
-    params: query
+    data: qs.stringify(data)
   })
 }
+
 //菜单树 删除跟节点名称
 export function deleteFollowNod(ORG_ID) {
   return request({

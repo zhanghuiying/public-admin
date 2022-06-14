@@ -189,6 +189,7 @@ export default {
 .el-main {
   padding: 0;
   background: #f5f5f5;
+
 }
 .el-aside .aside-logo {
   height: 60px;
@@ -246,8 +247,5 @@ export default {
   color: #fff !important;
   background: #2d8cf0 !important;
 }
-.refresh-go{
-  transform: rotate(360deg);
-  transition: all 1s;
-}
+
 </style>

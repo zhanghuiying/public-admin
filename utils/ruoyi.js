@@ -129,3 +129,17 @@ export function handleTree (data, id, parentId, children, rootId) {
   })
   return treeData != '' ? treeData : data
 }
+
+  /**
+   * 参数处理
+   * @param {*} params  参数
+   */
+export function tansParams(params) {
+	let result = ''
+	Object.keys(params).forEach((key) => {
+		if (!Object.is(params[key], undefined) && !Object.is(params[key], null)) {
+			result += encodeURIComponent(key) + '=' + encodeURIComponent(params[key]) + '&'
+		}
+	})
+	return result
+}

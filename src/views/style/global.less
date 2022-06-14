@@ -29,12 +29,12 @@ body{
     width: 25%!important;
 }
 .pb-bg{
-    background: #fff;
+    background: #fff!important;
 }
 
 .public-card-body{
-    padding: 15px 15px;
-    background: #fff;
+    height: 100%;
+    padding: 14px 10px;
 }
 .public-card-body-border{
     border: 1px solid #eee;
@@ -42,37 +42,45 @@ body{
 }
 .pb-main-left{
     width: 20%;
+    height: 100%;
     background: #fff;
 }
 .pb-main-mid{
     width: 60%;
+    height: 100%;
+    padding: 0 10px;
 }
 .pb-main-right{
     width: 80%;
+    height: 100%;
 }
 .pb-main-data-left{
     width: 34%;
+    height: 100%;
     background: #fff;
 }
 .pb-main-data-right{
     width: 66%;
+    height: 100%;
 }
 .pb-main-menu-left{
     width: 26%;
+    height: 100%;
     background: #fff;
 }
 .pb-main-menu-right{
     width: 74%;
+    height: 100%;
 }
 
 .pb-main_pad-lf{
-    padding-left: 6px;
+    padding-left: 10px;
 }
 .pb-main_pad-fr{
-    padding-right: 6px;
+    padding-right: 10px;
 }
 .pb-main-margin-b{
-    margin-bottom: 6px;
+    margin-bottom: 10px;
 }
 .pb-main-padding-t{
     padding-top: 15px;
@@ -85,9 +93,8 @@ body{
 }
 
 .pb-main-height{
-    background: #fff; 
-    padding-bottom: 30px; 
-    height: 100%
+    height: 100%;
+    background: #fff;
 }
 
 .custom_tree_node {
@@ -187,19 +194,20 @@ body{
     }
 }
 .public_main_p{
-    // height: 100%;
-    padding: 6px 6px;
+    height: 100%;
+    padding: 10px;
+    background: #f5f5f5;
 }
-
-
 .public_table_tool{
     position: relative;
     z-index: 890;
     padding: 10px 15px;
     border-width: 0 0 1px;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+    // box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+    box-shadow: 0 1px 5px rgb(0 0 0 / 8%);
     display: flex;
     justify-content: start;
+    background: #fff;
 }
 .public_table_tool_inline{
     width: 26px;
@@ -225,6 +233,11 @@ body{
     top: 0;
     width: 135px;
     height: 48px;
+}
+.pos_table_tool {
+  padding: 10px 0 10px 15px;
+  display: flex;
+  justify-content: start;
 }
 // 表格 编辑按钮
 .public-table-btn {
@@ -255,6 +268,7 @@ body{
   background: #FFB800;
 }
 .el-table{
+    // height: 100%;
     margin-bottom: 20px;
 }
 .el-table thead,
@@ -357,4 +371,8 @@ body{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.refresh-go{
+  transform: rotate(360deg);
+  transition: all 1s;
 }

@@ -1,17 +1,22 @@
 <template>
   <div class="pb-main-height">
-    <div class="">
+    <div class="h100 pb-bg">
       <div class="public_table_tool">
-        <div class="public_table_tool_inline" @click="getList">
-          <i class="el-icon-refresh"></i>
-        </div>
-        <div class="public_table_tool_inline" @click="addNameList">
-          <i class="el-icon-circle-plus-outline"></i>
-        </div>
-
-        <div class="public_table_tool_inline" @click="deleteTable()">
-          <i class="el-icon-delete"></i>
-        </div>
+          <el-popover placement="top" title="刷新" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="getList()">
+                    <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
+                  </div>
+                </el-popover>
+                <el-popover placement="top" title="添加" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="addNameList()">
+                    <i class="el-icon-circle-plus-outline"></i>
+                  </div>
+                </el-popover>
+                <el-popover placement="top" title="删除" trigger="hover" width="36">
+                  <div slot="reference" class="public_table_tool_inline" @click="deleteTable()">
+                    <i class="el-icon-delete"></i>
+                  </div>
+        </el-popover>
         <div
           :class="
             isShowCheckbox === true
@@ -30,11 +35,28 @@
           ></i>
         </div>
         <div class="pos_tool_tb">
-          <table-menut-tool />
+          <div class="pos_table_tool">
+            <el-popover placement="top" title="筛选列" trigger="hover" width="45">
+              <div slot="reference" class="public_table_tool_inline">
+                <i class="el-icon-data-analysis"></i>
+              </div>
+            </el-popover>
+            <el-popover placement="top" title="导出" trigger="hover" width="36">
+              <div slot="reference" class="public_table_tool_inline" @click="exportData">
+                <i class="el-icon-receiving"></i>
+              </div>
+            </el-popover>
+            <el-popover placement="top" title="打印" trigger="hover" width="36">
+              <div slot="reference" class="public_table_tool_inline" @click="printJson">
+                <i class="el-icon-printer"></i>
+              </div>
+            </el-popover>
+          </div>
         </div>
       </div>
 
       <el-table
+        ref="tableJson"
         :data="tableData"
         style="width: 100%"
         v-loading="loading"
@@ -178,6 +200,7 @@ export default {
   data() {
     return {
       loading: false,
+      isRefreshRouter: false,
       tableData: [],
       total: 0,
       queryParams: {
@@ -226,12 +249,21 @@ export default {
 
   methods: {
     getList() {
-      this.loading = true
+      this.isRefreshRouter = !this.isRefreshRouter;
+      setTimeout(() => {
+        this.isRefreshRouter = !this.isRefreshRouter;
+      },1000)
       getTimedtaskData(this.queryParams).then((response) => {
         this.tableData = response.data
         this.total = response.count
-        this.loading = false
       })
+    },
+    exportData() {
+      this.download('/lui_sys/pim/user/listJson.do', { ...this.tableData }, `定时任务信息`)
+      // this.download(this.tableData, `定时任务.xlsx`)
+    },
+    printJson() {
+      this.$print(this.$refs.tableJson);
     },
     getTaskClassList() {
       this.loading = true
@@ -402,6 +434,17 @@ export default {
 .el-date-editor,
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
+}
+.el-popover{
+  min-width: 36px!important;
+  text-align: center!important;
+  padding:6px 0!important;
+  border: 1px solid #ccc!important;
+}
+.el-popover .el-popover__title{
+  font-size: 12px!important;
+  margin: 0!important;
+  color: #333!important;
 }
 </style>
 <style lang='less' scoped>
