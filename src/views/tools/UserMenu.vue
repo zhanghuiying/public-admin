@@ -207,9 +207,8 @@ export default {
 </script>
 
 <style>
-/* .user_menu .nav_content_box .el-popover {
+.el-popover {
   margin-top: 0 !important;
-  padding: 10px 0 0 0 !important;
-} */
+} 
 
 </style>
