@@ -184,12 +184,16 @@ export default {
 }
 .el-aside {
   background-color: #28333e;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+.el-aside::-webkit-scrollbar {
+  display: none;
 }
 
 .el-main {
   padding: 0;
-  background: #f5f5f5;
-
+  background: #fff;
 }
 .el-aside .aside-logo {
   height: 60px;
