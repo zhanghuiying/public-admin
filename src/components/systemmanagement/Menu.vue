@@ -191,12 +191,21 @@
 
               <el-table-column prop="MENU_NAME" label="菜单名称" />
               <el-table-column prop="MENU_REMARK" label="菜单地址" />
-              <el-table-column prop="MENU_SORT" label="排序" />
+              <el-table-column prop="MENU_SORT" sortable label="排序" />
               <el-table-column prop="MENU_ICON" label="图标" />
 
-              <el-table-column label="状态">
+              <el-table-column
+                prop="MENU_STATE"
+                label="状态"
+                :filters="[{ text: '停用', value: '0' }, { text: '启用', value: '1' }]"
+                :filter-method="filterTag"
+                filter-placement="bottom-end">
                 <template slot-scope="scope">
-                  {{ stateText[scope.row.MENU_STATE] }}
+                  <span
+                    :type="scope.row.MENU_STATE === '初始' ? 'primary' : 'success'"
+                    disable-transitions>
+                    <span style="color: #1e9fff" v-if="(scope.row.MENU_STATE == 1)">启用</span>
+                    <span style="color: #ff5722" v-else>停用</span></span>
                 </template>
               </el-table-column>
             </el-table>
@@ -316,6 +325,9 @@ export default {
           'children'
         )
       })
+    },
+    filterTag(value, row) {
+      return row.MENU_STATE === value
     },
     exportData() {
       this.download('/lui_sys/pim/menu/selectall.do', { ...this.menuDataList }, `菜单管理信息`)
@@ -556,7 +568,7 @@ export default {
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
 }
-.el-popover {
+/* .el-popover {
   padding: 10px 0 0 0 !important;
   margin-top: 0 !important;
 }
@@ -570,7 +582,7 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
 <style lang='less' scoped>
 .menu_column {

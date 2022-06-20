@@ -80,8 +80,8 @@
         <el-table-column fixed="left" type="selection" width="45" />
         <el-table-column label="#" type="index" width="45" />
         <el-table-column prop="APP_NAME" label="应用名称" />
-        <el-table-column prop="APP_URL" label="访问地址" width="200" />
-        <el-table-column prop="APP_SORT" label="排序" />
+        <el-table-column prop="APP_URL" label="访问地址" width="500" />
+        <el-table-column prop="APP_SORT" width="100" sortable label="排序" />
         <el-table-column prop="APP_ICON" label="图标" />
 
         <el-table-column label="状态">
@@ -231,8 +231,6 @@
     <el-dialog :visible.sync="dialogVisible">
         <img width="100%" :src="applicationForm.APP_ICON" alt="">
       </el-dialog>
-
-
     
   </div>
 </template>
@@ -563,7 +561,7 @@ export default {
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
 }
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -573,7 +571,7 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
 <style lang='less' scoped>
 </style>

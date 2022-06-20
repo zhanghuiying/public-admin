@@ -163,26 +163,35 @@
               <el-table-column
                 prop="USER_ACCOUNT"
                 label="登录账号"
-                width="100"
+                width="110"
+                :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"
               />
-              <el-table-column prop="USER_NAME" label="姓名" />
+              <el-table-column prop="USER_NAME" width="100" label="姓名" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
 
-              <el-table-column prop="ORG_NAME" label="机构" />
+              <el-table-column prop="ORG_NAME" width="90" label="机构" />
 
-              <el-table-column label="状态">
+              <el-table-column
+                prop="USER_STATE"
+                label="状态"
+                width="100"
+                :filters="[{ text: '停用', value: '0' }, { text: '启用', value: '1' },{ text: '初始', value: '2' }]"
+                :filter-method="filterTag"
+                filter-placement="bottom-end">
                 <template slot-scope="scope">
-                  <span style="color: #1e9fff" v-if="(scope.row.USER_STATE = 1)"
-                    >初始</span
-                  >
-                  <span style="color: #ff5722" v-else>停用</span>
+                  <span
+                    :type="scope.row.USER_STATE === '初始' ? 'primary' : 'success'"
+                    disable-transitions>
+                    <span style="color: #1e9fff" v-if="(scope.row.USER_STATE == 1)">启用</span>
+                    <span style="color: #666" v-else-if="(scope.row.USER_STATE == 2)">初始</span>
+                    <span style="color: #ff5722" v-else>停用</span></span>
                 </template>
               </el-table-column>
 
-              <el-table-column prop="ROLE_NAMES" label="拥有角色" width="160" />
+              <el-table-column prop="ROLE_NAMES" label="拥有角色" width="120" />
               <el-table-column
                 prop="RES_NAMES"
                 label="拥有功能组"
-                width="110"
+                width="90"
               />
 
               <el-table-column prop="DLSBCS" width="110" label="登录失败次数" />
@@ -262,9 +271,9 @@
           </el-form-item>
           <el-form-item label="状态">
             <el-select v-model="editForm.USER_STATE" placeholder="请选择状态">
-              <el-option label="停用" :value="0"></el-option>
-              <el-option label="启用" :value="1"></el-option>
-              <el-option label="初始" :value="2"></el-option>
+              <el-option label="停用" value="0"></el-option>
+              <el-option label="启用" value="1"></el-option>
+              <el-option label="初始" value="2"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="角色绑定">
@@ -273,20 +282,6 @@
                 <el-checkbox v-for="(item, index) in userRoleList"
                   :key="index" :label="item.ROLE_ID">{{item.ROLE_NAME}}</el-checkbox>
               </el-checkbox-group>
-
-             <!-- <span
-                class="checkbox_span"
-                v-for="(item, index) in userRoleList"
-                :key="index"
-              >
-                 <input
-                  type="checkbox"
-                  :id="index"
-                  :value="item.ROLE_ID"
-                  v-model="userRoleSelection"
-                />
-                <label for="item">{{ item.ROLE_NAME }}</label>
-              </span>  -->
             </div>
           </el-form-item>
 
@@ -296,20 +291,6 @@
                 <el-checkbox v-for="(item, index) in userOpgList"
                   :key="index" :label="item.RES_ID">{{item.RES_NAME}}</el-checkbox>
               </el-checkbox-group>
-
-              <!-- <span
-                class="checkbox_span"
-                v-for="(item, index) in userOpgList"
-                :key="index"
-              >
-                <input
-                  type="checkbox"
-                  :id="index"
-                  :value="item.RES_ID"
-                  v-model="userOpgSelection"
-                />
-                <label for="item.RES_ID">{{ item.RES_NAME }}</label>
-              </span> -->
             </div>
           </el-form-item>
         </el-form>
@@ -392,6 +373,7 @@
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
 import { v4 as uuidv4 } from 'uuid'
+import SelectHeader from '../../components/Pagination/SelectHeader'
 // import utilWay from '../../../utils/privateIp'
 import {
   getUserData,
@@ -430,6 +412,7 @@ export default {
     addFollowNodPost,
     updateFollowNod,
     deleteFollowNod,
+    SelectHeader
   },
   data() {
     return {
@@ -445,6 +428,8 @@ export default {
         page: 1,
         limit: 10,
         ORG_ID: '',
+        USER_ACCOUNT: '',
+        USER_NAME: '',
       },
       multipleSelection: [],
       editTableDialog: false,
@@ -546,6 +531,10 @@ export default {
         this.total = response.count
       })
     },
+    filterTag(value, row) {
+      return row.USER_STATE === value
+    },
+      
     exportData() {
       this.download('/lui_sys/pim/user/listJson.do', { ...this.tableData }, `用户管理信息`)
       // this.download(this.tableData, `用户信息.xlsx`)
@@ -720,8 +709,6 @@ export default {
     submitForm: function () {
       const that = this
       that.editForm.ORG_ID = this.from_ORG_ID
-      console.log("____------"+ that.editForm.ORG_ID);
-
       that.editForm.roleIds = ''
       that.editForm.operateIds = ''
       that.userRoleSelection.forEach(function (e) {
@@ -1018,6 +1005,51 @@ export default {
         }
       })
     },
+    renderSpecNameHeader (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange,
+              resetChange: self.resetChange
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParams[type] = value
+        this.queryParams[data.type] = data.value;
+        this.getList();
+      },
+    resetChange (data) {
+      delete this.queryParams[data['type']]
+      this.queryParams[data.type] = data.value;
+      this.getList();
+    },
   },
 }
 </script>
@@ -1103,7 +1135,7 @@ export default {
 .el-checkbox-group {
   text-align: left;
 }
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -1113,7 +1145,7 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
 <style lang='less' scoped>
 .checkbox_span {

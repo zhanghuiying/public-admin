@@ -4,7 +4,7 @@
       <div class="public-card-body">
         <div class="public_table_tool">
           <el-popover placement="top" title="刷新" trigger="hover" width="36">
-                  <div slot="reference" class="public_table_tool_inline" @click="getList()">
+                <div slot="reference" class="public_table_tool_inline" @click="getList()">
                     <i :class="[isRefreshRouter? 'el-icon-refresh refresh-go' : 'el-icon-refresh']"></i>
                   </div>
                 </el-popover>
@@ -65,28 +65,23 @@
             @selection-change="handleSelectionChange"
           >
             <el-table-column fixed="left" type="selection" width="45" />
-            <el-table-column label="分组代码">
-              <template slot-scope="scope">
-                {{ scope.row.OG_CODE }}
-                <!-- <el-input
-                  :value="scope.row.OG_CODE"
-                  @blur="sureChange(scope)"
-                  @input="(a) => tableInputInp(a, scope)"
-                >
-              </el-input> -->
-              </template>
-            </el-table-column>
-            <el-table-column label="分组名称">
-              <template slot-scope="scope">
-                {{ scope.row.OG_NAME }}
-              </template>
-            </el-table-column>
+            <el-table-column prop="OG_CODE" label="分组代码" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+            <el-table-column prop="OG_NAME" label="分组名称" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
 
-            <el-table-column label="状态">
-              <template slot-scope="scope">
-                {{ stateText[scope.row.OG_STATE] }}
-              </template>
-            </el-table-column>
+            <el-table-column
+                prop="OG_STATE"
+                label="状态"
+                :filters="[{ text: '停用', value: '0' }, { text: '启用', value: '1' }]"
+                :filter-method="filterTag"
+                filter-placement="bottom-end">
+                <template slot-scope="scope">
+                  <span
+                    :type="scope.row.OG_STATE === '初始' ? 'primary' : 'success'"
+                    disable-transitions>
+                    <span style="color: #1e9fff" v-if="(scope.row.OG_STATE == 1)">启用</span>
+                    <span style="color: #ff5722" v-else>停用</span></span>
+                </template>
+              </el-table-column>
           </el-table>
         </div>
 
@@ -103,7 +98,7 @@
     </div>
     <div class="pb-main-data-right pb-main_pad-lf">
       <div class="h100 pb-bg">
-      <div class="pb-bg pb-main-padding-bt pb-main-margin-b">
+      <div class="pb-bg pb-main-padding-bt">
         <p class="public_card_header">分组详情</p>
         <el-form
           :model="groupingForm"
@@ -150,6 +145,7 @@
           </div>
         </el-form>
       </div>
+      <div style="height: 10px;background: #F5F5F5;"></div>
 
       <div class="pb-bg pb-main-margin-b">
         <p class="public_card_header">明细详情</p>
@@ -175,22 +171,14 @@
                 :class="
                   isShowCheckbox2 === true
                     ? 'public_editing_checkbox pb-checked-bg'
-                    : 'public_editing_checkbox'
-                "
-                @click="editingCheckbox2()"
-              >
-                开启编辑
-                <i
-                  :class="
+                    : 'public_editing_checkbox'" @click="editingCheckbox2()">开启编辑
+                <i :class="
                     isShowCheckbox2 === true
                       ? 'el-icon-check pb-checked-i'
-                      : 'el-icon-check'
-                  "
-                ></i>
+                      : 'el-icon-check'"></i>
               </div>
               <div class="pos_tool_tb">
                 <div class="pos_table_tool">
-                  
                   <div class="public_table_tool_inline">
                     <i class="el-icon-data-analysis"></i>
                   </div>
@@ -212,14 +200,25 @@
               <el-table-column fixed="left" type="selection" width="45" />
               <el-table-column label="#" type="index" width="45" />
 
-              <el-table-column prop="OD_TEXT" label="显示名称" />
-              <el-table-column prop="OD_VALUE" label="存储(值)" />
-              <el-table-column prop="OD_SORT" label="排序" />
-              <el-table-column label="状态">
+              <el-table-column prop="OD_TEXT" label="显示名称" :render-header="(element,obj) => renderSpecNameHeader2(element, obj, {componentType: 'input'})"/>
+              <el-table-column prop="OD_VALUE" label="存储(值)" :render-header="(element,obj) => renderSpecNameHeader2(element, obj, {componentType: 'input'})"/>
+              <el-table-column prop="OD_SORT" sortable label="排序" />
+
+              <el-table-column
+                prop="OD_STATE"
+                label="状态"
+                :filters="[{ text: '停用', value: '0' }, { text: '启用', value: '1' }]"
+                :filter-method="filterTag2"
+                filter-placement="bottom-end">
                 <template slot-scope="scope">
-                  {{ stateText[scope.row.OD_STATE] }}
+                  <span
+                    :type="scope.row.OD_STATE === '初始' ? 'primary' : 'success'"
+                    disable-transitions>
+                    <span style="color: #1e9fff" v-if="(scope.row.OD_STATE == 1)">启用</span>
+                    <span style="color: #ff5722" v-else>停用</span></span>
                 </template>
               </el-table-column>
+              
               <el-table-column prop="OD_REMARK" label="备注" />
               <el-table-column fixed="right" label="操作" width="120">
                 <template slot-scope="scope">
@@ -318,6 +317,7 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
+import SelectHeader from '../../components/Pagination/SelectHeader'
 
 import {
   getData,
@@ -337,6 +337,7 @@ export default {
     deleteData,
     deleteByIds,
     reviseTableInput,
+    SelectHeader
   },
   data() {
     return {
@@ -349,16 +350,19 @@ export default {
       queryParams: {
         page: 1,
         limit: 10,
+        OG_CODE: '',
+        OG_NAME: '',
       },
       totalDetails: 0,
       queryParamsDetails: {
         page: 1,
         limit: 10,
         OG_ID: '',
+        OD_TEXT: '',
+        OD_VALUE: '',
       },
       multipleSelection: [],
       multipleSelectionDetails: [],
-      stateText: { 0: '停用', 1: '启用', 2: '初始' },
       editTableDialog: false,
       groupingForm: {
         OG_ID: '',
@@ -438,6 +442,13 @@ export default {
         this.total = response.count
       })
     },
+    filterTag(value, row) {
+      return row.OG_STATE === value
+    },
+    filterTag2(value, row) {
+      return row.OD_STATE === value
+    },
+    
     getGroupingList() {
       this.isRefreshRouter2 = !this.isRefreshRouter2;
       setTimeout(() => {
@@ -463,16 +474,6 @@ export default {
     printJson2() {
       this.$print(this.$refs.tableJson2);
     },
-    // tableInputInp(value, data) {
-    //   this.nameInputParams.OG_NAME = value
-    //   console.log(data.row);
-    // },
-    // sureChange(data) {
-    //   this.nameInputParams = data.row
-    //   reviseTableInput(this.nameInputParams).then((response) => {
-    //   })
-    // },
-
     editingCheckbox() {
       this.isShowCheckbox = !this.isShowCheckbox
     },
@@ -707,6 +708,96 @@ export default {
           })
       }
     },
+    renderSpecNameHeader (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange,
+              resetChange: self.resetChange
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParams[type] = value
+        this.queryParams[data.type] = data.value;
+        this.getList();
+      },
+    resetChange (data) {
+      delete this.queryParams[data['type']]
+      this.queryParams[data.type] = data.value;
+      this.getList();
+    },
+    renderSpecNameHeader2 (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange2,
+              resetChange: self.resetChange2
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange2 (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParamsDetails[type] = value
+        this.queryParamsDetails[data.type] = data.value;
+        this.getGroupingList();
+      },
+    resetChange2 (data) {
+      delete this.queryParamsDetails[data['type']]
+      this.queryParamsDetails[data.type] = data.value;
+      this.getGroupingList();
+    },
   },
 }
 </script>
@@ -740,7 +831,7 @@ export default {
 .el-pagination{
   margin-top: 20px;
 }
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -750,7 +841,7 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
 <style lang='less' scoped>
 </style>

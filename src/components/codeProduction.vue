@@ -10,8 +10,11 @@
       >
         <el-table-column fixed="left" type="selection" width="45" />
         <el-table-column label="#" type="index" width="45" />
-        <el-table-column prop="DBNAME_" label="数据库" />
-        <el-table-column prop="TABLE_NAME" label="表名" />
+        <el-table-column prop="DBNAME_" label="数据库" 
+        :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="TABLE_NAME" label="表名" 
+        :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+
         <el-table-column prop="TABLE_DESCRIPTION" label="备注" />
 
         <el-table-column fixed="right" label="操作" width="200">
@@ -211,11 +214,14 @@
 </template>
 
 <script>
-import { getCodeData,addCodeProduction } from '../api/codeproduction'
+import { getCodeData, addCodeProduction } from '../api/codeproduction'
+import SelectHeader from '../components/Pagination/SelectHeader'
+
 export default {
   components: {
     getCodeData,
-    addCodeProduction
+    addCodeProduction,
+    SelectHeader
   },
   data() {
     return {
@@ -225,6 +231,8 @@ export default {
       queryParams: {
         page: 1,
         limit: 10,
+        DBNAME_: '',
+        TABLE_NAME:''
       },
       multipleSelection: [],
       operatingStatus: '',
@@ -382,13 +390,61 @@ export default {
     generateCode() {
       return (this.generateCodeDialog = true)
     },
-    previewClick() {},
+    previewClick() { },
+    renderSpecNameHeader (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange,
+              resetChange: self.resetChange
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParams[type] = value
+        this.queryParams[data.type] = data.value;
+        this.getList();
+      },
+    resetChange (data) {
+      delete this.queryParams[data['type']]
+      this.queryParams[data.type] = data.value;
+      this.getList();
+    },
   },
 }
 </script>
 <style>
 .code-production .el-dialog .el-dialog__body {
   padding: 0 !important;
+}
+.has-gutter .cell{
+  position: relative;
 }
 </style>
 <style lang='less' scoped>

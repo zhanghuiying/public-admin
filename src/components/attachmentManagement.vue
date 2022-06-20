@@ -63,11 +63,11 @@
       >
         <el-table-column fixed="left" type="selection" width="45" />
         <el-table-column label="#" type="index" width="45" />
-        <el-table-column prop="filename" label="文件名" />
-        <el-table-column prop="path" label="路径" />
-        <el-table-column prop="size" label="大小" />
-        <el-table-column prop="uploadtime" label="上传时间" />
-        <el-table-column prop="storagelocation" label="存储位置" />
+        <el-table-column prop="filename" label="文件名" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="path" label="路径" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="size" label="大小" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="uploadtime" label="上传时间" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="storagelocation" label="存储位置" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <span
@@ -184,6 +184,7 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
+import SelectHeader from '../components/Pagination/SelectHeader'
 import {
   getAttachmentData,
   addAttachmentSave,
@@ -196,6 +197,7 @@ export default {
     getAttachmentData,
     addAttachmentSave,
     deleteUser,
+    SelectHeader
   },
   data() {
     return {
@@ -206,6 +208,11 @@ export default {
       queryParams: {
         page: 1,
         limit: 10,
+        filename: '',
+        path: '',
+        size: '',
+        uploadtime: '',
+        storagelocation:'',
       },
       reviseTableDialog: false,
       appendixForm: {
@@ -392,6 +399,51 @@ export default {
           })
       }
     },
+    renderSpecNameHeader (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange,
+              resetChange: self.resetChange
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParams[type] = value
+        this.queryParams[data.type] = data.value;
+        this.getList();
+      },
+    resetChange (data) {
+      delete this.queryParams[data['type']]
+      this.queryParams[data.type] = data.value;
+      this.getList();
+    },
   },
 }
 </script>
@@ -402,7 +454,7 @@ export default {
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
 }
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -412,7 +464,7 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
 <style lang='less' scoped>
 </style>

@@ -53,7 +53,7 @@
 
                 <el-table-column prop="ROLE_CODE" label="角色编辑" />
                 <el-table-column prop="ROLE_NAME" label="角色名称" />
-                <el-table-column prop="ROLE_CREATE_TIME" label="角色时间" />
+                <el-table-column prop="ROLE_CREATE_TIME" label="创建时间" />
                 <el-table-column fixed="right" label="操作" width="300">
                   <template slot-scope="scope">
                     <span
@@ -513,7 +513,7 @@ export default {
     background-attachment: scroll;
     background-image: url(../../assets/images/sprite.png);
 }
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -523,5 +523,5 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>

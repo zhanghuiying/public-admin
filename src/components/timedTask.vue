@@ -64,9 +64,11 @@
       >
         <el-table-column fixed="left" type="selection" width="45" />
         <el-table-column label="#" type="index" width="45" />
-        <el-table-column prop="NAME" label="定时任务名称" />
-        <el-table-column prop="CRONSTR" label="CRON表达式" />
-        <el-table-column prop="CLASSPATH" label="任务类名" />
+        
+        
+        <el-table-column prop="NAME" label="定时任务名称" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="CRONSTR" label="CRON表达式" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+        <el-table-column prop="CLASSPATH" label="任务类名" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
 
         <el-table-column label="运行状态">
           <template slot-scope="scope">
@@ -176,6 +178,7 @@
 
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
+import SelectHeader from '../components/Pagination/SelectHeader'
 import {
   getTimedtaskData,
   getTaskClass,
@@ -183,7 +186,7 @@ import {
   deleteTimedtask,
   deleteUser,
   editSwitchChange,
-  exeTaskOnece,
+  exeTaskOnece
 } from '../api/timedtask'
 export default {
   name: 'timedtask',
@@ -196,6 +199,7 @@ export default {
     deleteUser,
     editSwitchChange,
     exeTaskOnece,
+    SelectHeader
   },
   data() {
     return {
@@ -206,6 +210,9 @@ export default {
       queryParams: {
         page: 1,
         limit: 10,
+        NAME: '',
+        CRONSTR: '',
+        CLASSPATH: '',
       },
       reviseTableDialog: false,
       timedTaskForm: {
@@ -425,6 +432,51 @@ export default {
           console.error(err)
         })
     },
+    renderSpecNameHeader (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange,
+              resetChange: self.resetChange
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParams[type] = value
+        this.queryParams[data.type] = data.value;
+        this.getList();
+      },
+    resetChange (data) {
+      delete this.queryParams[data['type']]
+      this.queryParams[data.type] = data.value;
+      this.getList();
+    },
   },
 }
 </script>
@@ -435,7 +487,7 @@ export default {
 .el-form-item__content .el-checkbox-group {
   width: 100% !important;
 }
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -445,7 +497,7 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
 <style lang='less' scoped>
 </style>

@@ -73,43 +73,17 @@
         <p class="public_card_header">
           功能点(点击菜单树节点切换选中菜单下的权限
           ，右键菜单节点追加选中菜单下的权限)
-          <span class="preservat_btn" @click="saveCheckboxPermission"
-            >保存</span
-          >
+          <span class="preservat_btn" @click="saveCheckboxPermission">保存</span>
         </p>
         <div class="authority_checkbox">
-          <div style="margin: 0 0 10px 0">
-           <!-- <el-checkbox
-              :indeterminate="isIndeterminate"
-              v-model="checkAll"
-              @change="handleCheckAllChange"
-              >全选</el-checkbox
-            > -->
-            <span class="checkbox_span">
-              <input type="checkbox" v-model="checkAll" @click="selectAll()"/>
-              <label>全选</label>
-            </span>
+          <el-checkbox v-model="checkAll" @change="pushUserCheckAll">全选</el-checkbox>
+            
+          <div class="checkbox_group">
+            <el-checkbox-group v-model="opgSelection" @change="handleCheckedCitiesChange">
+              <el-checkbox v-for="(item, index) in opsDataList"
+                :key="index" :label="item.OP_CODE">{{item.OP_NAME}}</el-checkbox>
+            </el-checkbox-group>
           </div>
-
-           <span
-            class="checkbox_span"
-            v-for="(item, index) in opsDataList"
-            :key="index"
-          >
-            <input
-              :checked="opgSelection"
-              type="checkbox"
-              :id="index"
-              :value="item.OP_CODE"
-              v-model="opgSelection"
-              @change="handleChange(item.OP_CODE)"
-            />
-            <label for="item.OP_CODE">{{ item.OP_NAME }}</label>
-          </span>
-          <!-- <el-checkbox-group v-model="opgSelection" @change="handleCheckedCitiesChange">
-            <el-checkbox v-for="(item, index) in opsDataList" :key="index"
-             :label="item.OP_CODE" >{{item.OP_NAME}}</el-checkbox>
-          </el-checkbox-group> -->
         </div>
       </div>
     </div>
@@ -152,7 +126,6 @@ import {
   getSelectallMenu,
 } from '../../api/authority/authority'
 import { v4 as uuidv4 } from 'uuid'
-
 export default {
   components: {
     getPageData,
@@ -169,10 +142,9 @@ export default {
       opgTreeDataList: [],
       opsDataList: [],
       menuDataList: [],
+      checkAll: false,
       opgSelection: [], //权限选中id
-      // checkAll: false,
       opsChecked: [],
-      isIndeterminate: true,
       RES_ID: '',
       queryParamsSave: {
         RES_ID: '',
@@ -192,6 +164,7 @@ export default {
         RES_NAME: '',
       },
       findOperateData: [], //id查看选中接口
+      checkedList: [], //选中
     }
   },
 
@@ -200,35 +173,79 @@ export default {
     this.getMenuList()
   },
   computed: {
-    checkAll: {
-      //全选影响小选
-      set(val) {
-        //set(val) 设置全选的状态(true/ false)
-        //我们手动设置了全选框的状态,就遍历数组里的每个对象的c属性, 也就是遍历看每个小选框的状态,让它的状态改为 val 全选框的状态
-        this.opsDataList.forEach((OP_NAME) => (this.opgSelection = val));
-      },
-      //小选框影响全选框
-      get() {
-        //判断数组里的每一个对象的c属性 它是不是等于true, 就是判断每一个小选框的状态, 只要有一个小选框的状态不为true 就是没有被勾上, 那就返回false , 全选框的状态就是false
-        // every口诀: 查找数组里"不符合"条件, 直接原地返回false
-        return this.opsDataList.every((OP_NAME) => this.opgSelection === true);
-      },
-    },
   },
 
   methods: {
-    selectAll() {
-      //实现反选遍历数组里的每一项,  让数组里对象的属性取反再赋值回去
-      this.opsDataList.forEach((OP_NAME) => (this.opgSelection = !this.opgSelection));
-    },
-
     getList(data) {
       getPageData(data).then((response) => {
         this.opgTreeDataList = response.opg
         this.opsDataList = response.ops
-        // console.log(this.opgTreeDataList)
-        // console.log(this.opsDataList)
       })
+    },
+    //全选、反选
+    pushUserCheckAll(checkAll) {
+      if (checkAll) {
+        this.opsDataList.forEach(value => {
+          if (this.opgSelection.indexOf(value.OP_CODE) < 0) {
+            this.opgSelection.push(value.OP_CODE);
+          }
+        })
+      } else {
+        this.opgSelection = [];
+      }
+    },
+    handleCheckedCitiesChange(value) {
+      const that = this
+      that.queryParamsSave.OP_CODE = value
+      this.queryParamsSave.OP_CODE.forEach(value => {
+        if (this.opgSelection.indexOf(value.OP_CODE) < 0) {
+          this.checkAll = false;
+        }
+        if (this.queryParamsSave.OP_CODE.length === this.opsDataList.length) {
+          this.checkAll = true;
+        }
+      })
+      that.checkedList = value
+      // for (var arry in that.checkedList) {
+      //   that.queryParamsSave.OP_CODE = that.checkedList[arry]
+      // }
+      // console.log(that.queryParamsSave.OP_CODE);
+
+      that.queryParamsSave.OP_CODE = []
+      that.checkedList.forEach(function (e) {
+        that.queryParamsSave.OP_CODE += e + ','
+      })
+      this.queryParamsSave.OP_CODE = this.queryParamsSave.OP_CODE.substr(0, this.queryParamsSave.OP_CODE.length-1)
+      
+      // that.queryParamsSave.OP_CODE = []
+      // that.checkedList.forEach(function (e) {
+      //   that.queryParamsSave.OP_CODE.push(e);
+      // })
+    },
+    permissionClick(data) {
+      const that = this
+      this.RES_ID = data.RES_ID
+      this.queryParamsSave.RES_ID = data.RES_ID
+
+      findOperate(this.RES_ID).then((response) => {
+        this.findOperateData = response
+        this.opgSelection = []
+        this.findOperateData.forEach(function (e) {
+          that.opgSelection.push(e.OP_CODE);
+        })
+
+        that.opgSelection.forEach(value => {
+          if (this.opgSelection.indexOf(value.OP_CODE) < 0) {
+            this.checkAll = false;
+          }
+          if (this.opgSelection.length === this.opsDataList.length) {
+            this.checkAll = true;
+          }
+        })
+      })
+    }, 
+    handleNodeClick(data) {
+      // console.log(data)
     },
     
     getMenuList(data) {
@@ -252,12 +269,6 @@ export default {
           center: true,
         })
       } else {
-        that.queryParamsSave.OP_CODE = ''
-        this.opgSelection.forEach(function (e) {
-          that.queryParamsSave.OP_CODE += e + ','
-        })
-        that.queryParamsSave.OP_CODE = that.queryParamsSave.OP_CODE.substr(0, that.queryParamsSave.OP_CODE.length-1)
-      
         this.$confirm('确认保存相关权限吗？', '信息', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -265,7 +276,7 @@ export default {
         })
           .then(async () => {
             await saveOperations(this.queryParamsSave)
-            this.opgSelection = ''
+            this.opgSelection = []
             this.getList()
             this.$message({
               type: 'success',
@@ -277,20 +288,8 @@ export default {
           })
       }
     },
-    handleCheckAllChange(val) {
-      this.opsDataList = val ? this.opsDataList : []
-      this.isIndeterminate = false
-      this.getList()
-    },
-      // handleCheckedCitiesChange(value) {
-      //   let checkedCount = value.length;
-      //   this.checkAll = checkedCount === this.opsDataList.length;
-      //   this.isIndeterminate = checkedCount > 0 && checkedCount < this.opsDataList.length;
-      // },
-
     addPermission() {
       var timestamp = uuidv4()
-
       this.equeryAddfollowParams.ORG_CODE = timestamp
       this.equeryAddfollowParams.RES_ID = timestamp
       this.equeryAddfollowParams.RES_PID = 0
@@ -308,40 +307,17 @@ export default {
     sureChange(data) {
       this.equeryUpdatefollowParams = data
       saveGroup(this.equeryUpdatefollowParams).then((response) => {
-        this.modifyTreeInput = ''
-        this.getList()
+        if (response.length!==null) {
+            this.$notify.success({ title: '提示', message: '修改成功' })
+            this.modifyTreeInput = ''
+            this.getList()
+        }
       })
     },
     // 取消修改按钮
     chancelChange() {
       this.modifyTreeInput = false
     },
-
-    permissionClick(data) {
-      const that = this
-      this.RES_ID = data.RES_ID
-      this.queryParamsSave.RES_ID = data.RES_ID
-      
-
-      findOperate(this.RES_ID).then((response) => {
-        this.findOperateData = response
-        console.log(this.findOperateData);
-        // this.opgSelection = ''
-        // that.findOperateData.forEach(function (e) {
-        //   that.opgSelection += e.OP_CODE + ','
-        // })
-        // that.opgSelection = that.opgSelection.substr(0, that.opgSelection.length-1)
-      })
-
-    },
-    handleChange(e){
-      // console.log("___________"+e);
-      // console.log(this.opgSelection);
-    },
-    handleNodeClick(data) {
-      console.log(data)
-    },
-
     /**
      * 存放的最终结果树数组
      * 遍历得到以id为键名的对象(建立整棵树的索引)
@@ -456,53 +432,21 @@ export default {
     background-attachment: scroll;
     background-image: url(../../assets/images/sprite.png);
 }
-
-.auth_ck_box .el-checkbox {
-  margin: 0 50px 30px 0;
-}
-.authority_checkbox .el-checkbox .el-checkbox__label{
-  font-size: 16px!important;
-  color: #666;
-}
-/*.authority_checkbox .el-checkbox__inner{
-  width: 16px!important;
-  height: 16px!important;
-} */
 </style>
 <style lang='less' scoped>
 .authority_checkbox {
   padding: 10px 0 30px 30px;
   text-align: left;
 }
-.auth_ck_box {
-  margin-top: 30px;
-  margin-bottom: 15px;
+.checkbox_group{
+  padding: 20px 0;
 }
-
-.checkbox_span {
-  position: relative;
+.checkbox_group .el-checkbox{
+  margin: 0 30px 0 0;
   display: inline-block;
-  width: 140px;
+  width: 190px;
   height: 34px;
-  line-height: 34px;
-  margin: 0 60px 0 0;
-  padding: 0 10px 0 28px;
-}
-.checkbox_span input {
-  position: absolute;
-  left: 0;
-  top: 6px;
-  width: 15px;
-  height: 15px;
-  background-color: #409EFF!important;
-  border-color: #409EFF!important;
-}
-.checkbox_span input:hover {
-  background-color: #409EFF!important;
-  border-color: #409EFF!important;
-}
-.checkbox_span label {
-  font-size: 14px;
+  font-size: 16px!important;
   color: #666;
 }
 </style>

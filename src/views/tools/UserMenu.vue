@@ -6,7 +6,7 @@
         <span class="hd-nav-bar"></span>
       </span>
 
-      <el-popover placement="bottom" trigger="hover">
+      <el-popover placement="bottom" trigger="click">
         <span class="hd-nav-item" slot="reference">
           <i class="el-icon-user"></i>
         </span>
@@ -207,9 +207,9 @@ export default {
 </script>
 
 <style>
-.el-popover {
+/* .user_menu .nav_content_box .el-popover {
   margin-top: 0 !important;
   padding: 10px 0 0 0 !important;
-}
+} */
 
 </style>

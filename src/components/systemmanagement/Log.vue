@@ -35,9 +35,9 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column fixed="left" label="#" type="index" width="45" />
-      <el-table-column prop="LOG_CONTENT" label="登录账号" />
-      <el-table-column prop="LOG_CONTENT" label="操作日志" width="700" />
-      <el-table-column prop="LOG_OPERATE_TIME" label="操作时间" />
+      <el-table-column prop="LOG_CONTENT" sortable label="登录账号" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+      <el-table-column prop="LOG_CONTENT" label="操作日志" width="700" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'input'})"/>
+      <el-table-column prop="LOG_OPERATE_TIME" label="操作时间" :render-header="(element,obj) => renderSpecNameHeader(element, obj, {componentType: 'date'})"/>
 
       <el-table-column fixed="right" label="备注" width="120">
         <template slot-scope="scope"> </template>
@@ -60,11 +60,13 @@
 <script>
 import tableMenutTool from '@/views/tools/tableMenutTool'
 import { getLogsData } from '../../api/logs/logs'
+import SelectHeader from '../../components/Pagination/SelectHeader'
 export default {
   name: 'Log',
   components: {
     tableMenutTool,
     getLogsData,
+    SelectHeader
   },
   data() {
     return {
@@ -75,6 +77,9 @@ export default {
       queryParams: {
         page: 1,
         limit: 10,
+        LOG_CONTENT: '',
+        LOG_CONTENT:'',
+        LOG_OPERATE_TIME:'',
       },
       multipleSelection: [],
     }
@@ -113,12 +118,57 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val
     },
+    renderSpecNameHeader (createElement, { column, $index }, mold) {
+      const self = this
+      return createElement(
+        'div',{
+          style: 'display:inline-flex;'
+        },[
+          createElement('div', {
+            domProps: {
+              innerHTML: column.label
+            }
+          }),
+          createElement(SelectHeader, {
+            style: 'cursor: pointer;position: absolute;right: 16px;top: 0;',
+            props: {
+              componentModule: mold.componentType,
+              type: column.property,
+              options: self.specIdOptions, // 下拉框选项
+              defaultValue: self.examinerFieldChname, // 默认值
+              defaultProps: {
+                value: 'examinerFieldName',
+                label: 'examinerFieldChname'
+              }
+            },
+            on: {
+              selectChange: self.selectChange,
+              resetChange: self.resetChange
+            },
+            nativeOn: {
+            }
+          })
+        ]
+      )
+    },
+    selectChange (data) {
+        const type = data['type']
+        const value = data['value']
+        this.queryParams[type] = value
+        this.queryParams[data.type] = data.value;
+        this.getList();
+      },
+    resetChange (data) {
+      delete this.queryParams[data['type']]
+      this.queryParams[data.type] = data.value;
+      this.getList();
+    },
   },
 }
 </script>
 
 <style>
-.el-popover{
+/* .el-popover{
   min-width: 36px!important;
   text-align: center!important;
   padding:6px 0!important;
@@ -128,5 +178,5 @@ export default {
   font-size: 12px!important;
   margin: 0!important;
   color: #333!important;
-}
+} */
 </style>
