@@ -103,14 +103,13 @@
             >刷新</span
           >
         </p>
-        <!-- :default-checked-keys="defKeys" -->
         <div class="role-tree" style="margin: 0 16px">
           <el-tree
           :data="jsonDataTree"
           show-checkbox
           default-expand-all
           highlight-current
-          node-key="id"
+          node-key="MENU_ID"
           ref="rightsTree"
           :expand-on-click-node="false"
           @check="handleNodeClick"
@@ -344,38 +343,20 @@ export default {
     },
     checkMenuPermissions(role) {
       const that = this;
-      // this.getLeafKeys(role.ROLE_ID,this.defKeys)
       that.defKeys = []
       selectMenuByRoleId(role.ROLE_ID).then((response) => {
         that.selectMenu = response
         that.selectMenu.map((item) => {
           that.defKeys.push(item.MENU_ID)
         })
-          that.$nextTick(() =>{
+        that.$nextTick(() =>{
           that.$refs.rightsTree.setCheckedKeys(this.defKeys)
         })
-
-        // that.selectMenu.forEach(function(e) {
-        //   that.defKeys += e.MENU_ID + ",";
-        // });
-        // that.defKeys = that.defKeys.substr(0, that.defKeys.length-1)
-        // this.getLeafKeys(role.ROLE_ID,this.defKeys)
-
-        console.log(that.defKeys)
       })
     },
-    getLeafKeys(node,arr){
-      // node.forEach(item=> 
-      //   this.getLeafKeys(item,arr))
-        console.log(node,arr);
-      // return arr.push(node.MENU_ID)
-    },
-
     koopMenuPermissions(id) {
       this.saveMenuParams.ROLE_ID = id
-
       this.saveMenuParams.MENU_ID = this.menu_id
-      console.log(this.saveMenuParams);
 
       this.$confirm('确定保存角色权限信息吗?', '信息', {
         confirmButtonText: '确定',
